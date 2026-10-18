@@ -1,43 +1,51 @@
 
-# StockFlow
+## Requisitos de desarrollo
 
-Sistema web de control de inventario y ventas para tiendas de conveniencia.
+- Git
+- Node.js 24 y npm
+- Java JDK 21
+- Maven 3.10
+- Visual Studio Code
 
-## Tecnologías
+## Ejecutar el frontend
 
-### Frontend
-- React
-- TypeScript
-- Vite
+Desde la carpeta principal del proyecto:
 
-### Backend
-- Java 21
-- Spring Boot
-- Maven
+```powershell
+cd apps/web
+npm.cmd install
+npm.cmd run dev
+```
 
-### Base de datos (Fase 3)
-- PostgreSQL
-- Flyway
-- Docker Compose
+Abrir http://localhost:5173/
 
-## Estructura del proyecto
+## Ejecutar el backend
 
-- apps/web: Aplicación frontend.
-- services/api: Aplicación backend.
-- database/migrations: Documentación y scripts de migración.
-- docs: Documentación técnica.
+Desde la carpeta principal del proyecto,
+en otra terminal:
 
-## Fases del desarrollo
+```powershell
+cd services/api
+.\mvnw.cmd spring-boot:run
+```
 
-1. Frontend y backend con datos simulados.
-2. API REST con almacenamiento temporal.
-3. Persistencia en PostgreSQL.
+Servidor: http://localhost:8080/
 
-## Estado actual
+Nota: La ruta raíz devuelve 404 hasta que
+implementemos los controladores correspondientes.
 
-Fase 1 — P1-1: Preparación del proyecto y repositorio.
+## Ejecutar pruebas
 
-## Objetivo
+Frontend:
 
-Construir una aplicación funcional para administrar productos,
-inventario, sucursales, almacenes y ventas.
+```powershell
+cd apps/web
+npm.cmd run build
+```
+
+Backend:
+
+```powershell
+cd services/api
+.\mvnw.cmd clean test
+```
