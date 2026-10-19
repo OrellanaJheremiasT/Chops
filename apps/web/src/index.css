@@ -1,23 +1,47 @@
-
 :root {
   font-family: Inter, system-ui, Arial, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  --primary: #7048D8;
+  --primary-hover: #603AC4;
+  --bg: #F3F6FA;
+  --sidebar-bg: #FFFFFF;
+  --surface: #FFFFFF;
+  --text: #171923;
+  --text-muted: #606577;
+  --border: #DFE1EA;
+  --success: #17876E;
+  --warning: #996006;
+  --danger: #C73F4D;
+  --primary-soft: #EFE9FD;
+  --success-soft: #DDF5ED;
+  --warning-soft: #FFF2D8;
+  --danger-soft: #FCE7E9;
+  --shadow: 0 3px 12px rgba(0,0,0,.05);
+  color-scheme: light;
 }
-
-* {
-  box-sizing: border-box;
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --primary: #8B5CF6;
+  --primary-hover: #A17AF8;
+  --bg: #101118;
+  --sidebar-bg: #171923;
+  --surface: #222431;
+  --text: #F3F6FA;
+  --text-muted: #A6A8B8;
+  --border: #363847;
+  --success: #65D7BD;
+  --warning: #FFD080;
+  --danger: #FF9B9B;
+  --primary-soft: #302544;
+  --success-soft: #153E37;
+  --warning-soft: #49371D;
+  --danger-soft: #4A252C;
+  --shadow: none;
 }
-
-body {
-  margin: 0;
-  min-width: 320px;
-}
-
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+button, input, select, textarea { font: inherit; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
