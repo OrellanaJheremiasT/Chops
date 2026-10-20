@@ -1,6 +1,8 @@
+import { useLanguage } from "../i18n/LanguageContext";
 
 import { useMemo, useState } from 'react'
-import { Pencil, Plus, Search, X } from 'lucide-react'
+import type { FormEvent } from 'react'
+import { Pencil, Plus, Search, Trash2, X } from 'lucide-react'
 
 type Variant = {
   sku: string
@@ -69,6 +71,7 @@ function getTotalStock(product: Product) {
 }
 
 export default function ProductsPage() {
+  const { t, language } = useLanguage();
   const [products, setProducts] = useState(initialProducts)
   const [search, setSearch] = useState('')
   const [editing, setEditing] = useState<Product | null>(null)
@@ -118,7 +121,7 @@ export default function ProductsPage() {
     setEditing({ ...editing, variants })
   }
 
-  function saveProduct(event: React.FormEvent<HTMLFormElement>) {
+  function saveProduct(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!editing) return
 
@@ -130,25 +133,35 @@ export default function ProductsPage() {
       name: variant.name.trim(),
     }))
 
-    if (!name || !category || variants.some(
-      (variant) => !variant.sku || !variant.name,
-    )) {
+    if (
+      !name ||
+      !category ||
+      variants.some((variant) => !variant.sku || !variant.name)
+    ) {
       setError('Complete all required fields.')
       return
     }
 
-    if (!Number.isFinite(editing.price) || editing.price < 0 ||
-      variants.some((variant) =>
-        !Number.isSafeInteger(variant.stock) || variant.stock < 0
-      )) {
+    if (
+      !Number.isFinite(editing.price) ||
+      editing.price < 0 ||
+      variants.some(
+        (variant) =>
+          !Number.isSafeInteger(variant.stock) ||
+          variant.stock < 0,
+      )
+    ) {
       setError('Price and stock must be valid non-negative numbers.')
       return
     }
 
     const skus = variants.map((variant) => variant.sku)
+
     const existingSkus = products
       .filter((product) => product.id !== editing.id)
-      .flatMap((product) => product.variants.map((variant) => variant.sku))
+      .flatMap((product) =>
+        product.variants.map((variant) => variant.sku),
+      )
 
     if (
       new Set(skus).size !== skus.length ||
@@ -158,67 +171,101 @@ export default function ProductsPage() {
       return
     }
 
-    const savedProduct = { ...editing, name, category, variants }
+    const savedProduct = {
+      ...editing,
+      name,
+      category,
+      variants,
+    }
 
     if (editing.id === 0) {
-      const nextId = Math.max(0, ...products.map((p) => p.id)) + 1
-      setProducts([...products, { ...savedProduct, id: nextId }])
+      const nextId =
+        Math.max(0, ...products.map((product) => product.id)) + 1
+
+      setProducts((current) => [
+        ...current,
+        { ...savedProduct, id: nextId },
+      ])
     } else {
-      setProducts(products.map((product) =>
-        product.id === editing.id ? savedProduct : product,
-      ))
+      setProducts((current) =>
+        current.map((product) =>
+          product.id === editing.id ? savedProduct : product,
+        ),
+      )
     }
 
     setEditing(null)
     setError('')
   }
 
+  function deleteProduct(product: Product) {
+    const confirmed = window.confirm(
+      language === "es" ? `¿Seguro que deseas eliminar "${product.name}"?` : `Are you sure you want to delete "${product.name}"?`,
+    )
+
+    if (!confirmed) return
+
+    setProducts((current) =>
+      current.filter((item) => item.id !== product.id),
+    )
+  }
+
   return (
     <section className="products-page">
       <div className="page-title">
         <div>
-          <h2>Products</h2>
-          <p>Manage your product catalog and SKU variants.</p>
+          <h2>{t('Products')}</h2>
+          <p>{t('Manage your product catalog and SKU variants.')}</p>
         </div>
-        <span className="badge badge-info">Demo Data</span>
+
+        <span className="badge badge-info">{t('Demo Data')}</span>
       </div>
 
       <div className="products-toolbar">
         <div className="products-search">
           <Search size={17} aria-hidden="true" />
+
           <input
-            aria-label="Search products"
-            placeholder="Search by name, category or SKU..."
+            aria-label={t('Search products')}
+            placeholder={t('Search by name, category or SKU...')}
             value={search}
             onChange={(event) => setSearch(event.target.value)}
           />
         </div>
-        <button className="btn btn-primary" onClick={openCreate}>
-          <Plus size={17} />
-          Add Product
-        </button>
+
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={openCreate}
+        >
+          <Plus size={17} />{t('Add Product')}</button>
       </div>
 
       <div className="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Product</th>
-              <th>Category</th>
-              <th>Variants / SKU</th>
-              <th>Price</th>
-              <th>Stock</th>
-              <th>Actions</th>
+              <th>{t('Product')}</th>
+              <th>{t('Category')}</th>
+              <th>{t('Variants / SKU')}</th>
+              <th>{t('Price')}</th>
+              <th>{t('Stock')}</th>
+              <th>{t('Actions')}</th>
             </tr>
           </thead>
+
           <tbody>
             {filteredProducts.map((product) => {
               const stock = getTotalStock(product)
 
               return (
                 <tr key={product.id}>
-                  <td><strong>{product.name}</strong></td>
+                  <td>
+                    <strong>{product.name}</strong>
+                  </td>
+
                   <td>{product.category}</td>
+
                   <td>
                     <div className="product-variants">
                       {product.variants.map((variant) => (
@@ -228,42 +275,56 @@ export default function ProductsPage() {
                       ))}
                     </div>
                   </td>
+
                   <td>S/ {product.price.toFixed(2)}</td>
+
                   <td>
-                    <span className={`badge ${
-                      stock === 0 ? 'badge-danger' :
-                      stock <= 5 ? 'badge-warning' : 'badge-success'
-                    }`}>
+                    <span
+                      className={`badge ${
+                        stock === 0
+                          ? 'badge-danger'
+                          : stock <= 5
+                            ? 'badge-warning'
+                            : 'badge-success'
+                      }`}
+                    >
                       {stock}
                     </span>
                   </td>
+
                   <td>
-                    <button
-                      className="btn btn-secondary"
-                      onClick={() => openEdit(product)}
-                      aria-label={`Edit ${product.name}`}
-                    >
-                      <Pencil size={15} />
-                      Edit
-                    </button>
+                    <div className="product-actions">
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => openEdit(product)}
+                        aria-label={`${t("Edit")} ${product.name}`}
+                      >
+                        <Pencil size={15} />{t('Edit')}</button>
+
+                      <button
+                        type="button"
+                        className="btn btn-danger"
+                        onClick={() => deleteProduct(product)}
+                        aria-label={`${t("Delete")} ${product.name}`}
+                      >
+                        <Trash2 size={15} />{t('Delete')}</button>
+                    </div>
                   </td>
                 </tr>
               )
             })}
+
             {filteredProducts.length === 0 && (
               <tr>
-                <td colSpan={6} className="products-empty">
-                  No products found.
-                </td>
+                <td colSpan={6} className="products-empty">{t('No products found.')}</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      <p className="products-note">
-        Demo catalog. Changes are temporary and reset on page reload.
-      </p>
+      <p className="products-note">{t('Demo catalog. Changes are temporary and reset on page reload.')}</p>
 
       {editing && (
         <div className="product-modal-backdrop">
@@ -277,10 +338,12 @@ export default function ProductsPage() {
               <h3 id="product-form-title">
                 {editing.id === 0 ? 'Add Product' : 'Edit Product'}
               </h3>
+
               <button
+                type="button"
                 className="product-icon-button"
                 onClick={() => setEditing(null)}
-                aria-label="Close form"
+                aria-label={t('Close form')}
               >
                 <X size={20} />
               </button>
@@ -288,31 +351,40 @@ export default function ProductsPage() {
 
             <form onSubmit={saveProduct}>
               <div className="field">
-                <label htmlFor="product-name">Product Name</label>
+                <label htmlFor="product-name">{t('Product Name')}</label>
+
                 <input
                   id="product-name"
                   value={editing.name}
                   onChange={(event) =>
-                    setEditing({ ...editing, name: event.target.value })
+                    setEditing({
+                      ...editing,
+                      name: event.target.value,
+                    })
                   }
                   required
                 />
               </div>
 
               <div className="field">
-                <label htmlFor="product-category">Category</label>
+                <label htmlFor="product-category">{t('Category')}</label>
+
                 <input
                   id="product-category"
                   value={editing.category}
                   onChange={(event) =>
-                    setEditing({ ...editing, category: event.target.value })
+                    setEditing({
+                      ...editing,
+                      category: event.target.value,
+                    })
                   }
                   required
                 />
               </div>
 
               <div className="field">
-                <label htmlFor="product-price">Base Price (S/)</label>
+                <label htmlFor="product-price">{t('Base Price (S/)')}</label>
+
                 <input
                   id="product-price"
                   type="number"
@@ -330,52 +402,70 @@ export default function ProductsPage() {
               </div>
 
               <div className="product-variant-heading">
-                <h4>Variants</h4>
+                <h4>{t('Variants')}</h4>
+
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() =>
                     setEditing({
                       ...editing,
-                      variants: [...editing.variants, emptyVariant()],
+                      variants: [
+                        ...editing.variants,
+                        emptyVariant(),
+                      ],
                     })
                   }
                 >
-                  <Plus size={15} />
-                  Add Variant
-                </button>
+                  <Plus size={15} />{t('Add Variant')}</button>
               </div>
 
               {editing.variants.map((variant, index) => (
-                <div className="product-variant-editor" key={index}>
+                <div
+                  className="product-variant-editor"
+                  key={index}
+                >
                   <div className="field">
-                    <label htmlFor={`variant-name-${index}`}>
-                      Variant
-                    </label>
+                    <label htmlFor={`variant-name-${index}`}>{t('Variant')}</label>
+
                     <input
                       id={`variant-name-${index}`}
-                      placeholder="e.g. 500 ml"
+                      placeholder={t('e.g. 500 ml')}
                       value={variant.name}
                       onChange={(event) =>
-                        updateVariant(index, 'name', event.target.value)
+                        updateVariant(
+                          index,
+                          'name',
+                          event.target.value,
+                        )
                       }
                       required
                     />
                   </div>
+
                   <div className="field">
-                    <label htmlFor={`variant-sku-${index}`}>SKU</label>
+                    <label htmlFor={`variant-sku-${index}`}>
+                      SKU
+                    </label>
+
                     <input
                       id={`variant-sku-${index}`}
-                      placeholder="e.g. BEV-COKE-500"
+                      placeholder={t('e.g. BEV-COKE-500')}
                       value={variant.sku}
                       onChange={(event) =>
-                        updateVariant(index, 'sku', event.target.value)
+                        updateVariant(
+                          index,
+                          'sku',
+                          event.target.value,
+                        )
                       }
                       required
                     />
                   </div>
+
                   <div className="field">
-                    <label htmlFor={`variant-stock-${index}`}>Stock</label>
+                    <label htmlFor={`variant-stock-${index}`}>{t('Stock')}</label>
+
                     <input
                       id={`variant-stock-${index}`}
                       type="number"
@@ -383,11 +473,16 @@ export default function ProductsPage() {
                       step="1"
                       value={variant.stock}
                       onChange={(event) =>
-                        updateVariant(index, 'stock', event.target.value)
+                        updateVariant(
+                          index,
+                          'stock',
+                          event.target.value,
+                        )
                       }
                       required
                     />
                   </div>
+
                   {editing.variants.length > 1 && (
                     <button
                       type="button"
@@ -400,26 +495,31 @@ export default function ProductsPage() {
                           ),
                         })
                       }
-                    >
-                      Remove variant
-                    </button>
+                    >{t('Remove variant')}</button>
                   )}
                 </div>
               ))}
 
-              {error && <p className="product-form-error" role="alert">{error}</p>}
+              {error && (
+                <p
+                  className="product-form-error"
+                  role="alert"
+                >
+                  {t(error)}
+                </p>
+              )}
 
               <div className="product-form-actions">
                 <button
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setEditing(null)}
-                >
-                  Cancel
-                </button>
-                <button type="submit" className="btn btn-primary">
-                  Save Product
-                </button>
+                >{t('Cancel')}</button>
+
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                >{t('Save Product')}</button>
               </div>
             </form>
           </section>
