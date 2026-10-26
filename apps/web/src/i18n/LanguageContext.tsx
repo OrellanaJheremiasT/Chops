@@ -4,6 +4,263 @@ import type { ReactNode } from "react"
 export type Language = "en" | "es"
 
 const spanish: Record<string, string> = {
+
+  
+  // P1-8: Sales / Checkout
+  'Create a sale using exhibition stock.':
+    'Registra una venta utilizando el stock de exhibición.',
+
+  'Product Catalog':
+    'Catálogo de productos',
+
+  'Search by product, SKU or barcode...':
+    'Buscar por producto, SKU o código de barras...',
+
+  'Exhibition Stock':
+    'Stock de exhibición',
+
+  'Add to Cart':
+    'Agregar al carrito',
+
+  'Add':
+    'Agregar',
+
+  'Current Sale':
+    'Venta actual',
+
+  'Units':
+    'Unidades',
+
+  'Clear Cart':
+    'Vaciar carrito',
+
+  'Your cart is empty.':
+    'Tu carrito está vacío.',
+
+  'Select products to start a sale.':
+    'Selecciona productos para iniciar una venta.',
+
+  'Remove':
+    'Quitar',
+
+  'Decrease quantity':
+    'Disminuir cantidad',
+
+  'Increase quantity':
+    'Aumentar cantidad',
+
+  'Total':
+    'Total',
+
+  'Payment Method':
+    'Método de pago',
+
+  'Cash':
+    'Efectivo',
+
+  'Card':
+    'Tarjeta',
+
+  'Amount Received (S/)':
+    'Monto recibido (S/)',
+
+  'Amount Received':
+    'Monto recibido',
+
+  'Change':
+    'Vuelto',
+
+  'Complete Sale':
+    'Completar venta',
+
+  'Sale Receipt':
+    'Comprobante de venta',
+
+  'Completed':
+    'Completada',
+
+  'Recent Sales':
+    'Ventas recientes',
+
+  'Sale':
+    'Venta',
+
+  'Not enough exhibition stock.':
+    'No hay suficiente stock en exhibición.',
+
+  'Add at least one product to the cart.':
+    'Agrega al menos un producto al carrito.',
+
+  'Received amount must cover the total.':
+    'El monto recibido debe cubrir el total.',
+
+  'Card payments are simulated. No charge will be made.':
+    'Los pagos con tarjeta son simulados. No se realizará ningún cobro.',
+
+  'Demo checkout. Sales and stock changes reset on page reload.':
+    'Caja de prueba. Las ventas y los cambios de stock se restablecen al recargar.',
+
+  'Inventory overview by branch and storage location.':
+    'Resumen del inventario por sucursal y ubicación.',
+
+  'Inventory views':
+    'Vistas de inventario',
+
+  'Total Stock':
+    'Stock total',
+
+  'Total Units':
+    'Unidades totales',
+
+  'Low Stock SKUs':
+    'SKU con stock bajo',
+
+  'Out of Stock SKUs':
+    'SKU agotados',
+
+  'Out of Stock':
+    'Agotado',
+
+  'Barcode':
+    'Código de barras',
+
+  'All branches':
+    'Todas las sucursales',
+
+  'All locations':
+    'Todas las ubicaciones',
+
+    
+  // P1-9: Stock Movements
+
+  "Register stock entries, exits and transfers between locations.":
+    "Registra entradas, salidas y transferencias entre ubicaciones.",
+
+  "Registered Movements":
+    "Movimientos registrados",
+
+  "This session":
+    "Esta sesión",
+
+  "New Movement":
+    "Nuevo movimiento",
+
+  "Movement Type":
+    "Tipo de movimiento",
+
+  "Stock In":
+    "Entrada de stock",
+
+  "Stock Out":
+    "Salida de stock",
+
+  "Transfer":
+    "Transferencia",
+
+  "Product / SKU":
+    "Producto / SKU",
+
+  "Available Stock":
+    "Stock disponible",
+
+  "Source Location":
+    "Ubicación de origen",
+
+  "Destination Location":
+    "Ubicación de destino",
+
+  "Quantity":
+    "Cantidad",
+
+  "Enter quantity":
+    "Ingresa la cantidad",
+
+  "Reason / Notes":
+    "Motivo / Notas",
+
+  "Optional movement description...":
+    "Descripción opcional del movimiento...",
+
+  "Register Movement":
+    "Registrar movimiento",
+
+  "Movement History":
+    "Historial de movimientos",
+
+  "Review recorded inventory operations.":
+    "Consulta las operaciones de inventario registradas.",
+
+  "Reset Demo":
+    "Restablecer demo",
+
+  "Search movements":
+    "Buscar movimientos",
+
+  "Search movements...":
+    "Buscar movimientos...",
+
+  "Filter by type":
+    "Filtrar por tipo",
+
+  "All Types":
+    "Todos los tipos",
+
+  "No movements found.":
+    "No se encontraron movimientos.",
+
+  "Register your first movement to see it here.":
+    "Registra tu primer movimiento para verlo aquí.",
+
+  "Try changing your search or filters.":
+    "Prueba cambiando la búsqueda o los filtros.",
+
+  "External":
+    "Externo",
+
+  "Enter a valid quantity greater than zero.":
+    "Ingresa una cantidad válida mayor que cero.",
+
+  "Select a valid product.":
+    "Selecciona un producto válido.",
+
+  "Source and destination must be different.":
+    "El origen y el destino deben ser diferentes.",
+
+  "Insufficient stock at the source location.":
+    "No hay suficiente stock en la ubicación de origen.",
+
+  "Movement registered successfully.":
+    "Movimiento registrado correctamente.",
+
+  "Demo mode: movements and balances reset when the page reloads.":
+    "Modo demo: los movimientos y existencias se restablecen al recargar la página.",
+
+
+
+  'Search inventory':
+    'Buscar inventario',
+
+  'Search by product, SKU or barcode... ':
+    'Buscar por producto, SKU o código de barras... ',
+
+  'Filter by stock status':
+    'Filtrar por estado del stock',
+
+  'All Stock':
+    'Todo el stock',
+
+  'Low Stock Only':
+    'Solo stock bajo',
+
+  'Out of Stock Only':
+    'Solo agotados',
+
+  'No inventory matches your filters.':
+    'No hay productos que coincidan con los filtros.',
+
+  'Demo inventory. Data is not yet synchronized with Products or Locations.':
+    'Inventario de prueba. Los datos todavía no están sincronizados con Productos ni Ubicaciones.',
+
   'Dashboard': 'Panel de control',
   'Products': 'Productos',
   'Locations': 'Ubicaciones',
