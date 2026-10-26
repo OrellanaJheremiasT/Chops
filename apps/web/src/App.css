@@ -1,8 +1,18 @@
 /* Chops: modular style entry point. Keep imports in this order. */
+
 @import "./styles/layout.css";
+
 @import "./styles/dashboard.css";
+
 @import "./styles/shared.css";
+
 @import "./styles/products.css";
+
 @import "./styles/locations.css";
+
 @import "./styles/inventory.css";
+
 @import "./styles/checkout.css";
+
+/* Unified search-field focus */
+@import "./styles/search-focus.css";

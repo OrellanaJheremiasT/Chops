@@ -1,0 +1,244 @@
+/* Chops — StackedBars: adapted from the Bencho stacked-chart interaction.
+   Uses only recorded inventory operations; no generated sample activity.
+   Motion gives feedback, never delays an inventory operation. */
+
+.chops-stacked-bars {
+  --chops-chart-in: var(--primary);
+  --chops-chart-out: #60a5fa;
+  --chops-chart-transfer: #34c7a1;
+  --chops-chart-loss: #f59e78;
+  --chops-chart-count: #e3b15e;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.chops-stacked-bars__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.chops-stacked-bars__heading h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.chops-stacked-bars__heading p {
+  margin: 5px 0 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.chops-stacked-bars__switch {
+  display: flex;
+  padding: 3px;
+  gap: 3px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.chops-stacked-bars__switch button {
+  min-height: 30px;
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.chops-stacked-bars__switch button.is-selected {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.chops-stacked-bars__summary {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 10px;
+}
+
+.chops-stacked-bars__summary strong {
+  font-size: 28px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.chops-stacked-bars__summary span {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.chops-stacked-bars__chart {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.chops-stacked-bars__plot {
+  display: grid;
+  align-items: end;
+  width: 100%;
+  min-width: 0;
+  height: 172px;
+  gap: clamp(2px, 0.7vw, 8px);
+  border-bottom: 1px solid var(--border);
+}
+
+.chops-stacked-bars__column {
+  display: flex;
+  min-width: 0;
+  height: 100%;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-end;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: crosshair;
+  border-radius: 5px 5px 0 0;
+}
+
+.chops-stacked-bars__column:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 0;
+}
+
+.chops-stacked-bars__stack {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column-reverse;
+  justify-content: flex-start;
+  width: 100%;
+  position: relative;
+  background: transparent;
+}
+
+.chops-stacked-bars__column.is-active .chops-stacked-bars__stack {
+  background: var(--primary-soft);
+  outline: 1px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.chops-stacked-bars__segment {
+  display: block;
+  flex: 0 0 auto;
+  width: 100%;
+  min-height: 0;
+  border-radius: 2px 2px 0 0;
+  transition: height 240ms ease;
+}
+
+.chops-stacked-bars__segment--in { background: var(--chops-chart-in); }
+.chops-stacked-bars__segment--out { background: var(--chops-chart-out); }
+.chops-stacked-bars__segment--transfer { background: var(--chops-chart-transfer); }
+.chops-stacked-bars__segment--loss { background: var(--chops-chart-loss); }
+.chops-stacked-bars__segment--count { background: var(--chops-chart-count); }
+
+.chops-stacked-bars__axis {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 20px;
+  padding-top: 4px;
+}
+
+.chops-stacked-bars__empty {
+  position: absolute;
+  inset: 0 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  text-align: center;
+  pointer-events: none;
+  font-size: 12px;
+}
+
+.chops-stacked-bars__detail {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 7px 14px;
+  padding: 12px;
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chops-stacked-bars__detail > span { color: var(--primary); font-weight: 650; }
+
+.chops-stacked-bars__detail-breakdown,
+.chops-stacked-bars__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 15px;
+}
+
+.chops-stacked-bars__detail-breakdown {
+  flex-basis: 100%;
+  margin-top: 3px;
+  color: var(--text-muted);
+}
+
+.chops-stacked-bars__detail-breakdown span,
+.chops-stacked-bars__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.chops-stacked-bars__legend {
+  margin-top: 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.chops-stacked-bars__dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.chops-stacked-bars__note {
+  margin: 12px 0 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+@media (max-width: 520px) {
+  .chops-stacked-bars { padding: 13px; }
+  .chops-stacked-bars__heading { align-items: center; }
+  .chops-stacked-bars__plot { height: 150px; gap: 2px; }
+  .chops-stacked-bars__axis { font-size: 10px; }
+  .chops-stacked-bars__summary strong { font-size: 24px; }
+  .chops-stacked-bars__legend { gap: 7px 11px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chops-stacked-bars__segment { transition: none; }
+}

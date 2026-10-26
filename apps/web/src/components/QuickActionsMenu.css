@@ -1,0 +1,60 @@
+/* Quick actions: compact, anchored Chops menu, keyboard/touch friendly. */
+.chops-quick { position: relative; min-width: 0; flex-shrink: 0; }
+.chops-quick-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  white-space: nowrap;
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  color: #fff;
+  background: var(--primary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.chops-quick-trigger:hover { background: var(--primary-hover); }
+.chops-quick-trigger:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.chops-quick-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 7px);
+  z-index: 150;
+  display: grid;
+  gap: 3px;
+  width: min(260px, calc(100vw - 24px));
+  max-height: min(360px, 65dvh);
+  overflow: auto;
+  padding: 7px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 12px 30px rgba(0,0,0,.18);
+}
+.chops-quick-panel button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 39px;
+  padding: 9px 10px;
+  background: transparent;
+  border: 0;
+  border-radius: 7px;
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.chops-quick-panel button svg { flex: none; color: var(--primary); }
+.chops-quick-panel button:hover,
+.chops-quick-panel button:focus-visible { background: var(--primary-soft); outline: none; }
+@media (max-width: 520px) {
+  .chops-quick-trigger { width: 36px; min-width: 36px; padding: 0; }
+  .chops-quick-trigger span { display: none; }
+}

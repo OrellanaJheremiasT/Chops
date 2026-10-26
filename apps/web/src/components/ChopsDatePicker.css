@@ -1,0 +1,56 @@
+/* Chops calendar: desktop visual style, mobile platform-native input. */
+.chops-date { position: relative; min-width: 0; width: 100%; }
+.chops-date__trigger {
+  display: flex; width: 100%; min-height: 42px; align-items: center; justify-content: space-between;
+  padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); color: var(--text); font: inherit; cursor: pointer;
+}
+.chops-date__trigger:hover, .chops-date__trigger:focus-visible { border-color: var(--primary); }
+.chops-date__trigger:disabled { opacity: .5; cursor: not-allowed; }
+.chops-date__trigger svg { color: var(--text-muted); }
+.chops-date__popup {
+  position: absolute; z-index: 1500; top: calc(100% + 7px); left: 0;
+  width: 282px; max-width: calc(100vw - 32px); padding: 13px;
+  border: 1px solid var(--border); border-radius: 11px;
+  background: var(--sidebar-bg); color: var(--text);
+  box-shadow: 0 16px 40px rgba(0,0,0,.3);
+}
+.chops-date__month { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-bottom: 10px; }
+.chops-date__month strong { font-size: 13px; text-transform: capitalize; text-align: center; }
+.chops-date__month button, .chops-date__grid button, .chops-date__today {
+  color: var(--text); background: transparent; border: 0; border-radius: 7px;
+  padding: 0; cursor: pointer; font: inherit;
+}
+.chops-date__month button { display: grid; place-items: center; height: 32px; width: 32px; }
+.chops-date__month button:hover, .chops-date__grid button:hover { background: var(--primary-soft); }
+.chops-date__grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.chops-date__weekday { display: grid; place-items: center; height: 30px; font-size: 11px; color: var(--text-muted); }
+.chops-date__grid button { height: 31px; font-size: 12px; }
+.chops-date__grid button.is-selected { background: var(--primary); color: #fff; font-weight: 700; }
+.chops-date__today { display: block; margin: 12px 0 0 auto; padding: 5px 8px; font-size: 12px; color: var(--primary); }
+/* A single custom Chops calendar on every screen. */
+.chops-date, .chops-date__trigger { box-sizing: border-box; max-width: 100%; }
+.chops-date__trigger { min-width: 0; gap: 8px; text-align: left; }
+.chops-date__trigger span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chops-date__popup { box-sizing: border-box; max-width: min(282px, calc(100vw - 24px)); }
+@media (max-width: 767px) {
+  .chops-date__trigger { min-height: 44px; font-size: 14px; }
+  .chops-date__popup {
+    position: fixed;
+    z-index: 5000;
+    inset: auto;
+    top: 50%;
+    left: 50%;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    width: min(340px, calc(100vw - 24px));
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    padding: 16px;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .55), 0 20px 60px rgba(0,0,0,.35);
+  }
+  .chops-date__grid button { min-height: 38px; }
+  .chops-date__month button { width: 40px; height: 40px; }
+}

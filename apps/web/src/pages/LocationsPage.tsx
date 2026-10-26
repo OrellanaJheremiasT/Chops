@@ -107,11 +107,11 @@ export default function LocationsPage() {
       branch
         ? { ...branch }
         : {
-            id: 0,
-            name: '',
-            address: '',
-            active: true,
-          },
+          id: 0,
+          name: '',
+          address: '',
+          active: true,
+        },
     )
 
     setError('')
@@ -123,13 +123,13 @@ export default function LocationsPage() {
       location
         ? { ...location }
         : {
-            id: 0,
-            name: '',
-            description: '',
-            type: 'warehouse',
-            branchId: branches[0]?.id ?? null,
-            active: true,
-          },
+          id: 0,
+          name: '',
+          description: '',
+          type: 'warehouse',
+          branchId: branches[0]?.id ?? null,
+          active: true,
+        },
     )
 
     setError('')
@@ -452,11 +452,10 @@ export default function LocationsPage() {
                   </td>
                   <td>
                     <span
-                      className={`badge ${
-                        branch.active
+                      className={`badge ${branch.active
                           ? 'badge-success'
                           : 'badge-warning'
-                      }`}
+                        }`}
                     >
                       {t(branch.active ? 'Active' : 'Inactive')}
                     </span>
@@ -524,11 +523,10 @@ export default function LocationsPage() {
 
                   <td>
                     <span
-                      className={`badge ${
-                        location.active
+                      className={`badge ${location.active
                           ? 'badge-success'
                           : 'badge-warning'
-                      }`}
+                        }`}
                     >
                       {t(location.active ? 'Active' : 'Inactive')}
                     </span>

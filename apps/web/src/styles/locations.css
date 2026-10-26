@@ -1,231 +1,117 @@
 /* Branches and storage locations */
 
 .locations-page {
-
   display: flex;
-
   flex-direction: column;
-
   gap: 16px;
-
 }
-
-
 
 .location-summary {
-
   display: grid;
-
   grid-template-columns: repeat(2, minmax(0, 1fr));
-
   gap: 10px;
-
 }
-
-
 
 .location-tabs {
-
   display: flex;
-
   gap: 8px;
-
   border-bottom: 1px solid var(--border);
-
 }
-
-
 
 .location-tab {
-
   display: inline-flex;
-
   align-items: center;
-
   gap: 8px;
-
   padding: 11px 14px;
-
   border: 0;
-
   border-bottom: 2px solid transparent;
-
   background: transparent;
-
   color: var(--text-muted);
-
   font-weight: 600;
-
   cursor: pointer;
-
 }
-
-
 
 .location-tab:hover {
-
   color: var(--text);
-
 }
-
-
 
 .location-tab.active {
-
   color: var(--primary);
-
   border-bottom-color: var(--primary);
-
 }
-
-
 
 .location-type {
-
   display: inline-flex;
-
   align-items: center;
-
   gap: 7px;
-
   color: var(--text-muted);
-
 }
-
-
 
 .location-hint {
-
   display: flex;
-
   align-items: center;
-
   gap: 8px;
-
   padding: 12px;
-
   border-radius: 8px;
-
   background: var(--primary-soft);
-
   color: var(--primary);
-
   font-size: 12px;
-
 }
-
-
 
 @media (max-width: 520px) {
-
   .location-summary {
-
     grid-template-columns: 1fr;
-
   }
-
-
 
   .location-tabs {
-
     overflow-x: auto;
-
   }
-
-
 
   .location-tab {
-
     white-space: nowrap;
-
   }
-
 }
-
-
 
 .location-actions {
-
   display: flex;
-
   align-items: center;
-
   gap: 8px;
-
   flex-wrap: wrap;
-
 }
-
-
 
 .location-notice {
-
   margin: 0;
-
   padding: 10px 14px;
-
   border: 1px solid var(--border);
-
   border-radius: 8px;
-
   background: var(--success-soft);
-
   color: var(--success);
-
   font-size: 13px;
-
 }
-
-
 
 .product-actions {
-
   display: flex;
-
   align-items: center;
-
   gap: 8px;
-
   flex-wrap: wrap;
-
 }
-
-
 
 .btn-danger {
-
   display: inline-flex;
-
   align-items: center;
-
   justify-content: center;
-
   gap: 6px;
-
   background: var(--danger);
-
   color: #ffffff;
-
   border: 1px solid transparent;
-
   border-radius: 8px;
-
   padding: 8px 12px;
-
   font-size: 12px;
-
   font-weight: 600;
-
   cursor: pointer;
-
   transition: opacity 0.2s ease;
-
 }
 
-
-
 .btn-danger:hover {
-
   opacity: 0.85;
-
 }

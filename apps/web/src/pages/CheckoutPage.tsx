@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import {
@@ -150,7 +149,7 @@ export default function CheckoutPage() {
 
   const receivedCents =
     cashReceived.trim() !== '' &&
-    Number.isFinite(Number(cashReceived))
+      Number.isFinite(Number(cashReceived))
       ? Math.round(Number(cashReceived) * 100)
       : 0
 

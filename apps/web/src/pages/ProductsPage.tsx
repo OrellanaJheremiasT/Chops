@@ -280,13 +280,12 @@ export default function ProductsPage() {
 
                   <td>
                     <span
-                      className={`badge ${
-                        stock === 0
+                      className={`badge ${stock === 0
                           ? 'badge-danger'
                           : stock <= 5
                             ? 'badge-warning'
                             : 'badge-success'
-                      }`}
+                        }`}
                     >
                       {stock}
                     </span>

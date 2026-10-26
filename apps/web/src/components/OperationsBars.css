@@ -1,0 +1,33 @@
+/* Bencho-inspired stacked bars: actual operations, Chops tokens and layout.
+ * Bars are buttons so touch and keyboard reveal exactly the same details. */
+.chops-operations-bars { min-width: 0; }
+.chops-operations-bars-title { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+.chops-operations-bars-title h3 { margin: 0 0 5px; }
+.chops-operations-bars-title p { margin: 0; color: var(--text-muted); font-size: 12px; }
+.chops-operations-bars-title > strong { white-space: nowrap; font-size: 13px; color: var(--primary); }
+.chops-operations-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 17px 0 10px; }
+.chops-operations-legend span { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); }
+.chops-operations-legend i { width: 9px; height: 9px; border-radius: 3px; background: var(--primary); }
+.chops-operations-scroll { min-width: 0; max-width: 100%; overflow-x: auto; }
+.chops-operations-plot { display: flex; align-items: stretch; width: 100%; gap: 5px; padding: 10px 1px 0; }
+.chops-operations-day { display: flex; align-items: stretch; flex-direction: column; flex: 1 0 0; min-width: 0; gap: 7px; padding: 0 2px; border: 0; border-radius: 6px; background: transparent; cursor: pointer; color: var(--text-muted); }
+.chops-operations-day:focus-visible { outline: 2px solid var(--primary); outline-offset: 1px; }
+.chops-operations-bar-track { display: flex; flex-direction: column; justify-content: flex-end; height: 145px; min-width: 0; width: 100%; border-bottom: 1px solid var(--border); }
+.chops-operations-bar-content { display: flex; flex-direction: column-reverse; gap: 1px; border-radius: 4px 4px 0 0; overflow: hidden; width: 100%; min-height: 0; }
+.chops-operations-segment { display: block; width: 100%; background: var(--primary); flex: none; }
+.chops-operations-segment[data-kind="in"], .chops-operations-legend [data-kind="in"] i { background: #8B5CF6; }
+.chops-operations-segment[data-kind="out"], .chops-operations-legend [data-kind="out"] i { background: #C49AFF; }
+.chops-operations-segment[data-kind="transfer"], .chops-operations-legend [data-kind="transfer"] i { background: #4C9AFF; }
+.chops-operations-segment[data-kind="loss"], .chops-operations-legend [data-kind="loss"] i { background: #F2A65A; }
+.chops-operations-segment[data-kind="count"], .chops-operations-legend [data-kind="count"] i { background: #5ACFB4; }
+.chops-operations-day[aria-pressed="true"] { background: var(--primary-soft); color: var(--primary); }
+.chops-operations-day-label { display: block; text-align: center; white-space: nowrap; font-size: 10px; line-height: 18px; min-height: 18px; }
+.chops-operations-selection { margin: 12px 0 0; color: var(--text-muted); line-height: 1.6; font-size: 12px; }
+.chops-operations-selection strong { color: var(--text); }
+@media (max-width: 520px) {
+  .chops-operations-bars-title { flex-wrap: wrap; }
+  .chops-operations-day-label { font-size: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chops-operations-bars * { transition: none !important; animation: none !important; }
+}

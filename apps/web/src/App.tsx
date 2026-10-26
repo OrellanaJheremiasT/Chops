@@ -1,7 +1,5 @@
-
 import { useEffect, useState } from "react";
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
-import StockMovementsPage from "./pages/StockMovementsPage";
 
 import {
   LayoutDashboard,
@@ -13,19 +11,28 @@ import {
   Moon,
   Sun,
   Globe,
+  TrendingDown,
+  FileBarChart2,
 } from "lucide-react";
 
 import ChopsSelect from "./components/ChopsSelect";
+
 import {
   LanguageProvider,
   useLanguage,
 } from "./i18n/LanguageContext";
+
+import { OperationsProvider } from "./demo/OperationsContext";
 
 import DashboardPage from "./pages/DashboardPage";
 import ProductsPage from "./pages/ProductsPage";
 import LocationsPage from "./pages/LocationsPage";
 import InventoryPage from "./pages/InventoryPage";
 import CheckoutPage from "./pages/CheckoutPage";
+import StockMovementsPage from "./pages/StockMovementsPage";
+import LossesPage from "./pages/LossesPage";
+import StockCountPage from "./pages/StockCountPage";
+import ReportsPage from "./pages/ReportsPage";
 
 import "./App.css";
 import "./language-switcher.css";
@@ -61,18 +68,17 @@ const sections = [
     label: "Stock Movements",
     icon: ArrowLeftRight,
   },
+  {
+    path: "/losses",
+    label: "Losses & Shrinkage",
+    icon: TrendingDown,
+  },
+  {
+    path: "/reports",
+    label: "Reports & Analytics",
+    icon: FileBarChart2,
+  },
 ];
-
-function SectionPage({ title }: { title: string }) {
-  const { t } = useLanguage();
-
-  return (
-    <section className="card section-placeholder">
-      <h2>{title}</h2>
-      <p>{t("This section is under development.")}</p>
-    </section>
-  );
-}
 
 function AppContent() {
   const { language, setLanguage, t } = useLanguage();
@@ -135,8 +141,8 @@ function AppContent() {
                   { value: "en", label: "EN" },
                   { value: "es", label: "ES" },
                 ]}
-                onChange={(next) =>
-                  setLanguage(next as "en" | "es")
+                onChange={(value) =>
+                  setLanguage(value as "en" | "es")
                 }
               />
             </div>
@@ -144,16 +150,16 @@ function AppContent() {
             <button
               type="button"
               className="theme-toggle"
-              onClick={() =>
-                setTheme((current) =>
-                  current === "light" ? "dark" : "light"
-                )
-              }
               aria-label={t(
                 theme === "light"
                   ? "Switch to dark mode"
                   : "Switch to light mode"
               )}
+              onClick={() =>
+                setTheme((current) =>
+                  current === "light" ? "dark" : "light"
+                )
+              }
             >
               {theme === "light" ? (
                 <Moon size={16} />
@@ -200,6 +206,11 @@ function AppContent() {
             />
 
             <Route
+              path="/inventory/count"
+              element={<StockCountPage />}
+            />
+
+            <Route
               path="/checkout"
               element={<CheckoutPage />}
             />
@@ -209,32 +220,22 @@ function AppContent() {
               element={<StockMovementsPage />}
             />
 
-            {sections
-              .filter(
-                (section) =>
-                  ![
-                    "/dashboard",
-                    "/products",
-                    "/locations",
-                    "/inventory",
-                    "/checkout",
-                    "/stock-movements",
-                  ].includes(section.path)
-              )
-              .map((section) => (
-                <Route
-                  key={section.path}
-                  path={section.path}
-                  element={
-                    <SectionPage title={t(section.label)} />
-                  }
-                />
-              ))}
+            <Route
+              path="/losses"
+              element={<LossesPage />}
+            />
+
+            <Route
+              path="/reports"
+              element={<ReportsPage />}
+            />
 
             <Route
               path="*"
               element={
-                <SectionPage title={t("Page not found")} />
+                <section className="card">
+                  <h2>{t("Page not found")}</h2>
+                </section>
               }
             />
           </Routes>
@@ -247,7 +248,9 @@ function AppContent() {
 export default function App() {
   return (
     <LanguageProvider>
-      <AppContent />
+      <OperationsProvider>
+        <AppContent />
+      </OperationsProvider>
     </LanguageProvider>
   );
 }

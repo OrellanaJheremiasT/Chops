@@ -1,327 +1,161 @@
 /* Product catalog */
 
 .products-page {
-
   display: flex;
-
   flex-direction: column;
-
   gap: 16px;
-
 }
-
-
 
 .products-toolbar {
-
   display: flex;
-
   justify-content: space-between;
-
   align-items: center;
-
   flex-wrap: wrap;
-
   gap: 12px;
-
 }
-
-
 
 .products-search {
-
   display: flex;
-
   align-items: center;
-
   gap: 10px;
-
   flex: 1;
-
   max-width: 420px;
-
   padding: 0 12px;
-
   border: 1px solid var(--border);
-
   border-radius: 8px;
-
   background: var(--surface);
-
   color: var(--text-muted);
-
 }
-
-
 
 .products-search input {
-
   flex: 1;
-
   min-width: 0;
-
   border: 0;
-
   background: transparent;
-
   outline: none;
-
 }
-
-
 
 .product-variants {
-
   display: flex;
-
   flex-direction: column;
-
   gap: 5px;
-
   font-size: 12px;
-
 }
-
-
 
 .product-variants code {
-
   color: var(--primary);
-
   font-size: 11px;
-
 }
-
-
 
 .products-empty {
-
   padding: 28px;
-
   text-align: center;
-
   color: var(--text-muted);
-
 }
-
-
 
 .products-note {
-
   margin: 0;
-
   color: var(--text-muted);
-
   font-size: 12px;
-
 }
-
-
 
 .product-modal-backdrop {
-
   position: fixed;
-
   inset: 0;
-
   z-index: 100;
-
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   padding: 16px;
-
   background: rgba(0, 0, 0, .65);
-
 }
-
-
 
 .product-modal {
-
   width: 100%;
-
   max-width: 560px;
-
   max-height: 90vh;
-
   overflow-y: auto;
-
   padding: 22px;
-
   border: 1px solid var(--border);
-
   border-radius: 12px;
-
   background: var(--surface);
-
   box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
-
 }
 
-
-
-.product-modal-header,
-
-.product-variant-heading,
-
-.product-form-actions {
-
+.product-modal-header, .product-variant-heading, .product-form-actions {
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
-
   gap: 12px;
-
 }
-
-
 
 .product-modal-header {
-
   margin-bottom: 20px;
-
 }
 
-
-
-.product-modal-header h3,
-
-.product-variant-heading h4 {
-
+.product-modal-header h3, .product-variant-heading h4 {
   margin: 0;
-
 }
-
-
 
 .product-icon-button {
-
   display: inline-flex;
-
   padding: 6px;
-
   border: 0;
-
   border-radius: 6px;
-
   background: transparent;
-
   color: var(--text);
-
   cursor: pointer;
-
 }
-
-
 
 .product-variant-heading {
-
   margin: 20px 0 12px;
-
 }
-
-
 
 .product-variant-editor {
-
   margin-bottom: 12px;
-
   padding: 14px;
-
   border: 1px solid var(--border);
-
   border-radius: 8px;
-
   background: var(--bg);
-
 }
-
-
 
 .product-variant-editor .field {
-
   margin-bottom: 10px;
-
 }
 
-
-
-.product-variant-editor input,
-
-.product-modal .field input {
-
+.product-variant-editor input, .product-modal .field input {
   width: 100%;
-
 }
-
-
 
 .product-remove-variant {
-
   padding: 4px 0;
-
   border: 0;
-
   background: transparent;
-
   color: var(--danger);
-
   cursor: pointer;
-
 }
-
-
 
 .product-form-error {
-
   color: var(--danger);
-
   font-size: 13px;
-
 }
-
-
 
 .product-form-actions {
-
   justify-content: flex-end;
-
   margin-top: 20px;
-
 }
 
-
-
 @media (max-width: 520px) {
-
   .products-search {
-
     max-width: none;
-
     flex-basis: 100%;
-
   }
-
-
 
   .products-toolbar>.btn {
-
     width: 100%;
-
   }
-
-
 
   .product-modal {
-
     padding: 16px;
-
   }
-
 }

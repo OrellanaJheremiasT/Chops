@@ -1,0 +1,77 @@
+.inv-title-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.inv-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.inv-toolbar .products-search {
+  flex: 1;
+  min-width: 230px;
+  max-width: 560px;
+}
+
+.inv-toolbar select {
+  min-width: 160px;
+}
+
+.inv-tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--border);
+  overflow: auto;
+}
+
+.inv-tabs button {
+  padding: 10px 14px;
+  white-space: nowrap;
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.inv-tabs button.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.inventory-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (max-width:560px) {
+  .inv-title-actions {
+    width: 100%;
+  }
+
+  .inv-title-actions .btn {
+    width: 100%;
+  }
+}
+
+/* Custom dropdown in the inventory toolbar */
+
+.inv-status-select {
+  width: 205px;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+@media (max-width: 560px) {
+  .inv-status-select {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+}
