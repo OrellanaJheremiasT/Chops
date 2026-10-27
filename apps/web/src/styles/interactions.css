@@ -1,0 +1,95 @@
+/* Chops: unified interaction layer (hover / press / focus / disabled / tabs).
+   Imported LAST so it wins over per-component transitions at equal specificity.
+   Uses the individual `scale` / `translate` properties so it never clashes with
+   existing `transform` rules. */
+
+:root {
+  --ease-out: cubic-bezier(.22, .61, .36, 1);
+  --dur-fast: .14s;
+  --dur-base: .2s;
+}
+
+/* 1. Smooth color/border/shadow changes on every interactive control */
+:is(
+  button, a.btn, [role="tab"], .nav-link, .btn, .theme-toggle, .menu-toggle,
+  .sidebar-close, .location-tab, .inventory-tab, .inventory-filter,
+  .ops-segment button, .chops-stacked-bars__switch button,
+  .product-icon-button, .checkout-icon-button, .checkout-quantity button,
+  .status-panel-btn, input, select, textarea
+) {
+  transition:
+    background-color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out),
+    color var(--dur-base) var(--ease-out),
+    box-shadow var(--dur-base) var(--ease-out),
+    opacity var(--dur-base) var(--ease-out),
+    scale var(--dur-fast) var(--ease-out),
+    translate var(--dur-fast) var(--ease-out);
+}
+
+/* 2. Press feedback (all pointer types, incl. touch) */
+:is(
+  .btn, a.btn, .theme-toggle, .menu-toggle, .sidebar-close, .nav-link,
+  [role="tab"], .location-tab, .inventory-tab, .inventory-filter,
+  .ops-segment button, .chops-stacked-bars__switch button,
+  .product-icon-button, .checkout-icon-button, .checkout-quantity button,
+  .status-panel-btn
+):active:not(:disabled):not([aria-disabled="true"]) {
+  scale: .97;
+}
+
+/* 3. Hover lift only where hover exists (avoids sticky hover on touch) */
+@media (hover: hover) {
+  :is(.btn-primary, .btn-secondary, .btn-danger, .status-panel-btn):hover:not(:disabled):not([aria-disabled="true"]) {
+    translate: 0 -1px;
+  }
+  .btn-primary:hover:not(:disabled) {
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--primary) 35%, transparent);
+  }
+  .btn-secondary:hover:not(:disabled),
+  .product-icon-button:hover:not(:disabled),
+  .checkout-icon-button:hover:not(:disabled) {
+    border-color: var(--primary);
+  }
+  :is([role="tab"], .location-tab, .inventory-tab, .inventory-filter, .ops-segment button):not(.active):not([aria-selected="true"]):hover {
+    background-color: var(--primary-soft);
+    color: var(--text);
+  }
+}
+
+/* 4. Tabs / segmented controls: selected state fades in, never jumps */
+:is([role="tab"], .location-tab, .inventory-tab, .ops-segment button)[aria-selected="true"],
+:is(.location-tab, .inventory-tab, .ops-segment button).active {
+  animation: chops-pop var(--dur-base) var(--ease-out);
+}
+@keyframes chops-pop {
+  from { scale: .96; }
+  to   { scale: 1; }
+}
+
+/* 5. Consistent keyboard focus */
+:is(button, a, [role="tab"], input, select, textarea):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* 6. Disabled */
+:is(button, .btn):disabled,
+[aria-disabled="true"] {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+/* 7. Smooth theme switch (only while the class is set by the toggle) */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition:
+    background-color .25s ease, border-color .25s ease, color .25s ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.btn, button, [role="tab"], a)::after { transition: none; }
+  * { scale: none !important; translate: none !important; }
+}

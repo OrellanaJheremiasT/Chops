@@ -114,3 +114,109 @@
   .header-brand { flex: 1 1 auto; min-width: 0; }
   .page-content { overflow-x: clip; }
 }
+
+/* ---- Accessibility: skip link ---- */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 200;
+  padding: 8px 12px;
+  border-radius: 7px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform .15s;
+}
+.skip-link:focus { transform: none; }
+.page-content:focus { outline: none; }
+
+/* ---- Nav / header interaction states ---- */
+.nav-link:active { transform: scale(.98); }
+.theme-toggle { transition: border-color .15s, background .15s, transform .1s; }
+.theme-toggle:active { transform: scale(.97); }
+
+/* ---- Page transition (opacity only: never delays interaction) ---- */
+.page-transition { animation: page-in .18s ease-out; }
+@keyframes page-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---- Mobile drawer controls (hidden on desktop) ---- */
+.menu-toggle,
+.sidebar-close {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.menu-toggle:hover,
+.sidebar-close:hover { border-color: var(--primary); }
+.sidebar-backdrop { display: none; }
+
+@media (max-width: 768px) {
+  .menu-toggle { display: inline-flex; }
+  .header-brand { flex: 1 1 auto; min-width: 0; }
+
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Off-canvas sidebar */
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 60;
+    width: min(280px, 85vw);
+    height: 100dvh;
+    padding: 14px 12px;
+    transform: translateX(-100%);
+    visibility: hidden; /* removes closed menu from tab order */
+    transition: transform .22s ease, visibility 0s linear .22s;
+    box-shadow: 0 0 32px rgba(0, 0, 0, .35);
+  }
+  .sidebar.is-open {
+    transform: none;
+    visibility: visible;
+    transition: transform .22s ease, visibility 0s;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sidebar-close { display: inline-flex; }
+
+  .nav-link { padding: 12px; font-size: 14px; min-height: 44px; }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(8, 9, 14, .55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+  }
+  .sidebar-backdrop.is-open { opacity: 1; pointer-events: auto; }
+
+  body.nav-open { overflow: hidden; }
+}
+
+@media print {
+  .menu-toggle, .sidebar-backdrop, .skip-link { display: none !important; }
+}

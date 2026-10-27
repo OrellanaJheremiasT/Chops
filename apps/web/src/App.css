@@ -16,3 +16,6 @@
 
 /* Unified search-field focus */
 @import "./styles/search-focus.css";
+
+/* Unified hover/press/focus/tab effects (keep last) */
+@import "./styles/interactions.css";

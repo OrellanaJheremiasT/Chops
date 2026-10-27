@@ -254,6 +254,18 @@ const spanish: Record<string, string> = {
     "El cierre guarda una copia del período; no elimina movimientos ni reinicia el inventario.",
   "Closings are local snapshots, not accounting or tax-certified books.":
     "Los cierres son copias locales de prueba, no libros contables ni documentos tributarios oficiales.",
+  "Skip to content": "Saltar al contenido",
+  "Open menu": "Abrir menú",
+  "Close menu": "Cerrar menú",
+  "Something went wrong": "Algo salió mal",
+  "This section failed to load. Your saved data was not changed.":
+    "No se pudo cargar esta sección. Tus datos guardados no se modificaron.",
+  "Try again": "Reintentar",
+  "Reload page": "Recargar página",
+  "Loading…": "Cargando…",
+  "Back to Dashboard": "Volver al Dashboard",
+  "The page you are looking for does not exist or was moved.":
+    "La página que buscas no existe o fue movida.",
   "in": "Entrada",
   "out": "Salida",
   "transfer": "Transferencia",
