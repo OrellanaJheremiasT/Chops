@@ -36,8 +36,8 @@
 }
 
 .location-tab.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
+  color: var(--primary-ink);
+  border-bottom-color: var(--primary-ink);
 }
 
 .location-type {
@@ -54,7 +54,7 @@
   padding: 12px;
   border-radius: 8px;
   background: var(--primary-soft);
-  color: var(--primary);
+  color: var(--primary-ink);
   font-size: 12px;
 }
 
@@ -85,7 +85,7 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--success-soft);
-  color: var(--success);
+  color: var(--success-ink);
   font-size: 13px;
 }
 
@@ -101,7 +101,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: var(--danger);
+  background: var(--danger-solid);
   color: #ffffff;
   border: 1px solid transparent;
   border-radius: 8px;

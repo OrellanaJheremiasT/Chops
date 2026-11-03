@@ -16,7 +16,7 @@
   color: var(--text-muted);
 }
 
-.status-panel > svg { color: var(--primary); }
+.status-panel > svg { color: var(--primary-ink); }
 .status-panel h2 { margin: 0; font-size: 17px; color: var(--text); }
 .status-panel p { margin: 0; font-size: 13px; }
 
@@ -24,7 +24,7 @@
   font-size: 34px !important;
   font-weight: 800;
   line-height: 1;
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 .status-panel-detail {
@@ -32,7 +32,7 @@
   padding: 6px 9px;
   border-radius: 6px;
   background: var(--danger-soft);
-  color: var(--danger);
+  color: var(--danger-ink);
   font-size: 12px;
   overflow-wrap: anywhere;
 }
@@ -62,12 +62,12 @@
   transition: border-color .15s, background .15s, transform .1s;
 }
 
-.status-panel-btn:hover { border-color: var(--primary); }
+.status-panel-btn:hover { border-color: var(--primary-ink); }
 .status-panel-btn:active { transform: scale(.98); }
 
 .status-panel-btn.primary {
   background: var(--primary);
-  border-color: var(--primary);
+  border-color: var(--primary-ink);
   color: #fff;
 }
 

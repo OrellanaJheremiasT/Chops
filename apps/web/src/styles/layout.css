@@ -60,7 +60,8 @@
 
 .nav-link.active {
   background: var(--primary-soft);
-  color: var(--primary);
+  color: var(--primary-ink);
+  box-shadow: inset 3px 0 0 var(--primary);
   font-weight: 700;
 }
 
@@ -99,7 +100,7 @@
 }
 
 .theme-toggle:hover {
-  border-color: var(--primary);
+  border-color: var(--primary-ink);
 }
 
 .page-content {
@@ -159,7 +160,7 @@
   transition: border-color .15s, background .15s;
 }
 .menu-toggle:hover,
-.sidebar-close:hover { border-color: var(--primary); }
+.sidebar-close:hover { border-color: var(--primary-ink); }
 .sidebar-backdrop { display: none; }
 
 @media (max-width: 768px) {
@@ -207,7 +208,7 @@
     position: fixed;
     inset: 0;
     z-index: 50;
-    background: rgba(8, 9, 14, .55);
+    background: rgba(10, 10, 10, .65);
     opacity: 0;
     pointer-events: none;
     transition: opacity .2s;

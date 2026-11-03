@@ -60,14 +60,14 @@
 }
 
 .inventory-filter:hover {
-  border-color: var(--primary);
+  border-color: var(--primary-ink);
   color: var(--text);
 }
 
 .inventory-filter.active {
   background: var(--primary-soft);
-  color: var(--primary);
-  border-color: var(--primary);
+  color: var(--primary-ink);
+  border-color: var(--primary-ink);
 }
 
 .inventory-summary {
@@ -81,11 +81,11 @@
 }
 
 .inventory-warning {
-  color: var(--warning);
+  color: var(--warning-ink);
 }
 
 .inventory-danger {
-  color: var(--danger);
+  color: var(--danger-ink);
 }
 
 .inventory-product {
@@ -106,7 +106,7 @@
 
 .inventory-sku {
   font-size: 11px;
-  color: var(--primary);
+  color: var(--primary-ink);
   white-space: nowrap;
 }
 

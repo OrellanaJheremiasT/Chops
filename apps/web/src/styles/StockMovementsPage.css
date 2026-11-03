@@ -29,8 +29,8 @@
 .sm-demo-badge {
   padding: 6px 10px;
   border-radius: 6px;
-  background: rgba(139, 92, 246, 0.12);
-  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary-ink);
   font-size: 11px;
   font-weight: 700;
   white-space: nowrap;
@@ -62,8 +62,8 @@
   height: 34px;
   margin-bottom: 5px;
   border-radius: 8px;
-  background: rgba(139, 92, 246, 0.12);
-  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary-ink);
 }
 
 .sm-summary-card > span {
@@ -151,7 +151,7 @@
 }
 
 .sm-field input:focus, .sm-field textarea:focus {
-  border-color: var(--primary);
+  border-color: var(--primary-ink);
 }
 
 .sm-field textarea {
@@ -191,7 +191,7 @@
 }
 
 .sm-balance-heading strong {
-  color: var(--primary);
+  color: var(--primary-ink);
   font-size: 20px;
   font-variant-numeric: tabular-nums;
 }
@@ -260,13 +260,13 @@
 }
 
 .sm-error {
-  color: #ef7777;
-  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger-ink);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
 }
 
 .sm-success {
-  color: #34c991;
-  background: rgba(52, 201, 145, 0.1);
+  color: var(--success-ink);
+  background: color-mix(in srgb, var(--success) 10%, transparent);
 }
 
 .sm-reset {
@@ -286,7 +286,7 @@
 
 .sm-reset:hover:not(:disabled) {
   color: var(--text);
-  border-color: var(--primary);
+  border-color: var(--primary-ink);
 }
 
 .sm-reset:disabled {
@@ -314,7 +314,7 @@
 }
 
 .sm-search:focus-within {
-  border-color: var(--primary);
+  border-color: var(--primary-ink);
 }
 
 .sm-search input {
@@ -345,7 +345,7 @@
 }
 
 .sm-empty svg {
-  color: var(--primary);
+  color: var(--primary-ink);
   opacity: 0.65;
 }
 
@@ -415,18 +415,18 @@
 }
 
 .sm-movement-icon.sm-type-in {
-  background: rgba(52, 201, 145, 0.12);
-  color: #34c991;
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+  color: var(--success-ink);
 }
 
 .sm-movement-icon.sm-type-out {
-  background: rgba(239, 110, 110, 0.12);
-  color: #ef7777;
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger-ink);
 }
 
 .sm-movement-icon.sm-type-transfer {
-  background: rgba(139, 92, 246, 0.12);
-  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary-ink);
 }
 
 .sm-quantity-badge {
@@ -438,18 +438,18 @@
 }
 
 .sm-quantity-badge.sm-type-in {
-  background: rgba(52, 201, 145, 0.12);
-  color: #34c991;
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+  color: var(--success-ink);
 }
 
 .sm-quantity-badge.sm-type-out {
-  background: rgba(239, 110, 110, 0.12);
-  color: #ef7777;
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger-ink);
 }
 
 .sm-quantity-badge.sm-type-transfer {
-  background: rgba(139, 92, 246, 0.12);
-  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary-ink);
 }
 
 .sm-history-product {
@@ -470,7 +470,7 @@
 }
 
 .sm-history-product code {
-  color: var(--primary);
+  color: var(--primary-ink);
   font-size: 10px;
   overflow-wrap: anywhere;
 }

@@ -94,7 +94,7 @@
 }
 
 .reports-metrics svg {
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 .reports-metrics span {
@@ -140,12 +140,12 @@
 }
 
 .reports-download-grid button:hover, .reports-close button:hover {
-  border-color: var(--primary);
+  border-color: var(--primary-ink);
 }
 
 .reports-download-grid svg, .reports-close button svg {
   flex-shrink: 0;
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 .reports-footnote, .reports-caveat {
@@ -211,12 +211,12 @@
 }
 
 .reports-error {
-  color: var(--danger);
+  color: var(--danger-ink);
   font-size: 12px;
 }
 
 .reports-success {
-  color: var(--success);
+  color: var(--success-ink);
   font-size: 12px;
 }
 

@@ -1,45 +1,91 @@
+/* Chops — centralized theme tokens.
+   Dark surfaces are tonal steps of #0A0A0A, never another base hue.
+   #1B21BB is the primary interactive accent; green/yellow/red are states. */
 :root {
   font-family: Inter, system-ui, Arial, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  --primary: #7048D8;
-  --primary-hover: #603AC4;
-  --bg: #F3F6FA;
-  --sidebar-bg: #FFFFFF;
+
+  /* Official colors */
+  --brand-black: #0A0A0A;
+  --brand-primary: #1B21BB;
+  --brand-success: #0CCA4A;
+  --brand-warning: #E3AA39;
+  --brand-danger: #931621;
+
+  /* Light theme: clean neutral surfaces with the same blue accent */
+  --primary: var(--brand-primary);
+  --primary-hover: #3138D6;
+  --primary-ink: var(--brand-primary);
+  --focus-ring: var(--brand-primary);
+  --bg: #F5F5F5;
+  --sidebar-bg: #EDEDED;
   --surface: #FFFFFF;
-  --text: #171923;
-  --text-muted: #606577;
-  --border: #DFE1EA;
-  --success: #17876E;
-  --warning: #996006;
-  --danger: #C73F4D;
-  --primary-soft: #EFE9FD;
-  --success-soft: #DDF5ED;
-  --warning-soft: #FFF2D8;
-  --danger-soft: #FCE7E9;
-  --shadow: 0 3px 12px rgba(0,0,0,.05);
+  --surface-raised: #FFFFFF;
+  --text: var(--brand-black);
+  --text-muted: #595959;
+  --border: #D4D4D4;
+  --primary-soft: #E8E9FC;
+
+  /* State bases remain the exact requested values. Text shades only
+     adapt to ensure readable contrast on the current surface. */
+  --success: var(--brand-success);
+  --success-ink: #08752F;
+  --success-soft: #E4F9EA;
+  --warning: var(--brand-warning);
+  --warning-ink: #76500A;
+  --warning-soft: #FFF4D8;
+  --danger: var(--brand-danger);
+  --danger-ink: var(--brand-danger);
+  --danger-solid: var(--brand-danger);
+  --danger-soft: #FBE8EB;
+  --shadow: 0 4px 18px rgba(10, 10, 10, .06);
+
+  /* Chart series: primary-blue shades + neutral; red only for losses. */
+  --chart-in: var(--brand-primary);
+  --chart-out: #6368E1;
+  --chart-transfer: #858585;
+  --chart-loss: var(--brand-danger);
+  --chart-count: #B5B5B5;
   color-scheme: light;
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --primary: #8B5CF6;
-  --primary-hover: #A17AF8;
-  --bg: #101118;
-  --sidebar-bg: #171923;
-  --surface: #222431;
-  --text: #F3F6FA;
-  --text-muted: #A6A8B8;
-  --border: #363847;
-  --success: #65D7BD;
-  --warning: #FFD080;
-  --danger: #FF9B9B;
-  --primary-soft: #302544;
-  --success-soft: #153E37;
-  --warning-soft: #49371D;
-  --danger-soft: #4A252C;
-  --shadow: none;
+  --primary: var(--brand-primary);
+  --primary-hover: #333CDA;
+  --primary-ink: #999DFF;
+  --focus-ring: #999DFF;
+
+  /* All structural backgrounds are neutral tonal variations of #0A0A0A. */
+  --bg: var(--brand-black);  /* Canvas: exactly #0A0A0A */
+  --sidebar-bg: #141414;     /* Sidebar: neutral gray step 1 */
+  --surface: #1C1C1C;        /* Cards, menus, inputs: neutral step 2 */
+  --surface-raised: #272727; /* Optional elevated layer: step 3 */
+  --border: #3D3D3D;        /* Dividers: neutral step 4 */
+  --text: #F0F0F0;
+  --text-muted: #B4B4B4;
+  --primary-soft: #252525;  /* Active/hover surface stays neutral */
+
+  --success: var(--brand-success);
+  --success-ink: var(--brand-success);
+  --success-soft: #10271A;
+  --warning: var(--brand-warning);
+  --warning-ink: var(--brand-warning);
+  --warning-soft: #2E2516;
+  --danger: var(--brand-danger);
+  --danger-ink: #F18C94;
+  --danger-solid: var(--brand-danger);
+  --danger-soft: #30191C;
+  --shadow: 0 4px 18px rgba(0, 0, 0, .24);
+
+  /* Brighter versions of the same blue keep data visible on black. */
+  --chart-in: #535CE7;
+  --chart-out: #969BFF;
+  --chart-transfer: #A7A7A7;
+  --chart-loss: #B73A45;
+  --chart-count: #DEDEDE;
 }
 
 * {
@@ -60,7 +106,7 @@ button, input, select, textarea {
 }
 
 :focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
 }
 

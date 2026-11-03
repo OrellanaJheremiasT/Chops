@@ -39,7 +39,7 @@
 }
 
 .ops-metric svg {
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 .ops-metric span,.ops-metric small {
@@ -116,7 +116,7 @@
 }
 
 .ops-search:focus-within {
-  border-color: var(--primary);
+  border-color: var(--primary-ink);
 }
 
 .ops-search input {
@@ -161,7 +161,7 @@
 
 .ops-options button:hover,.ops-options button.selected {
   background: var(--primary-soft);
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 .ops-options small {
@@ -208,8 +208,8 @@
 }
 
 .ops-segment button.active {
-  color: var(--primary);
-  border-color: var(--primary);
+  color: var(--primary-ink);
+  border-color: var(--primary-ink);
   background: var(--primary-soft);
 }
 
@@ -221,12 +221,12 @@
 
 .ops-error {
   font-size: 12px;
-  color: var(--danger);
+  color: var(--danger-ink);
 }
 
 .ops-success {
   font-size: 12px;
-  color: var(--success);
+  color: var(--success-ink);
 }
 
 .ops-history {
@@ -306,7 +306,7 @@
 }
 
 .ops-negative {
-  color: var(--danger);
+  color: var(--danger-ink);
 }
 
 @media (max-width:990px) {

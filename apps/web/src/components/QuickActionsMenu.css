@@ -18,7 +18,7 @@
   cursor: pointer;
 }
 .chops-quick-trigger:hover { background: var(--primary-hover); }
-.chops-quick-trigger:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.chops-quick-trigger:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .chops-quick-panel {
   position: absolute;
   right: 0;
@@ -32,7 +32,7 @@
   padding: 7px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  background: var(--surface);
+  background: var(--surface-raised);
   box-shadow: 0 12px 30px rgba(0,0,0,.18);
 }
 .chops-quick-panel button {
@@ -51,7 +51,7 @@
   font-size: 12px;
   cursor: pointer;
 }
-.chops-quick-panel button svg { flex: none; color: var(--primary); }
+.chops-quick-panel button svg { flex: none; color: var(--primary-ink); }
 .chops-quick-panel button:hover,
 .chops-quick-panel button:focus-visible { background: var(--primary-soft); outline: none; }
 @media (max-width: 520px) {

@@ -64,15 +64,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 .stat.is-ok .stat-icon {
-  color: var(--success);
+  color: var(--success-ink);
 }
 
 .stat.is-warning .stat-icon {
-  color: var(--warning);
+  color: var(--warning-ink);
 }
 
 .recent-products, .card {
@@ -122,21 +122,21 @@
 }
 
 .badge-info {
-  color: var(--primary);
+  color: var(--primary-ink);
   background: var(--primary-soft);
 }
 
 .badge-success {
-  color: var(--success);
+  color: var(--success-ink);
   background: var(--success-soft);
 }
 
 .badge-warning {
-  color: var(--warning);
+  color: var(--warning-ink);
   background: var(--warning-soft);
 }
 
 .badge-danger {
-  color: var(--danger);
+  color: var(--danger-ink);
   background: var(--danger-soft);
 }

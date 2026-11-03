@@ -42,7 +42,7 @@
 }
 
 .checkout-panel-heading h3 svg {
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 .checkout-panel-heading p {
@@ -98,18 +98,18 @@
 }
 
 .checkout-product-info code, .checkout-cart-item code {
-  color: var(--primary);
+  color: var(--primary-ink);
   font-size: 11px;
   overflow-wrap: anywhere;
 }
 
 .checkout-product-info .checkout-stock {
   font-size: 11px;
-  color: var(--success);
+  color: var(--success-ink);
 }
 
 .checkout-product-info .checkout-stock-out {
-  color: var(--danger);
+  color: var(--danger-ink);
 }
 
 .checkout-product-action {
@@ -143,7 +143,7 @@
   padding: 5px;
   border: 0;
   background: transparent;
-  color: var(--danger);
+  color: var(--danger-ink);
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
@@ -184,7 +184,7 @@
 }
 
 .checkout-empty svg {
-  color: var(--primary);
+  color: var(--primary-ink);
   opacity: 0.65;
 }
 
@@ -233,7 +233,7 @@
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: var(--danger);
+  color: var(--danger-ink);
   cursor: pointer;
 }
 
@@ -262,7 +262,7 @@
 }
 
 .checkout-quantity button:hover:not(:disabled) {
-  color: var(--primary);
+  color: var(--primary-ink);
   background: var(--primary-soft);
 }
 
@@ -303,7 +303,7 @@
 }
 
 .checkout-total strong {
-  color: var(--primary);
+  color: var(--primary-ink);
   font-size: 24px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
@@ -340,14 +340,14 @@
 }
 
 .checkout-method:hover {
-  border-color: var(--primary);
+  border-color: var(--primary-ink);
   color: var(--text);
 }
 
 .checkout-method.active {
-  border-color: var(--primary);
+  border-color: var(--primary-ink);
   background: var(--primary-soft);
-  color: var(--primary);
+  color: var(--primary-ink);
 }
 
 .checkout-cash-field {
@@ -365,7 +365,7 @@
 }
 
 .checkout-change strong {
-  color: var(--success);
+  color: var(--success-ink);
   font-variant-numeric: tabular-nums;
 }
 
@@ -405,7 +405,7 @@
 
 .checkout-receipt-total {
   margin-top: 10px;
-  color: var(--primary);
+  color: var(--primary-ink);
   font-weight: 700;
 }
 
