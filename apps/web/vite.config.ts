@@ -1,8 +1,8 @@
-import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
 
-// GitHub Pages: https://orellanajheremiast.github.io/Chops/
-export default defineConfig({
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig(({ command }) => ({
   plugins: [react()],
-  base: '/Chops/',
-})
+  base: command === 'serve' ? '/' : '/Chops/',
+}))
