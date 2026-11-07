@@ -1,37 +1,67 @@
 
 const API_BASE_URL = import.meta.env.DEV
   ? ""
-  : (import.meta.env.VITE_API_URL ?? "").replace(/\/$/, "");
+  : (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/+$/, "");
 
-export async function apiGet<T>(
+export class ApiError extends Error {
+  readonly status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
+export async function apiRequest<T>(
   path: `/${string}`,
-  signal?: AbortSignal
+  options: RequestInit = {}
 ): Promise<T> {
-  const response = await fetch(
-    `${API_BASE_URL}${path}`,
-    {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-      signal,
-    }
-  );
+  const headers = new Headers(options.headers);
+  headers.set("Accept", "application/json");
 
-  if (!response.ok) {
-    throw new Error(
-      `API request failed: HTTP ${response.status}`
-    );
+  if (options.body != null && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
   }
 
-  const contentType =
-    response.headers.get("content-type") ?? "";
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    ...options,
+    headers,
+  });
 
+  if (!response.ok) {
+    let message = `HTTP ${response.status}`;
+    const body: unknown = await response.json().catch(() => null);
+
+    if (
+      body !== null &&
+      typeof body === "object" &&
+      "detail" in body &&
+      typeof body.detail === "string"
+    ) {
+      message = body.detail;
+    }
+
+    throw new ApiError(response.status, message);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  const contentType = response.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) {
     throw new Error("The API did not return JSON");
   }
 
   return (await response.json()) as T;
+}
+
+export function apiGet<T>(
+  path: `/${string}`,
+  signal?: AbortSignal
+): Promise<T> {
+  return apiRequest<T>(path, { method: "GET", signal });
 }
 
 export interface HealthResponse {
