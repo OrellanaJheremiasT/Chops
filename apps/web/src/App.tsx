@@ -1,4 +1,12 @@
-import { Suspense, lazy, useEffect, useRef, useState } from "react";
+
+import {
+  Suspense,
+  lazy,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
 import {
   NavLink,
   Navigate,
@@ -23,6 +31,7 @@ import {
   X,
 } from "lucide-react";
 
+import ApiConnectionStatus from "./components/ApiConnectionStatus";
 import ChopsSelect from "./components/ChopsSelect";
 import ErrorBoundary from "./components/ErrorBoundary";
 import NotFound from "./components/NotFound";
@@ -35,18 +44,33 @@ import {
 
 import { OperationsProvider } from "./demo/OperationsContext";
 
-// Each page is its own chunk: the initial bundle only carries the shell.
-const DashboardPage = lazy(() => import("./pages/DashboardPage"));
-const ProductsPage = lazy(() => import("./pages/ProductsPage"));
-const LocationsPage = lazy(() => import("./pages/LocationsPage"));
-const InventoryPage = lazy(() => import("./pages/InventoryPage"));
-const CheckoutPage = lazy(() => import("./pages/CheckoutPage"));
+const DashboardPage = lazy(
+  () => import("./pages/DashboardPage")
+);
+const ProductsPage = lazy(
+  () => import("./pages/ProductsPage")
+);
+const LocationsPage = lazy(
+  () => import("./pages/LocationsPage")
+);
+const InventoryPage = lazy(
+  () => import("./pages/InventoryPage")
+);
+const CheckoutPage = lazy(
+  () => import("./pages/CheckoutPage")
+);
 const StockMovementsPage = lazy(
   () => import("./pages/StockMovementsPage")
 );
-const LossesPage = lazy(() => import("./pages/LossesPage"));
-const StockCountPage = lazy(() => import("./pages/StockCountPage"));
-const ReportsPage = lazy(() => import("./pages/ReportsPage"));
+const LossesPage = lazy(
+  () => import("./pages/LossesPage")
+);
+const StockCountPage = lazy(
+  () => import("./pages/StockCountPage")
+);
+const ReportsPage = lazy(
+  () => import("./pages/ReportsPage")
+);
 
 import "./App.css";
 import "./language-switcher.css";
@@ -97,7 +121,9 @@ const sections = [
 function AppContent() {
   const { language, setLanguage, t } = useLanguage();
 
-  const [theme, setTheme] = useState<"light" | "dark">(() =>
+  const [theme, setTheme] = useState<
+    "light" | "dark"
+  >(() =>
     localStorage.getItem("chops-theme") === "light"
       ? "light"
       : "dark"
@@ -105,24 +131,27 @@ function AppContent() {
 
   useEffect(() => {
     const root = document.documentElement;
+
     root.setAttribute("data-theme", theme);
     localStorage.setItem("chops-theme", theme);
-    // Brief fade for the theme change only (class is removed right after).
+
     root.classList.add("theme-transition");
+
     const id = window.setTimeout(
       () => root.classList.remove("theme-transition"),
       300
     );
+
     return () => window.clearTimeout(id);
   }, [theme]);
 
-  // Mobile drawer (<= 768px). On desktop the sidebar is always visible.
   const location = useLocation();
+
   const [menuOpen, setMenuOpen] = useState(false);
+
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
 
-  // Close after navigating.
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
@@ -136,37 +165,64 @@ function AppContent() {
         menuButtonRef.current?.focus();
       }
     };
-    // If the viewport grows past the breakpoint, drop the open state.
-    const mq = window.matchMedia("(min-width: 769px)");
-    const onChange = () => mq.matches && setMenuOpen(false);
+
+    const mq = window.matchMedia(
+      "(min-width: 769px)"
+    );
+
+    const onChange = () => {
+      if (mq.matches) {
+        setMenuOpen(false);
+      }
+    };
 
     document.addEventListener("keydown", onKey);
     mq.addEventListener("change", onChange);
+
     document.body.classList.add("nav-open");
+
     sidebarRef.current
       ?.querySelector<HTMLElement>(".nav-link")
       ?.focus();
 
     return () => {
-      document.removeEventListener("keydown", onKey);
-      mq.removeEventListener("change", onChange);
-      document.body.classList.remove("nav-open");
+      document.removeEventListener(
+        "keydown",
+        onKey
+      );
+
+      mq.removeEventListener(
+        "change",
+        onChange
+      );
+
+      document.body.classList.remove(
+        "nav-open"
+      );
     };
   }, [menuOpen]);
 
   return (
     <div className="app-layout">
-      <a className="skip-link" href="#main-content">
+      <a
+        className="skip-link"
+        href="#main-content"
+      >
         {t("Skip to content")}
       </a>
 
       <aside
         ref={sidebarRef}
         id="app-sidebar"
-        className={menuOpen ? "sidebar is-open" : "sidebar"}
+        className={
+          menuOpen
+            ? "sidebar is-open"
+            : "sidebar"
+        }
       >
         <div className="brand">
           <h1>Chops</h1>
+
           <button
             type="button"
             className="sidebar-close"
@@ -181,27 +237,35 @@ function AppContent() {
         </div>
 
         <nav aria-label={t("Main navigation")}>
-          {sections.map(({ path, label, icon: Icon }) => (
-            <NavLink
-              key={path}
-              to={path}
-              className={({ isActive }) =>
-                isActive ? "nav-link active" : "nav-link"
-              }
-            >
-              <Icon
-                size={16}
-                strokeWidth={1.8}
-                aria-hidden="true"
-              />
-              <span>{t(label)}</span>
-            </NavLink>
-          ))}
+          {sections.map(
+            ({ path, label, icon: Icon }) => (
+              <NavLink
+                key={path}
+                to={path}
+                className={({ isActive }) =>
+                  isActive
+                    ? "nav-link active"
+                    : "nav-link"
+                }
+              >
+                <Icon
+                  size={16}
+                  strokeWidth={1.8}
+                  aria-hidden="true"
+                />
+                <span>{t(label)}</span>
+              </NavLink>
+            )
+          )}
         </nav>
       </aside>
 
       <div
-        className={menuOpen ? "sidebar-backdrop is-open" : "sidebar-backdrop"}
+        className={
+          menuOpen
+            ? "sidebar-backdrop is-open"
+            : "sidebar-backdrop"
+        }
         onClick={() => setMenuOpen(false)}
         aria-hidden="true"
       />
@@ -215,16 +279,28 @@ function AppContent() {
             aria-label={t("Open menu")}
             aria-expanded={menuOpen}
             aria-controls="app-sidebar"
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={() =>
+              setMenuOpen((open) => !open)
+            }
           >
-            <Menu size={18} aria-hidden="true" />
+            <Menu
+              size={18}
+              aria-hidden="true"
+            />
           </button>
 
-          <span className="header-brand">Chops</span>
+          <span className="header-brand">
+            Chops
+          </span>
 
           <div className="header-controls">
+            <ApiConnectionStatus />
+
             <div className="language-picker">
-              <Globe size={16} aria-hidden="true" />
+              <Globe
+                size={16}
+                aria-hidden="true"
+              />
 
               <span className="sr-only">
                 Language / Idioma
@@ -235,11 +311,19 @@ function AppContent() {
                 value={language}
                 compact
                 options={[
-                  { value: "en", label: "EN" },
-                  { value: "es", label: "ES" },
+                  {
+                    value: "en",
+                    label: "EN",
+                  },
+                  {
+                    value: "es",
+                    label: "ES",
+                  },
                 ]}
                 onChange={(value) =>
-                  setLanguage(value as "en" | "es")
+                  setLanguage(
+                    value as "en" | "es"
+                  )
                 }
               />
             </div>
@@ -254,7 +338,9 @@ function AppContent() {
               )}
               onClick={() =>
                 setTheme((current) =>
-                  current === "light" ? "dark" : "light"
+                  current === "light"
+                    ? "dark"
+                    : "light"
                 )
               }
             >
@@ -275,32 +361,78 @@ function AppContent() {
           </div>
         </header>
 
-        <main id="main-content" className="page-content" tabIndex={-1}>
-          {/* key resets the boundary when the user navigates away */}
-          <ErrorBoundary key={location.pathname}>
-            <Suspense fallback={<RouteFallback />}>
+        <main
+          id="main-content"
+          className="page-content"
+          tabIndex={-1}
+        >
+          <ErrorBoundary
+            key={location.pathname}
+          >
+            <Suspense
+              fallback={<RouteFallback />}
+            >
               <div className="page-transition">
                 <Routes>
                   <Route
                     path="/"
-                    element={<Navigate to="/dashboard" replace />}
+                    element={
+                      <Navigate
+                        to="/dashboard"
+                        replace
+                      />
+                    }
                   />
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/products" element={<ProductsPage />} />
-                  <Route path="/locations" element={<LocationsPage />} />
-                  <Route path="/inventory" element={<InventoryPage />} />
+
+                  <Route
+                    path="/dashboard"
+                    element={<DashboardPage />}
+                  />
+
+                  <Route
+                    path="/products"
+                    element={<ProductsPage />}
+                  />
+
+                  <Route
+                    path="/locations"
+                    element={<LocationsPage />}
+                  />
+
+                  <Route
+                    path="/inventory"
+                    element={<InventoryPage />}
+                  />
+
                   <Route
                     path="/inventory/count"
                     element={<StockCountPage />}
                   />
-                  <Route path="/checkout" element={<CheckoutPage />} />
+
+                  <Route
+                    path="/checkout"
+                    element={<CheckoutPage />}
+                  />
+
                   <Route
                     path="/stock-movements"
                     element={<StockMovementsPage />}
                   />
-                  <Route path="/losses" element={<LossesPage />} />
-                  <Route path="/reports" element={<ReportsPage />} />
-                  <Route path="*" element={<NotFound />} />
+
+                  <Route
+                    path="/losses"
+                    element={<LossesPage />}
+                  />
+
+                  <Route
+                    path="/reports"
+                    element={<ReportsPage />}
+                  />
+
+                  <Route
+                    path="*"
+                    element={<NotFound />}
+                  />
                 </Routes>
               </div>
             </Suspense>
