@@ -61,7 +61,7 @@ function makeBuckets(
   const buckets: Bucket[] = [];
   const byKey = new Map<string, Bucket>();
 
-  for (const cursor = new Date(start); cursor <= last;) {
+  for (const cursor = new Date(start); cursor <= last; ) {
     const bucketEnd = new Date(cursor);
     bucketEnd.setDate(bucketEnd.getDate() + (granularity === "week" ? 6 : 0));
 
@@ -84,10 +84,18 @@ function makeBuckets(
 
   for (const operation of operations) {
     const date = new Date(operation.createdAt);
-    if (Number.isNaN(date.getTime()) || date < first || date >= new Date(last.getFullYear(), last.getMonth(), last.getDate() + 1)) {
+    if (
+      Number.isNaN(date.getTime()) ||
+      date < first ||
+      date >= new Date(last.getFullYear(), last.getMonth(), last.getDate() + 1)
+    ) {
       continue;
     }
-    if (!KINDS.includes(operation.kind) || !Number.isFinite(operation.quantity) || operation.quantity <= 0) {
+    if (
+      !KINDS.includes(operation.kind) ||
+      !Number.isFinite(operation.quantity) ||
+      operation.quantity <= 0
+    ) {
       continue;
     }
 
@@ -129,19 +137,29 @@ export default function StackedBars({ operations, days }: StackedBarsProps) {
   const countText = (count: number) => count.toLocaleString(locale);
 
   return (
-    <section className="chops-stacked-bars" aria-label={t("Inventory activity chart")}>
+    <section
+      className="chops-stacked-bars"
+      aria-label={t("Inventory activity chart")}
+    >
       <div className="chops-stacked-bars__heading">
         <div>
           <h3>{t("Inventory activity")}</h3>
           <p>{t("Units moved or adjusted in the selected period")}</p>
         </div>
 
-        <div className="chops-stacked-bars__switch" role="group" aria-label={t("Chart grouping")}>
+        <div
+          className="chops-stacked-bars__switch"
+          role="group"
+          aria-label={t("Chart grouping")}
+        >
           <button
             type="button"
             className={granularity === "day" ? "is-selected" : ""}
             aria-pressed={granularity === "day"}
-            onClick={() => { setGranularity("day"); setActiveKey(null); }}
+            onClick={() => {
+              setGranularity("day");
+              setActiveKey(null);
+            }}
           >
             {t("Daily")}
           </button>
@@ -149,7 +167,10 @@ export default function StackedBars({ operations, days }: StackedBarsProps) {
             type="button"
             className={granularity === "week" ? "is-selected" : ""}
             aria-pressed={granularity === "week"}
-            onClick={() => { setGranularity("week"); setActiveKey(null); }}
+            onClick={() => {
+              setGranularity("week");
+              setActiveKey(null);
+            }}
           >
             {t("Weekly")}
           </button>
@@ -164,7 +185,9 @@ export default function StackedBars({ operations, days }: StackedBarsProps) {
       <div className="chops-stacked-bars__chart">
         <div
           className="chops-stacked-bars__plot"
-          style={{ gridTemplateColumns: `repeat(${buckets.length}, minmax(0, 1fr))` }}
+          style={{
+            gridTemplateColumns: `repeat(${buckets.length}, minmax(0, 1fr))`,
+          }}
         >
           {buckets.map((bucket) => (
             <button
@@ -188,17 +211,20 @@ export default function StackedBars({ operations, days }: StackedBarsProps) {
                   <span
                     key={kind}
                     className={`chops-stacked-bars__segment chops-stacked-bars__segment--${kind}`}
-                    style={{ height: `${(bucket.values[kind] / maxTotal) * 100}%` }}
+                    style={{
+                      height: `${(bucket.values[kind] / maxTotal) * 100}%`,
+                    }}
                   />
                 ))}
               </span>
-
             </button>
           ))}
         </div>
         <div className="chops-stacked-bars__axis" aria-hidden="true">
           <span>{buckets.length ? dateLabel(buckets[0].start) : ""}</span>
-          <span>{buckets.length ? dateLabel(buckets[buckets.length - 1].end) : ""}</span>
+          <span>
+            {buckets.length ? dateLabel(buckets[buckets.length - 1].end) : ""}
+          </span>
         </div>
 
         {totalUnits === 0 && (
@@ -211,11 +237,15 @@ export default function StackedBars({ operations, days }: StackedBarsProps) {
       {active && (
         <div className="chops-stacked-bars__detail" role="status">
           <strong>{bucketLabel(active)}</strong>
-          <span>{countText(active.total)} {t("Units")}</span>
+          <span>
+            {countText(active.total)} {t("Units")}
+          </span>
           <div className="chops-stacked-bars__detail-breakdown">
             {KINDS.map((kind) => (
               <span key={kind}>
-                <i className={`chops-stacked-bars__dot chops-stacked-bars__segment--${kind}`} />
+                <i
+                  className={`chops-stacked-bars__dot chops-stacked-bars__segment--${kind}`}
+                />
                 {t(KIND_LABEL[kind])}: {countText(active.values[kind])}
               </span>
             ))}
@@ -223,10 +253,15 @@ export default function StackedBars({ operations, days }: StackedBarsProps) {
         </div>
       )}
 
-      <div className="chops-stacked-bars__legend" aria-label={t("Movement types")}>
+      <div
+        className="chops-stacked-bars__legend"
+        aria-label={t("Movement types")}
+      >
         {KINDS.map((kind) => (
           <span key={kind}>
-            <i className={`chops-stacked-bars__dot chops-stacked-bars__segment--${kind}`} />
+            <i
+              className={`chops-stacked-bars__dot chops-stacked-bars__segment--${kind}`}
+            />
             {t(KIND_LABEL[kind])}
           </span>
         ))}

@@ -1,4 +1,3 @@
-
 const API_BASE_URL = import.meta.env.DEV
   ? ""
   : (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/+$/, "");
@@ -15,7 +14,7 @@ export class ApiError extends Error {
 
 export async function apiRequest<T>(
   path: `/${string}`,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<T> {
   const headers = new Headers(options.headers);
   headers.set("Accept", "application/json");
@@ -59,7 +58,7 @@ export async function apiRequest<T>(
 
 export function apiGet<T>(
   path: `/${string}`,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<T> {
   return apiRequest<T>(path, { method: "GET", signal });
 }
@@ -71,12 +70,9 @@ export interface HealthResponse {
 }
 
 export async function getApiHealth(
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<HealthResponse> {
-  const health = await apiGet<HealthResponse>(
-    "/api/v1/health",
-    signal
-  );
+  const health = await apiGet<HealthResponse>("/api/v1/health", signal);
 
   if (
     health.status !== "UP" ||

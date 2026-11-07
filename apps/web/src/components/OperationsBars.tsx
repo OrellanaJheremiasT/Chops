@@ -74,23 +74,35 @@ export default function OperationsBars({
   );
 
   return (
-    <section className="dash-panel chops-operations-bars" aria-label={t("Operations by day")}>
+    <section
+      className="dash-panel chops-operations-bars"
+      aria-label={t("Operations by day")}
+    >
       <div className="chops-operations-bars-title">
         <div>
           <h3>{t("Operations by day")}</h3>
           <p>{t("Recorded inventory operations, not estimated sales.")}</p>
         </div>
-        <strong>{recorded} {t("records")}</strong>
+        <strong>
+          {recorded} {t("records")}
+        </strong>
       </div>
-      <div className="chops-operations-legend" aria-label={t("Operation types")}>
+      <div
+        className="chops-operations-legend"
+        aria-label={t("Operation types")}
+      >
         {kinds.map((kind) => (
           <span key={kind} data-kind={kind}>
-            <i aria-hidden="true" />{t(kind)}
+            <i aria-hidden="true" />
+            {t(kind)}
           </span>
         ))}
       </div>
       <div className="chops-operations-scroll">
-        <div className="chops-operations-plot" style={{ minWidth: count === 30 ? 520 : 0 }}>
+        <div
+          className="chops-operations-plot"
+          style={{ minWidth: count === 30 ? 520 : 0 }}
+        >
           {groups.map((group, index) => {
             const total = kinds.reduce((sum, kind) => sum + group[kind], 0);
             return (
@@ -101,10 +113,15 @@ export default function OperationsBars({
                 aria-pressed={selected === group.key}
                 aria-label={`${group.label}: ${total} ${t("records")}`}
                 title={`${group.label}: ${total} ${t("records")}`}
-                onClick={() => setSelected(group.key === selected ? null : group.key)}
+                onClick={() =>
+                  setSelected(group.key === selected ? null : group.key)
+                }
               >
                 <span className="chops-operations-bar-track">
-                  <span className="chops-operations-bar-content" style={{ height: `${(total / highest) * 100}%` }}>
+                  <span
+                    className="chops-operations-bar-content"
+                    style={{ height: `${(total / highest) * 100}%` }}
+                  >
                     {kinds.map((kind) => {
                       const share = total > 0 ? (group[kind] / total) * 100 : 0;
                       return share > 0 ? (
@@ -119,7 +136,9 @@ export default function OperationsBars({
                   </span>
                 </span>
                 <span className="chops-operations-day-label">
-                  {count === 7 || index % 5 === 0 || index === count - 1 ? group.label : ""}
+                  {count === 7 || index % 5 === 0 || index === count - 1
+                    ? group.label
+                    : ""}
                 </span>
               </button>
             );
@@ -132,7 +151,11 @@ export default function OperationsBars({
           {kinds.map((kind) => `${t(kind)} ${current[kind]}`).join(" · ")}
         </p>
       )}
-      {recorded === 0 && <p className="ops-footnote">{t("No recorded operations for this period.")}</p>}
+      {recorded === 0 && (
+        <p className="ops-footnote">
+          {t("No recorded operations for this period.")}
+        </p>
+      )}
     </section>
   );
 }

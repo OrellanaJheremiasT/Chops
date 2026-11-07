@@ -8,13 +8,7 @@ import "./StatusPanel.css";
 type Props = { children: ReactNode };
 type State = { error: Error | null };
 
-function ErrorPanel({
-  error,
-  onRetry,
-}: {
-  error: Error;
-  onRetry: () => void;
-}) {
+function ErrorPanel({ error, onRetry }: { error: Error; onRetry: () => void }) {
   const { t } = useLanguage();
 
   return (
@@ -22,9 +16,7 @@ function ErrorPanel({
       <AlertTriangle size={28} aria-hidden="true" />
       <h2>{t("Something went wrong")}</h2>
       <p>
-        {t(
-          "This section failed to load. Your saved data was not changed."
-        )}
+        {t("This section failed to load. Your saved data was not changed.")}
       </p>
       {/* The real error is shown, not hidden behind a generic message. */}
       <code className="status-panel-detail">{error.message}</code>

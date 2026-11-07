@@ -41,7 +41,11 @@ export function SkeletonTable({
           style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
         >
           {Array.from({ length: cols }, (_, c) => (
-            <Skeleton key={c} height={r === 0 ? 10 : 12} width={c === 0 ? "80%" : "60%"} />
+            <Skeleton
+              key={c}
+              height={r === 0 ? 10 : 12}
+              width={c === 0 ? "80%" : "60%"}
+            />
           ))}
         </div>
       ))}

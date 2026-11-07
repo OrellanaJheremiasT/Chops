@@ -16,9 +16,18 @@
   color: var(--text-muted);
 }
 
-.status-panel > svg { color: var(--primary-ink); }
-.status-panel h2 { margin: 0; font-size: 17px; color: var(--text); }
-.status-panel p { margin: 0; font-size: 13px; }
+.status-panel > svg {
+  color: var(--primary-ink);
+}
+.status-panel h2 {
+  margin: 0;
+  font-size: 17px;
+  color: var(--text);
+}
+.status-panel p {
+  margin: 0;
+  font-size: 13px;
+}
 
 .status-panel-code {
   font-size: 34px !important;
@@ -59,11 +68,18 @@
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
-  transition: border-color .15s, background .15s, transform .1s;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    transform 0.1s;
 }
 
-.status-panel-btn:hover { border-color: var(--primary-ink); }
-.status-panel-btn:active { transform: scale(.98); }
+.status-panel-btn:hover {
+  border-color: var(--primary-ink);
+}
+.status-panel-btn:active {
+  transform: scale(0.98);
+}
 
 .status-panel-btn.primary {
   background: var(--primary);
@@ -71,7 +87,9 @@
   color: #fff;
 }
 
-.status-panel-btn.primary:hover { background: var(--primary-hover); }
+.status-panel-btn.primary:hover {
+  background: var(--primary-hover);
+}
 
 .route-fallback {
   min-height: 60vh;

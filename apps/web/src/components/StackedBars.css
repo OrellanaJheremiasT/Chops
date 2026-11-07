@@ -144,11 +144,21 @@
   transition: height 240ms ease;
 }
 
-.chops-stacked-bars__segment--in { background: var(--chops-chart-in); }
-.chops-stacked-bars__segment--out { background: var(--chops-chart-out); }
-.chops-stacked-bars__segment--transfer { background: var(--chops-chart-transfer); }
-.chops-stacked-bars__segment--loss { background: var(--chops-chart-loss); }
-.chops-stacked-bars__segment--count { background: var(--chops-chart-count); }
+.chops-stacked-bars__segment--in {
+  background: var(--chops-chart-in);
+}
+.chops-stacked-bars__segment--out {
+  background: var(--chops-chart-out);
+}
+.chops-stacked-bars__segment--transfer {
+  background: var(--chops-chart-transfer);
+}
+.chops-stacked-bars__segment--loss {
+  background: var(--chops-chart-loss);
+}
+.chops-stacked-bars__segment--count {
+  background: var(--chops-chart-count);
+}
 
 .chops-stacked-bars__axis {
   display: flex;
@@ -187,7 +197,10 @@
   font-variant-numeric: tabular-nums;
 }
 
-.chops-stacked-bars__detail > span { color: var(--primary); font-weight: 650; }
+.chops-stacked-bars__detail > span {
+  color: var(--primary);
+  font-weight: 650;
+}
 
 .chops-stacked-bars__detail-breakdown,
 .chops-stacked-bars__legend {
@@ -231,14 +244,29 @@
 }
 
 @media (max-width: 520px) {
-  .chops-stacked-bars { padding: 13px; }
-  .chops-stacked-bars__heading { align-items: center; }
-  .chops-stacked-bars__plot { height: 150px; gap: 2px; }
-  .chops-stacked-bars__axis { font-size: 10px; }
-  .chops-stacked-bars__summary strong { font-size: 24px; }
-  .chops-stacked-bars__legend { gap: 7px 11px; }
+  .chops-stacked-bars {
+    padding: 13px;
+  }
+  .chops-stacked-bars__heading {
+    align-items: center;
+  }
+  .chops-stacked-bars__plot {
+    height: 150px;
+    gap: 2px;
+  }
+  .chops-stacked-bars__axis {
+    font-size: 10px;
+  }
+  .chops-stacked-bars__summary strong {
+    font-size: 24px;
+  }
+  .chops-stacked-bars__legend {
+    gap: 7px 11px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .chops-stacked-bars__segment { transition: none; }
+  .chops-stacked-bars__segment {
+    transition: none;
+  }
 }

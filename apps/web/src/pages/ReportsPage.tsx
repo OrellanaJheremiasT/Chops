@@ -12,13 +12,9 @@ import {
 import { useLanguage } from "../i18n/LanguageContext";
 import ChopsSelect from "../components/ChopsSelect";
 import ChopsDatePicker from "../components/ChopsDatePicker";
-import {
-  useOperations,
-} from "../demo/OperationsContext";
+import { useOperations } from "../demo/OperationsContext";
 
-import type {
-  Operation,
-} from "../demo/OperationsContext";
+import type { Operation } from "../demo/OperationsContext";
 
 import "../styles/reports.css";
 
@@ -32,10 +28,7 @@ type Closing = {
   end: string;
   createdAt: string;
   operations: Operation[];
-  stockSnapshot: Record<
-    string,
-    { exhibition: number; warehouse: number }
-  >;
+  stockSnapshot: Record<string, { exhibition: number; warehouse: number }>;
 };
 
 const CLOSINGS_KEY = "chops-report-closings-v1";
@@ -63,7 +56,7 @@ function readClosings(): Closing[] {
     const raw = localStorage.getItem(CLOSINGS_KEY);
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed as Closing[] : [];
+    return Array.isArray(parsed) ? (parsed as Closing[]) : [];
   } catch {
     return [];
   }
@@ -73,18 +66,14 @@ function csvCell(value: CsvValue) {
   const text = String(value ?? "");
   const safe =
     /^[=+@\t\r]/.test(text) ||
-      (text.startsWith("-") && !/^-?\d+(\.\d+)?$/.test(text))
+    (text.startsWith("-") && !/^-?\d+(\.\d+)?$/.test(text))
       ? "'" + text
       : text;
 
   return `"${safe.replace(/"/g, '""')}"`;
 }
 
-function downloadFile(
-  filename: string,
-  content: string,
-  mimeType: string
-) {
+function downloadFile(filename: string, content: string, mimeType: string) {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -98,16 +87,10 @@ function downloadFile(
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function downloadCSV(
-  filename: string,
-  headers: string[],
-  rows: CsvValue[][]
-) {
+function downloadCSV(filename: string, headers: string[], rows: CsvValue[][]) {
   const csv =
     "\uFEFF" +
-    [headers, ...rows]
-      .map((row) => row.map(csvCell).join(","))
-      .join("\r\n");
+    [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
 
   downloadFile(filename, csv, "text/csv;charset=utf-8");
 }
@@ -116,7 +99,7 @@ function downloadJSON(filename: string, value: unknown) {
   downloadFile(
     filename,
     JSON.stringify(value, null, 2),
-    "application/json;charset=utf-8"
+    "application/json;charset=utf-8",
   );
 }
 
@@ -129,17 +112,14 @@ export default function ReportsPage() {
   const [end, setEnd] = useState(() => dateKey(new Date()));
   const [closingName, setClosingName] = useState("");
 
-  const [closings, setClosings] = useState<Closing[]>(
-    readClosings
-  );
+  const [closings, setClosings] = useState<Closing[]>(readClosings);
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   const locale = language === "es" ? "es-PE" : "en-US";
 
-  const validPeriod =
-    period === "all" || (!!start && !!end && start <= end);
+  const validPeriod = period === "all" || (!!start && !!end && start <= end);
 
   const selectedOperations = useMemo(() => {
     if (!validPeriod) return [];
@@ -160,28 +140,18 @@ export default function ReportsPage() {
     const byType = (kind: Operation["kind"]) =>
       selectedOperations.filter((op) => op.kind === kind);
 
-    const received = byType("in").reduce(
-      (sum, op) => sum + op.quantity,
-      0
-    );
+    const received = byType("in").reduce((sum, op) => sum + op.quantity, 0);
 
-    const dispatched = byType("out").reduce(
-      (sum, op) => sum + op.quantity,
-      0
-    );
+    const dispatched = byType("out").reduce((sum, op) => sum + op.quantity, 0);
 
     const transfers = byType("transfer").length;
 
     const losses = byType("loss");
-    const lossUnits = losses.reduce(
-      (sum, op) => sum + op.quantity,
-      0
-    );
+    const lossUnits = losses.reduce((sum, op) => sum + op.quantity, 0);
 
     const lossCost = losses.reduce(
-      (sum, op) =>
-        sum + op.quantity * (findProduct(op.sku)?.cost ?? 0),
-      0
+      (sum, op) => sum + op.quantity * (findProduct(op.sku)?.cost ?? 0),
+      0,
     );
 
     const shortages = byType("count")
@@ -199,9 +169,8 @@ export default function ReportsPage() {
   }, [selectedOperations, items]);
 
   const currentStock = Object.values(balances).reduce(
-    (sum, balance) =>
-      sum + balance.exhibition + balance.warehouse,
-    0
+    (sum, balance) => sum + balance.exhibition + balance.warehouse,
+    0,
   );
 
   const inventoryRows: CsvValue[][] = items.map((item) => {
@@ -260,8 +229,7 @@ export default function ReportsPage() {
     });
   }
 
-  const periodFilename =
-    period === "all" ? "all-time" : `${start}_${end}`;
+  const periodFilename = period === "all" ? "all-time" : `${start}_${end}`;
 
   function changePeriod(value: Period) {
     setPeriod(value);
@@ -297,19 +265,12 @@ export default function ReportsPage() {
         ["Estimated loss cost", stats.lossCost, "PEN"],
         ["Unexplained shortages", stats.shortages, "units"],
         ["Current stock", currentStock, "units"],
-      ]
+      ],
     );
   }
 
-  function exportOperations(
-    filename: string,
-    list: Operation[]
-  ) {
-    downloadCSV(
-      filename,
-      operationHeaders,
-      operationRows(list)
-    );
+  function exportOperations(filename: string, list: Operation[]) {
+    downloadCSV(filename, operationHeaders, operationRows(list));
   }
 
   function createClosing() {
@@ -322,10 +283,7 @@ export default function ReportsPage() {
     }
 
     if (
-      closings.some(
-        (closing) =>
-          closing.start === start && closing.end === end
-      )
+      closings.some((closing) => closing.start === start && closing.end === end)
     ) {
       setError(t("This period has already been closed."));
       return;
@@ -344,10 +302,7 @@ export default function ReportsPage() {
     const updated = [closing, ...closings];
 
     try {
-      localStorage.setItem(
-        CLOSINGS_KEY,
-        JSON.stringify(updated)
-      );
+      localStorage.setItem(CLOSINGS_KEY, JSON.stringify(updated));
 
       setClosings(updated);
       setClosingName("");
@@ -397,14 +352,12 @@ export default function ReportsPage() {
           <h2>{t("Reports & Analytics")}</h2>
           <p>
             {t(
-              "Download reports, review performance and archive period closings."
+              "Download reports, review performance and archive period closings.",
             )}
           </p>
         </div>
 
-        <span className="badge badge-info">
-          {t("Demo / Local")}
-        </span>
+        <span className="badge badge-info">{t("Demo / Local")}</span>
       </header>
 
       <section className="reports-panel reports-filters">
@@ -457,9 +410,7 @@ export default function ReportsPage() {
         </div>
 
         {!validPeriod && (
-          <p className="reports-error">
-            {t("Choose a valid period.")}
-          </p>
+          <p className="reports-error">{t("Choose a valid period.")}</p>
         )}
       </section>
 
@@ -488,7 +439,7 @@ export default function ReportsPage() {
 
         <p className="reports-caveat">
           {t(
-            "Sales and profitability reports are pending Checkout integration."
+            "Sales and profitability reports are pending Checkout integration.",
           )}
         </p>
       </section>
@@ -507,7 +458,7 @@ export default function ReportsPage() {
             onClick={() =>
               exportOperations(
                 `chops-operations-${periodFilename}.csv`,
-                selectedOperations
+                selectedOperations,
               )
             }
           >
@@ -518,10 +469,7 @@ export default function ReportsPage() {
           <button
             type="button"
             onClick={() =>
-              exportOperations(
-                "chops-all-operations.csv",
-                operations
-              )
+              exportOperations("chops-all-operations.csv", operations)
             }
           >
             <Download size={16} />
@@ -545,7 +493,7 @@ export default function ReportsPage() {
                   "Cost",
                   "Price",
                 ],
-                inventoryRows
+                inventoryRows,
               )
             }
           >
@@ -558,9 +506,7 @@ export default function ReportsPage() {
             onClick={() =>
               exportOperations(
                 `chops-losses-${periodFilename}.csv`,
-                selectedOperations.filter(
-                  (op) => op.kind === "loss"
-                )
+                selectedOperations.filter((op) => op.kind === "loss"),
               )
             }
           >
@@ -573,9 +519,7 @@ export default function ReportsPage() {
             onClick={() =>
               exportOperations(
                 `chops-counts-${periodFilename}.csv`,
-                selectedOperations.filter(
-                  (op) => op.kind === "count"
-                )
+                selectedOperations.filter((op) => op.kind === "count"),
               )
             }
           >
@@ -600,10 +544,7 @@ export default function ReportsPage() {
             {t("Export JSON backup")}
           </button>
 
-          <button
-            type="button"
-            onClick={() => window.print()}
-          >
+          <button type="button" onClick={() => window.print()}>
             <Printer size={16} />
             {t("Print report / Save PDF")}
           </button>
@@ -618,7 +559,7 @@ export default function ReportsPage() {
 
         <p className="reports-footnote">
           {t(
-            "Closing stores a snapshot; it does not clear operations or reset inventory."
+            "Closing stores a snapshot; it does not clear operations or reset inventory.",
           )}
         </p>
 
@@ -629,9 +570,7 @@ export default function ReportsPage() {
               value={closingName}
               maxLength={80}
               placeholder="October 2026"
-              onChange={(e) =>
-                setClosingName(e.target.value)
-              }
+              onChange={(e) => setClosingName(e.target.value)}
             />
           </label>
 
@@ -661,9 +600,7 @@ export default function ReportsPage() {
           <h4>{t("Closing history")}</h4>
 
           {closings.length === 0 ? (
-            <p className="reports-footnote">
-              {t("No closings yet.")}
-            </p>
+            <p className="reports-footnote">{t("No closings yet.")}</p>
           ) : (
             closings.map((closing) => (
               <div className="reports-close" key={closing.id}>
@@ -672,9 +609,7 @@ export default function ReportsPage() {
                   <small>
                     {closing.start} — {closing.end}
                     {" · "}
-                    {new Date(
-                      closing.createdAt
-                    ).toLocaleString(locale)}
+                    {new Date(closing.createdAt).toLocaleString(locale)}
                   </small>
                 </div>
 
@@ -683,7 +618,7 @@ export default function ReportsPage() {
                   onClick={() =>
                     downloadJSON(
                       `chops-closing-${closing.start}_${closing.end}.json`,
-                      closing
+                      closing,
                     )
                   }
                 >
@@ -700,9 +635,7 @@ export default function ReportsPage() {
         <h3>{t("Movement History")}</h3>
 
         {selectedOperations.length === 0 ? (
-          <p className="reports-footnote">
-            {t("No entries in this period.")}
-          </p>
+          <p className="reports-footnote">{t("No entries in this period.")}</p>
         ) : (
           <div className="reports-table-scroll">
             <table>
@@ -722,15 +655,10 @@ export default function ReportsPage() {
 
                   return (
                     <tr key={op.id}>
-                      <td>
-                        {new Date(
-                          op.createdAt
-                        ).toLocaleString(locale)}
-                      </td>
+                      <td>{new Date(op.createdAt).toLocaleString(locale)}</td>
                       <td>{t(op.kind)}</td>
                       <td>
-                        {product?.name ?? op.sku}{" "}
-                        {product?.variant}
+                        {product?.name ?? op.sku} {product?.variant}
                       </td>
                       <td>{op.quantity}</td>
                       <td>{op.reason || "—"}</td>
@@ -745,7 +673,7 @@ export default function ReportsPage() {
 
       <p className="reports-caveat">
         {t(
-          "Closings are local snapshots, not accounting or tax-certified books."
+          "Closings are local snapshots, not accounting or tax-certified books.",
         )}
       </p>
     </section>

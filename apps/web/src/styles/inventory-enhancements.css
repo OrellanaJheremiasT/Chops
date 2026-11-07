@@ -51,7 +51,7 @@
   gap: 16px;
 }
 
-@media (max-width:560px) {
+@media (max-width: 560px) {
   .inv-title-actions {
     width: 100%;
   }

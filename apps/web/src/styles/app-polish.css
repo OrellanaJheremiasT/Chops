@@ -16,11 +16,23 @@
   text-decoration: none;
 }
 
-.skip-link:focus-visible { transform: translateY(0); }
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
 
-.header-leading { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
-.mobile-menu-toggle, .sidebar-close { display: none; }
-.sidebar-backdrop { display: none; }
+.header-leading {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.mobile-menu-toggle,
+.sidebar-close {
+  display: none;
+}
+.sidebar-backdrop {
+  display: none;
+}
 
 .nav-link:focus-visible,
 .theme-toggle:focus-visible,
@@ -44,17 +56,31 @@
   color: var(--text);
 }
 
-.chops-empty-state > svg { color: var(--primary); }
-.chops-empty-state h2 { margin: 0; font-size: clamp(18px, 2.5vw, 24px); }
-.chops-empty-state p { margin: 0 0 6px; color: var(--text-muted); }
-.chops-empty-state .btn { min-height: 40px; }
+.chops-empty-state > svg {
+  color: var(--primary);
+}
+.chops-empty-state h2 {
+  margin: 0;
+  font-size: clamp(18px, 2.5vw, 24px);
+}
+.chops-empty-state p {
+  margin: 0 0 6px;
+  color: var(--text-muted);
+}
+.chops-empty-state .btn {
+  min-height: 40px;
+}
 
 /* A touch-friendly drawer replaces the eight-item horizontal nav on phones.
    It remains the SAME sidebar and the SAME NavLinks, not a duplicate menu. */
 @media (max-width: 768px) {
-  body.chops-nav-open { overflow: hidden; }
+  body.chops-nav-open {
+    overflow: hidden;
+  }
 
-  .app-layout { flex-direction: column; }
+  .app-layout {
+    flex-direction: column;
+  }
 
   .sidebar {
     position: fixed;
@@ -70,8 +96,10 @@
     transform: translateX(-104%);
     visibility: hidden;
     pointer-events: none;
-    transition: transform 200ms ease, visibility 200ms ease;
-    box-shadow: 16px 0 40px rgba(0, 0, 0, .28);
+    transition:
+      transform 200ms ease,
+      visibility 200ms ease;
+    box-shadow: 16px 0 40px rgba(0, 0, 0, 0.28);
   }
 
   .sidebar.sidebar--open {
@@ -80,9 +108,24 @@
     pointer-events: auto;
   }
 
-  .sidebar nav { display: flex; flex-direction: column; overflow: visible; gap: 5px; }
-  .sidebar .nav-link { padding: 12px; min-height: 44px; white-space: normal; }
-  .sidebar .brand { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding: 0 8px 16px; }
+  .sidebar nav {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    gap: 5px;
+  }
+  .sidebar .nav-link {
+    padding: 12px;
+    min-height: 44px;
+    white-space: normal;
+  }
+  .sidebar .brand {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding: 0 8px 16px;
+  }
   .sidebar-close,
   .mobile-menu-toggle {
     display: inline-grid;
@@ -99,7 +142,10 @@
   }
 
   .sidebar-close:hover,
-  .mobile-menu-toggle:hover { color: var(--primary); border-color: var(--primary); }
+  .mobile-menu-toggle:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+  }
 
   .sidebar-backdrop {
     display: block;
@@ -110,7 +156,7 @@
     height: 100%;
     border: 0;
     padding: 0;
-    background: rgba(0, 0, 0, .55);
+    background: rgba(0, 0, 0, 0.55);
     cursor: default;
   }
 
@@ -122,17 +168,33 @@
     background: var(--bg);
   }
 
-  .page-content { overflow-x: visible; }
-  .header-brand { white-space: nowrap; }
+  .page-content {
+    overflow-x: visible;
+  }
+  .header-brand {
+    white-space: nowrap;
+  }
 }
 
 @media (max-width: 390px) {
-  .app-header { padding: 8px 10px; }
-  .header-leading { gap: 7px; }
-  .mobile-menu-toggle { min-width: 36px; min-height: 38px; }
-  .header-brand { font-size: 14px; }
+  .app-header {
+    padding: 8px 10px;
+  }
+  .header-leading {
+    gap: 7px;
+  }
+  .mobile-menu-toggle {
+    min-width: 36px;
+    min-height: 38px;
+  }
+  .header-brand {
+    font-size: 14px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sidebar, .skip-link { transition: none; }
+  .sidebar,
+  .skip-link {
+    transition: none;
+  }
 }

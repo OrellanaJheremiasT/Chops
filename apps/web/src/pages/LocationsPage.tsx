@@ -1,8 +1,8 @@
 import ChopsSelect from "../components/ChopsSelect";
 import { useLanguage } from "../i18n/LanguageContext";
 
-import { useMemo, useState } from 'react'
-import type { FormEvent } from 'react'
+import { useMemo, useState } from "react";
+import type { FormEvent } from "react";
 import {
   Building2,
   MapPin,
@@ -13,109 +13,107 @@ import {
   Trash2,
   Warehouse,
   X,
-} from 'lucide-react'
+} from "lucide-react";
 
 type Branch = {
-  id: number
-  name: string
-  address: string
-  active: boolean
-}
+  id: number;
+  name: string;
+  address: string;
+  active: boolean;
+};
 
 type StorageLocation = {
-  id: number
-  name: string
-  description: string
-  type: 'exhibition' | 'warehouse'
-  branchId: number | null
-  active: boolean
-}
+  id: number;
+  name: string;
+  description: string;
+  type: "exhibition" | "warehouse";
+  branchId: number | null;
+  active: boolean;
+};
 
 const initialBranches: Branch[] = [
   {
     id: 1,
-    name: 'Main Store',
-    address: 'Lima, Peru',
+    name: "Main Store",
+    address: "Lima, Peru",
     active: true,
   },
-]
+];
 
 const initialLocations: StorageLocation[] = [
   {
     id: 1,
-    name: 'Exhibition',
-    description: 'Products displayed for customers',
-    type: 'exhibition',
+    name: "Exhibition",
+    description: "Products displayed for customers",
+    type: "exhibition",
     branchId: 1,
     active: true,
   },
   {
     id: 2,
-    name: 'Warehouse',
-    description: 'Reserve inventory',
-    type: 'warehouse',
+    name: "Warehouse",
+    description: "Reserve inventory",
+    type: "warehouse",
     branchId: 1,
     active: true,
   },
-]
+];
 
 function nextId(items: { id: number }[]) {
-  return Math.max(0, ...items.map((item) => item.id)) + 1
+  return Math.max(0, ...items.map((item) => item.id)) + 1;
 }
 
 export default function LocationsPage() {
   const { t, language } = useLanguage();
-  const [branches, setBranches] = useState(initialBranches)
-  const [locations, setLocations] = useState(initialLocations)
-  const [search, setSearch] = useState('')
-  const [tab, setTab] = useState<'branches' | 'locations'>('branches')
+  const [branches, setBranches] = useState(initialBranches);
+  const [locations, setLocations] = useState(initialLocations);
+  const [search, setSearch] = useState("");
+  const [tab, setTab] = useState<"branches" | "locations">("branches");
 
-  const [editingBranch, setEditingBranch] = useState<Branch | null>(null)
+  const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
   const [editingLocation, setEditingLocation] =
-    useState<StorageLocation | null>(null)
+    useState<StorageLocation | null>(null);
 
-  const [error, setError] = useState('')
-  const [notice, setNotice] = useState('')
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
   const filteredBranches = useMemo(() => {
-    const query = search.trim().toLowerCase()
+    const query = search.trim().toLowerCase();
 
     return branches.filter((branch) =>
       `${branch.name} ${branch.address}`.toLowerCase().includes(query),
-    )
-  }, [branches, search])
+    );
+  }, [branches, search]);
 
   const filteredLocations = useMemo(() => {
-    const query = search.trim().toLowerCase()
+    const query = search.trim().toLowerCase();
 
     return locations.filter((location) => {
       const branchName =
         branches.find((branch) => branch.id === location.branchId)?.name ??
-        t('Central / Independent')
+        t("Central / Independent");
 
-      return [
-        location.name,
-        location.description,
-        location.type,
-        branchName,
-      ].join(' ').toLowerCase().includes(query)
-    })
-  }, [locations, branches, search])
+      return [location.name, location.description, location.type, branchName]
+        .join(" ")
+        .toLowerCase()
+        .includes(query);
+    });
+  }, [locations, branches, search]);
 
   function openBranch(branch?: Branch) {
     setEditingBranch(
       branch
         ? { ...branch }
         : {
-          id: 0,
-          name: '',
-          address: '',
-          active: true,
-        },
-    )
+            id: 0,
+            name: "",
+            address: "",
+            active: true,
+          },
+    );
 
-    setError('')
-    setNotice('')
+    setError("");
+    setNotice("");
   }
 
   function openLocation(location?: StorageLocation) {
@@ -123,29 +121,29 @@ export default function LocationsPage() {
       location
         ? { ...location }
         : {
-          id: 0,
-          name: '',
-          description: '',
-          type: 'warehouse',
-          branchId: branches[0]?.id ?? null,
-          active: true,
-        },
-    )
+            id: 0,
+            name: "",
+            description: "",
+            type: "warehouse",
+            branchId: branches[0]?.id ?? null,
+            active: true,
+          },
+    );
 
-    setError('')
-    setNotice('')
+    setError("");
+    setNotice("");
   }
 
   function saveBranch(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (!editingBranch) return
+    event.preventDefault();
+    if (!editingBranch) return;
 
-    const name = editingBranch.name.trim()
-    const address = editingBranch.address.trim()
+    const name = editingBranch.name.trim();
+    const address = editingBranch.address.trim();
 
     if (!name || !address) {
-      setError('Name and address are required.')
-      return
+      setError("Name and address are required.");
+      return;
     }
 
     if (
@@ -155,13 +153,13 @@ export default function LocationsPage() {
           branch.name.toLowerCase() === name.toLowerCase(),
       )
     ) {
-      setError('A branch with this name already exists.')
-      return
+      setError("A branch with this name already exists.");
+      return;
     }
 
     if (editingBranch.id === 0) {
-      const branchId = nextId(branches)
-      const locationId = nextId(locations)
+      const branchId = nextId(branches);
+      const locationId = nextId(locations);
 
       setBranches((current) => [
         ...current,
@@ -171,27 +169,27 @@ export default function LocationsPage() {
           name,
           address,
         },
-      ])
+      ]);
 
       setLocations((current) => [
         ...current,
         {
           id: locationId,
-          name: 'Exhibition',
-          description: 'Products displayed for customers',
-          type: 'exhibition',
+          name: "Exhibition",
+          description: "Products displayed for customers",
+          type: "exhibition",
           branchId,
           active: true,
         },
         {
           id: locationId + 1,
-          name: 'Warehouse',
-          description: 'Reserve inventory',
-          type: 'warehouse',
+          name: "Warehouse",
+          description: "Reserve inventory",
+          type: "warehouse",
           branchId,
           active: true,
         },
-      ])
+      ]);
     } else {
       setBranches((current) =>
         current.map((branch) =>
@@ -199,12 +197,12 @@ export default function LocationsPage() {
             ? { ...editingBranch, name, address }
             : branch,
         ),
-      )
+      );
     }
 
-    setEditingBranch(null)
-    setError('')
-    setNotice('Branch saved successfully.')
+    setEditingBranch(null);
+    setError("");
+    setNotice("Branch saved successfully.");
   }
 
   function hasRequiredLocations(
@@ -215,44 +213,44 @@ export default function LocationsPage() {
       candidateLocations.some(
         (location) =>
           location.branchId === branchId &&
-          location.type === 'exhibition' &&
+          location.type === "exhibition" &&
           location.active,
       ) &&
       candidateLocations.some(
         (location) =>
           location.branchId === branchId &&
-          location.type === 'warehouse' &&
+          location.type === "warehouse" &&
           location.active,
       )
-    )
+    );
   }
 
   function saveLocation(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (!editingLocation) return
+    event.preventDefault();
+    if (!editingLocation) return;
 
-    const name = editingLocation.name.trim()
-    const description = editingLocation.description.trim()
+    const name = editingLocation.name.trim();
+    const description = editingLocation.description.trim();
 
     if (!name) {
-      setError('Location name is required.')
-      return
+      setError("Location name is required.");
+      return;
     }
 
     if (
-      editingLocation.type === 'exhibition' &&
+      editingLocation.type === "exhibition" &&
       editingLocation.branchId === null
     ) {
-      setError('Exhibition must belong to a branch.')
-      return
+      setError("Exhibition must belong to a branch.");
+      return;
     }
 
     if (
       editingLocation.branchId !== null &&
       !branches.some((branch) => branch.id === editingLocation.branchId)
     ) {
-      setError('Select a valid branch.')
-      return
+      setError("Select a valid branch.");
+      return;
     }
 
     if (
@@ -263,15 +261,15 @@ export default function LocationsPage() {
           location.name.toLowerCase() === name.toLowerCase(),
       )
     ) {
-      setError('This location name already exists in the selected branch.')
-      return
+      setError("This location name already exists in the selected branch.");
+      return;
     }
 
     const savedLocation: StorageLocation = {
       ...editingLocation,
       name,
       description,
-    }
+    };
 
     if (editingLocation.id === 0) {
       setLocations((current) => [
@@ -280,125 +278,145 @@ export default function LocationsPage() {
           ...savedLocation,
           id: nextId(current),
         },
-      ])
+      ]);
     } else {
       const candidateLocations = locations.map((location) =>
         location.id === editingLocation.id ? savedLocation : location,
-      )
+      );
 
       const affectedBranchIds = new Set(
-        [locations.find((location) =>
-          location.id === editingLocation.id,
-        )?.branchId, editingLocation.branchId].filter(
-          (id): id is number => id !== null && id !== undefined,
-        ),
-      )
+        [
+          locations.find((location) => location.id === editingLocation.id)
+            ?.branchId,
+          editingLocation.branchId,
+        ].filter((id): id is number => id !== null && id !== undefined),
+      );
 
       for (const branchId of affectedBranchIds) {
         if (!hasRequiredLocations(branchId, candidateLocations)) {
-          setError('Each branch must retain an active exhibition and warehouse.')
-          return
+          setError(
+            "Each branch must retain an active exhibition and warehouse.",
+          );
+          return;
         }
       }
 
-      setLocations(candidateLocations)
+      setLocations(candidateLocations);
     }
 
-    setEditingLocation(null)
-    setError('')
-    setNotice('Location saved successfully.')
+    setEditingLocation(null);
+    setError("");
+    setNotice("Location saved successfully.");
   }
 
   function deleteLocation(location: StorageLocation) {
-    setNotice('')
+    setNotice("");
 
     const candidateLocations = locations.filter(
       (item) => item.id !== location.id,
-    )
+    );
 
     if (
       location.branchId !== null &&
       !hasRequiredLocations(location.branchId, candidateLocations)
     ) {
-      window.alert(t('Cannot delete this location. Each branch must retain an active exhibition and warehouse.'))
-      return
+      window.alert(
+        t(
+          "Cannot delete this location. Each branch must retain an active exhibition and warehouse.",
+        ),
+      );
+      return;
     }
 
     const confirmed = window.confirm(
-      language === "es" ? `¿Seguro que deseas eliminar "${location.name}"?` : `Are you sure you want to delete "${location.name}"?`,
-    )
+      language === "es"
+        ? `¿Seguro que deseas eliminar "${location.name}"?`
+        : `Are you sure you want to delete "${location.name}"?`,
+    );
 
-    if (!confirmed) return
+    if (!confirmed) return;
 
-    setLocations(candidateLocations)
-    setNotice(language === "es" ? `Ubicación "${location.name}" eliminada correctamente.` : `Location "${location.name}" deleted successfully.`)
+    setLocations(candidateLocations);
+    setNotice(
+      language === "es"
+        ? `Ubicación "${location.name}" eliminada correctamente.`
+        : `Location "${location.name}" deleted successfully.`,
+    );
   }
 
   return (
     <section className="locations-page">
       <div className="page-title">
         <div>
-          <h2>{t('Locations')}</h2>
-          <p>{t('Manage branches and inventory storage locations.')}</p>
+          <h2>{t("Locations")}</h2>
+          <p>{t("Manage branches and inventory storage locations.")}</p>
         </div>
-        <span className="badge badge-info">{t('Demo Data')}</span>
+        <span className="badge badge-info">{t("Demo Data")}</span>
       </div>
 
       <div className="location-summary">
         <article className="stat">
           <Store size={18} className="stat-icon" />
-          <div className="stat-label">{t('Branches')}</div>
+          <div className="stat-label">{t("Branches")}</div>
           <div className="stat-value">{branches.length}</div>
         </article>
 
         <article className="stat">
           <Warehouse size={18} className="stat-icon" />
-          <div className="stat-label">{t('Storage Locations')}</div>
+          <div className="stat-label">{t("Storage Locations")}</div>
           <div className="stat-value">{locations.length}</div>
         </article>
       </div>
 
-      <div className="location-tabs" role="tablist" aria-label={t('Location views')}>
+      <div
+        className="location-tabs"
+        role="tablist"
+        aria-label={t("Location views")}
+      >
         <button
           type="button"
           role="tab"
-          aria-selected={tab === 'branches'}
+          aria-selected={tab === "branches"}
           className={
-            tab === 'branches' ? 'location-tab active' : 'location-tab'
+            tab === "branches" ? "location-tab active" : "location-tab"
           }
           onClick={() => {
-            setTab('branches')
-            setSearch('')
-            setNotice('')
+            setTab("branches");
+            setSearch("");
+            setNotice("");
           }}
         >
-          <Building2 size={16} />{t('Branches')}</button>
+          <Building2 size={16} />
+          {t("Branches")}
+        </button>
 
         <button
           type="button"
           role="tab"
-          aria-selected={tab === 'locations'}
+          aria-selected={tab === "locations"}
           className={
-            tab === 'locations' ? 'location-tab active' : 'location-tab'
+            tab === "locations" ? "location-tab active" : "location-tab"
           }
           onClick={() => {
-            setTab('locations')
-            setSearch('')
-            setNotice('')
+            setTab("locations");
+            setSearch("");
+            setNotice("");
           }}
         >
-          <Warehouse size={16} />{t('Storage Locations')}</button>
+          <Warehouse size={16} />
+          {t("Storage Locations")}
+        </button>
       </div>
 
       <div className="products-toolbar">
         <div className="products-search">
           <Search size={17} aria-hidden="true" />
           <input
-            aria-label={t('Search locations')}
+            aria-label={t("Search locations")}
             placeholder={
-              tab === 'branches'
-                ? t('Search branches...')
-                : t('Search storage locations...')
+              tab === "branches"
+                ? t("Search branches...")
+                : t("Search storage locations...")
             }
             value={search}
             onChange={(event) => setSearch(event.target.value)}
@@ -408,12 +426,10 @@ export default function LocationsPage() {
         <button
           type="button"
           className="btn btn-primary"
-          onClick={() =>
-            tab === 'branches' ? openBranch() : openLocation()
-          }
+          onClick={() => (tab === "branches" ? openBranch() : openLocation())}
         >
           <Plus size={17} />
-          {t(tab === 'branches' ? 'Add Branch' : 'Add Location')}
+          {t(tab === "branches" ? "Add Branch" : "Add Location")}
         </button>
       </div>
 
@@ -423,16 +439,16 @@ export default function LocationsPage() {
         </p>
       )}
 
-      {tab === 'branches' ? (
+      {tab === "branches" ? (
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>{t('Branch')}</th>
-                <th>{t('Address')}</th>
-                <th>{t('Locations')}</th>
-                <th>{t('Status')}</th>
-                <th>{t('Actions')}</th>
+                <th>{t("Branch")}</th>
+                <th>{t("Address")}</th>
+                <th>{t("Locations")}</th>
+                <th>{t("Status")}</th>
+                <th>{t("Actions")}</th>
               </tr>
             </thead>
 
@@ -452,12 +468,11 @@ export default function LocationsPage() {
                   </td>
                   <td>
                     <span
-                      className={`badge ${branch.active
-                          ? 'badge-success'
-                          : 'badge-warning'
-                        }`}
+                      className={`badge ${
+                        branch.active ? "badge-success" : "badge-warning"
+                      }`}
                     >
-                      {t(branch.active ? 'Active' : 'Inactive')}
+                      {t(branch.active ? "Active" : "Inactive")}
                     </span>
                   </td>
                   <td>
@@ -466,14 +481,18 @@ export default function LocationsPage() {
                       className="btn btn-secondary"
                       onClick={() => openBranch(branch)}
                     >
-                      <Pencil size={15} />{t('Edit')}</button>
+                      <Pencil size={15} />
+                      {t("Edit")}
+                    </button>
                   </td>
                 </tr>
               ))}
 
               {filteredBranches.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="products-empty">{t('No branches found.')}</td>
+                  <td colSpan={5} className="products-empty">
+                    {t("No branches found.")}
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -484,12 +503,12 @@ export default function LocationsPage() {
           <table>
             <thead>
               <tr>
-                <th>{t('Location')}</th>
-                <th>{t('Type')}</th>
-                <th>{t('Branch')}</th>
-                <th>{t('Description')}</th>
-                <th>{t('Status')}</th>
-                <th>{t('Actions')}</th>
+                <th>{t("Location")}</th>
+                <th>{t("Type")}</th>
+                <th>{t("Branch")}</th>
+                <th>{t("Description")}</th>
+                <th>{t("Status")}</th>
+                <th>{t("Actions")}</th>
               </tr>
             </thead>
 
@@ -502,33 +521,31 @@ export default function LocationsPage() {
 
                   <td>
                     <span className="location-type">
-                      {location.type === 'exhibition' ? (
+                      {location.type === "exhibition" ? (
                         <Store size={15} />
                       ) : (
                         <Warehouse size={15} />
                       )}
-                      {location.type === 'exhibition'
-                        ? t('Exhibition')
-                        : t('Warehouse')}
+                      {location.type === "exhibition"
+                        ? t("Exhibition")
+                        : t("Warehouse")}
                     </span>
                   </td>
 
                   <td>
-                    {branches.find(
-                      (branch) => branch.id === location.branchId,
-                    )?.name ?? t('Central / Independent')}
+                    {branches.find((branch) => branch.id === location.branchId)
+                      ?.name ?? t("Central / Independent")}
                   </td>
 
-                  <td>{location.description || '—'}</td>
+                  <td>{location.description || "—"}</td>
 
                   <td>
                     <span
-                      className={`badge ${location.active
-                          ? 'badge-success'
-                          : 'badge-warning'
-                        }`}
+                      className={`badge ${
+                        location.active ? "badge-success" : "badge-warning"
+                      }`}
                     >
-                      {t(location.active ? 'Active' : 'Inactive')}
+                      {t(location.active ? "Active" : "Inactive")}
                     </span>
                   </td>
 
@@ -539,14 +556,18 @@ export default function LocationsPage() {
                         className="btn btn-secondary"
                         onClick={() => openLocation(location)}
                       >
-                        <Pencil size={15} />{t('Edit')}</button>
+                        <Pencil size={15} />
+                        {t("Edit")}
+                      </button>
 
                       <button
                         type="button"
                         className="btn btn-danger"
                         onClick={() => deleteLocation(location)}
                       >
-                        <Trash2 size={15} />{t('Delete')}</button>
+                        <Trash2 size={15} />
+                        {t("Delete")}
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -554,7 +575,9 @@ export default function LocationsPage() {
 
               {filteredLocations.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="products-empty">{t('No storage locations found.')}</td>
+                  <td colSpan={6} className="products-empty">
+                    {t("No storage locations found.")}
+                  </td>
                 </tr>
               )}
             </tbody>
@@ -562,7 +585,9 @@ export default function LocationsPage() {
         </div>
       )}
 
-      <p className="products-note">{t('Demo data. Changes reset when the page is reloaded.')}</p>
+      <p className="products-note">
+        {t("Demo data. Changes reset when the page is reloaded.")}
+      </p>
 
       {editingBranch && (
         <div className="product-modal-backdrop">
@@ -574,13 +599,13 @@ export default function LocationsPage() {
           >
             <div className="product-modal-header">
               <h3 id="branch-form-title">
-                {t(editingBranch.id === 0 ? 'Add Branch' : 'Edit Branch')}
+                {t(editingBranch.id === 0 ? "Add Branch" : "Edit Branch")}
               </h3>
 
               <button
                 type="button"
                 className="product-icon-button"
-                aria-label={t('Close form')}
+                aria-label={t("Close form")}
                 onClick={() => setEditingBranch(null)}
               >
                 <X size={20} />
@@ -589,7 +614,7 @@ export default function LocationsPage() {
 
             <form onSubmit={saveBranch}>
               <div className="field">
-                <label htmlFor="branch-name">{t('Branch Name')}</label>
+                <label htmlFor="branch-name">{t("Branch Name")}</label>
                 <input
                   id="branch-name"
                   required
@@ -604,7 +629,7 @@ export default function LocationsPage() {
               </div>
 
               <div className="field">
-                <label htmlFor="branch-address">{t('Address')}</label>
+                <label htmlFor="branch-address">{t("Address")}</label>
                 <input
                   id="branch-address"
                   required
@@ -619,19 +644,29 @@ export default function LocationsPage() {
               </div>
 
               <div className="field">
-                <label htmlFor="branch-status">{t('Status')}</label>
+                <label htmlFor="branch-status">{t("Status")}</label>
                 <ChopsSelect
                   id="branch-status"
-                  ariaLabel={t('Status')}
-                  value={editingBranch.active ? 'active' : 'inactive'}
-                  options={[{ value: 'active', label: t('Active') }, { value: 'inactive', label: t('Inactive') }]}
-                  onChange={(next) => setEditingBranch({ ...editingBranch, active: next === 'active' })}
+                  ariaLabel={t("Status")}
+                  value={editingBranch.active ? "active" : "inactive"}
+                  options={[
+                    { value: "active", label: t("Active") },
+                    { value: "inactive", label: t("Inactive") },
+                  ]}
+                  onChange={(next) =>
+                    setEditingBranch({
+                      ...editingBranch,
+                      active: next === "active",
+                    })
+                  }
                 />
               </div>
 
               {editingBranch.id === 0 && (
                 <p className="location-hint">
-                  <MapPin size={15} />{t('Exhibition and Warehouse will be created automatically.')}</p>
+                  <MapPin size={15} />
+                  {t("Exhibition and Warehouse will be created automatically.")}
+                </p>
               )}
 
               {error && (
@@ -645,9 +680,13 @@ export default function LocationsPage() {
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setEditingBranch(null)}
-                >{t('Cancel')}</button>
+                >
+                  {t("Cancel")}
+                </button>
 
-                <button type="submit" className="btn btn-primary">{t('Save Branch')}</button>
+                <button type="submit" className="btn btn-primary">
+                  {t("Save Branch")}
+                </button>
               </div>
             </form>
           </section>
@@ -664,15 +703,13 @@ export default function LocationsPage() {
           >
             <div className="product-modal-header">
               <h3 id="location-form-title">
-                {t(editingLocation.id === 0
-                  ? 'Add Location'
-                  : 'Edit Location')}
+                {t(editingLocation.id === 0 ? "Add Location" : "Edit Location")}
               </h3>
 
               <button
                 type="button"
                 className="product-icon-button"
-                aria-label={t('Close form')}
+                aria-label={t("Close form")}
                 onClick={() => setEditingLocation(null)}
               >
                 <X size={20} />
@@ -681,7 +718,7 @@ export default function LocationsPage() {
 
             <form onSubmit={saveLocation}>
               <div className="field">
-                <label htmlFor="location-name">{t('Location Name')}</label>
+                <label htmlFor="location-name">{t("Location Name")}</label>
                 <input
                   id="location-name"
                   required
@@ -696,7 +733,7 @@ export default function LocationsPage() {
               </div>
 
               <div className="field">
-                <label htmlFor="location-description">{t('Description')}</label>
+                <label htmlFor="location-description">{t("Description")}</label>
                 <input
                   id="location-description"
                   value={editingLocation.description}
@@ -710,45 +747,70 @@ export default function LocationsPage() {
               </div>
 
               <div className="field">
-                <label htmlFor="location-type">{t('Location Type')}</label>
+                <label htmlFor="location-type">{t("Location Type")}</label>
                 <ChopsSelect
                   id="location-type"
-                  ariaLabel={t('Location Type')}
+                  ariaLabel={t("Location Type")}
                   value={editingLocation.type}
-                  options={[{ value: 'exhibition', label: t('Exhibition') }, { value: 'warehouse', label: t('Warehouse') }]}
-                  onChange={(next) => setEditingLocation({
-                    ...editingLocation,
-                    type: next as StorageLocation['type'],
-                    branchId: next === 'exhibition' ? editingLocation.branchId ?? branches[0]?.id ?? null : editingLocation.branchId,
-                  })}
+                  options={[
+                    { value: "exhibition", label: t("Exhibition") },
+                    { value: "warehouse", label: t("Warehouse") },
+                  ]}
+                  onChange={(next) =>
+                    setEditingLocation({
+                      ...editingLocation,
+                      type: next as StorageLocation["type"],
+                      branchId:
+                        next === "exhibition"
+                          ? (editingLocation.branchId ??
+                            branches[0]?.id ??
+                            null)
+                          : editingLocation.branchId,
+                    })
+                  }
                 />
               </div>
 
               <div className="field">
-                <label htmlFor="location-branch">{t('Branch')}</label>
+                <label htmlFor="location-branch">{t("Branch")}</label>
                 <ChopsSelect
                   id="location-branch"
-                  ariaLabel={t('Branch')}
-                  value={String(editingLocation.branchId ?? '')}
+                  ariaLabel={t("Branch")}
+                  value={String(editingLocation.branchId ?? "")}
                   options={[
-                    ...(editingLocation.type === 'warehouse' ? [{ value: '', label: t('Central / Independent') }] : []),
-                    ...branches.map((branch) => ({ value: String(branch.id), label: branch.name })),
+                    ...(editingLocation.type === "warehouse"
+                      ? [{ value: "", label: t("Central / Independent") }]
+                      : []),
+                    ...branches.map((branch) => ({
+                      value: String(branch.id),
+                      label: branch.name,
+                    })),
                   ]}
-                  onChange={(next) => setEditingLocation({
-                    ...editingLocation,
-                    branchId: next === '' ? null : Number(next),
-                  })}
+                  onChange={(next) =>
+                    setEditingLocation({
+                      ...editingLocation,
+                      branchId: next === "" ? null : Number(next),
+                    })
+                  }
                 />
               </div>
 
               <div className="field">
-                <label htmlFor="location-status">{t('Status')}</label>
+                <label htmlFor="location-status">{t("Status")}</label>
                 <ChopsSelect
                   id="location-status"
-                  ariaLabel={t('Status')}
-                  value={editingLocation.active ? 'active' : 'inactive'}
-                  options={[{ value: 'active', label: t('Active') }, { value: 'inactive', label: t('Inactive') }]}
-                  onChange={(next) => setEditingLocation({ ...editingLocation, active: next === 'active' })}
+                  ariaLabel={t("Status")}
+                  value={editingLocation.active ? "active" : "inactive"}
+                  options={[
+                    { value: "active", label: t("Active") },
+                    { value: "inactive", label: t("Inactive") },
+                  ]}
+                  onChange={(next) =>
+                    setEditingLocation({
+                      ...editingLocation,
+                      active: next === "active",
+                    })
+                  }
                 />
               </div>
 
@@ -763,14 +825,18 @@ export default function LocationsPage() {
                   type="button"
                   className="btn btn-secondary"
                   onClick={() => setEditingLocation(null)}
-                >{t('Cancel')}</button>
+                >
+                  {t("Cancel")}
+                </button>
 
-                <button type="submit" className="btn btn-primary">{t('Save Location')}</button>
+                <button type="submit" className="btn btn-primary">
+                  {t("Save Location")}
+                </button>
               </div>
             </form>
           </section>
         </div>
       )}
     </section>
-  )
+  );
 }

@@ -1,5 +1,9 @@
 /* Quick actions: compact, anchored Chops menu, keyboard/touch friendly. */
-.chops-quick { position: relative; min-width: 0; flex-shrink: 0; }
+.chops-quick {
+  position: relative;
+  min-width: 0;
+  flex-shrink: 0;
+}
 .chops-quick-trigger {
   display: inline-flex;
   align-items: center;
@@ -17,8 +21,13 @@
   font-weight: 650;
   cursor: pointer;
 }
-.chops-quick-trigger:hover { background: var(--primary-hover); }
-.chops-quick-trigger:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.chops-quick-trigger:hover {
+  background: var(--primary-hover);
+}
+.chops-quick-trigger:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
 .chops-quick-panel {
   position: absolute;
   right: 0;
@@ -33,7 +42,7 @@
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface-raised);
-  box-shadow: 0 12px 30px rgba(0,0,0,.18);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
 }
 .chops-quick-panel button {
   display: flex;
@@ -51,10 +60,22 @@
   font-size: 12px;
   cursor: pointer;
 }
-.chops-quick-panel button svg { flex: none; color: var(--primary-ink); }
+.chops-quick-panel button svg {
+  flex: none;
+  color: var(--primary-ink);
+}
 .chops-quick-panel button:hover,
-.chops-quick-panel button:focus-visible { background: var(--primary-soft); outline: none; }
+.chops-quick-panel button:focus-visible {
+  background: var(--primary-soft);
+  outline: none;
+}
 @media (max-width: 520px) {
-  .chops-quick-trigger { width: 36px; min-width: 36px; padding: 0; }
-  .chops-quick-trigger span { display: none; }
+  .chops-quick-trigger {
+    width: 36px;
+    min-width: 36px;
+    padding: 0;
+  }
+  .chops-quick-trigger span {
+    display: none;
+  }
 }

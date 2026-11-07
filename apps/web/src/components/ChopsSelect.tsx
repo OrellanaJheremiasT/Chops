@@ -36,9 +36,7 @@ export default function ChopsSelect({
   const generatedId = useId();
   const listId = `chops-options-${generatedId}`;
 
-  const selectedIndex = options.findIndex(
-    (option) => option.value === value
-  );
+  const selectedIndex = options.findIndex((option) => option.value === value);
   const selected = options[selectedIndex];
 
   // Close the menu when the user clicks outside of this component.
@@ -72,11 +70,9 @@ export default function ChopsSelect({
         options.length * (window.innerWidth <= 767 ? 44 : 38) + 12,
         window.innerWidth <= 767
           ? Math.min(270, window.innerHeight * 0.42)
-          : 220
+          : 220,
       );
-      setOpenAbove(
-        spaceBelow < estimatedMenuHeight && rect.top > spaceBelow
-      );
+      setOpenAbove(spaceBelow < estimatedMenuHeight && rect.top > spaceBelow);
     }
 
     setFocusIndex(Math.max(0, selectedIndex));
@@ -101,7 +97,7 @@ export default function ChopsSelect({
 
   function handleOptionKey(
     event: KeyboardEvent<HTMLButtonElement>,
-    index: number
+    index: number,
   ) {
     if (event.key === "Escape") {
       event.preventDefault();
@@ -136,9 +132,7 @@ export default function ChopsSelect({
         onClick={() => (open ? setOpen(false) : showOptions())}
         onKeyDown={handleTriggerKey}
       >
-        <span className="chops-select__value">
-          {selected?.label ?? "—"}
-        </span>
+        <span className="chops-select__value">{selected?.label ?? "—"}</span>
         <ChevronDown
           size={15}
           className="chops-select__chevron"
@@ -173,9 +167,7 @@ export default function ChopsSelect({
               onClick={() => choose(option.value)}
             >
               <span>{option.label}</span>
-              {option.value === value && (
-                <Check size={15} aria-hidden="true" />
-              )}
+              {option.value === value && <Check size={15} aria-hidden="true" />}
             </button>
           ))}
         </div>

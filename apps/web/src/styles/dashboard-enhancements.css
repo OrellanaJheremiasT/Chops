@@ -25,7 +25,7 @@
 
 .dash-kpis {
   display: grid;
-  grid-template-columns: repeat(4,minmax(0,1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -39,7 +39,7 @@
 
 .dash-panels {
   display: grid;
-  grid-template-columns: repeat(2,minmax(0,1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -101,36 +101,37 @@
   height: 100%;
 }
 
-.dash-bar-col>div {
+.dash-bar-col > div {
   background: var(--primary);
   border-radius: 5px 5px 0 0;
   width: 65%;
   min-height: 5px;
 }
 
-.dash-bar-col span,.dash-bar-col small {
+.dash-bar-col span,
+.dash-bar-col small {
   font-size: 10px;
   color: var(--text-muted);
   white-space: nowrap;
 }
 
-.dash-panel>.ops-footnote {
+.dash-panel > .ops-footnote {
   margin-top: 16px;
 }
 
-@media (max-width:1150px) {
+@media (max-width: 1150px) {
   .dash-kpis {
-    grid-template-columns: repeat(2,minmax(0,1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width:750px) {
+@media (max-width: 750px) {
   .dash-panels {
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width:500px) {
+@media (max-width: 500px) {
   .dash-kpis {
     grid-template-columns: 1fr 1fr;
   }

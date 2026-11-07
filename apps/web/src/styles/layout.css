@@ -27,7 +27,7 @@
   margin: 0;
   font-size: 17px;
   font-weight: 800;
-  letter-spacing: -.02em;
+  letter-spacing: -0.02em;
 }
 
 .sidebar nav {
@@ -46,7 +46,9 @@
   text-decoration: none;
   font-weight: 500;
   font-size: 13px;
-  transition: background .15s, color .15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .nav-link svg {
@@ -109,11 +111,24 @@
 }
 
 /* Keep navigation/header from overflowing the viewport on phones. */
-.app-layout, .main-area, .page-content { min-width: 0; }
+.app-layout,
+.main-area,
+.page-content {
+  min-width: 0;
+}
 @media (max-width: 520px) {
-  .app-header { gap: 6px; padding-left: 12px; padding-right: 12px; }
-  .header-brand { flex: 1 1 auto; min-width: 0; }
-  .page-content { overflow-x: clip; }
+  .app-header {
+    gap: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .header-brand {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .page-content {
+    overflow-x: clip;
+  }
 }
 
 /* ---- Accessibility: skip link ---- */
@@ -129,19 +144,41 @@
   font-weight: 600;
   text-decoration: none;
   transform: translateY(-200%);
-  transition: transform .15s;
+  transition: transform 0.15s;
 }
-.skip-link:focus { transform: none; }
-.page-content:focus { outline: none; }
+.skip-link:focus {
+  transform: none;
+}
+.page-content:focus {
+  outline: none;
+}
 
 /* ---- Nav / header interaction states ---- */
-.nav-link:active { transform: scale(.98); }
-.theme-toggle { transition: border-color .15s, background .15s, transform .1s; }
-.theme-toggle:active { transform: scale(.97); }
+.nav-link:active {
+  transform: scale(0.98);
+}
+.theme-toggle {
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    transform 0.1s;
+}
+.theme-toggle:active {
+  transform: scale(0.97);
+}
 
 /* ---- Page transition (opacity only: never delays interaction) ---- */
-.page-transition { animation: page-in .18s ease-out; }
-@keyframes page-in { from { opacity: 0; } to { opacity: 1; } }
+.page-transition {
+  animation: page-in 0.18s ease-out;
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 
 /* ---- Mobile drawer controls (hidden on desktop) ---- */
 .menu-toggle,
@@ -157,15 +194,26 @@
   background: var(--surface);
   color: var(--text);
   cursor: pointer;
-  transition: border-color .15s, background .15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 .menu-toggle:hover,
-.sidebar-close:hover { border-color: var(--primary-ink); }
-.sidebar-backdrop { display: none; }
+.sidebar-close:hover {
+  border-color: var(--primary-ink);
+}
+.sidebar-backdrop {
+  display: none;
+}
 
 @media (max-width: 768px) {
-  .menu-toggle { display: inline-flex; }
-  .header-brand { flex: 1 1 auto; min-width: 0; }
+  .menu-toggle {
+    display: inline-flex;
+  }
+  .header-brand {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
 
   .app-header {
     position: sticky;
@@ -185,13 +233,17 @@
     padding: 14px 12px;
     transform: translateX(-100%);
     visibility: hidden; /* removes closed menu from tab order */
-    transition: transform .22s ease, visibility 0s linear .22s;
-    box-shadow: 0 0 32px rgba(0, 0, 0, .35);
+    transition:
+      transform 0.22s ease,
+      visibility 0s linear 0.22s;
+    box-shadow: 0 0 32px rgba(0, 0, 0, 0.35);
   }
   .sidebar.is-open {
     transform: none;
     visibility: visible;
-    transition: transform .22s ease, visibility 0s;
+    transition:
+      transform 0.22s ease,
+      visibility 0s;
   }
 
   .brand {
@@ -199,25 +251,40 @@
     align-items: center;
     justify-content: space-between;
   }
-  .sidebar-close { display: inline-flex; }
+  .sidebar-close {
+    display: inline-flex;
+  }
 
-  .nav-link { padding: 12px; font-size: 14px; min-height: 44px; }
+  .nav-link {
+    padding: 12px;
+    font-size: 14px;
+    min-height: 44px;
+  }
 
   .sidebar-backdrop {
     display: block;
     position: fixed;
     inset: 0;
     z-index: 50;
-    background: rgba(10, 10, 10, .65);
+    background: rgba(10, 10, 10, 0.65);
     opacity: 0;
     pointer-events: none;
-    transition: opacity .2s;
+    transition: opacity 0.2s;
   }
-  .sidebar-backdrop.is-open { opacity: 1; pointer-events: auto; }
+  .sidebar-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
 
-  body.nav-open { overflow: hidden; }
+  body.nav-open {
+    overflow: hidden;
+  }
 }
 
 @media print {
-  .menu-toggle, .sidebar-backdrop, .skip-link { display: none !important; }
+  .menu-toggle,
+  .sidebar-backdrop,
+  .skip-link {
+    display: none !important;
+  }
 }

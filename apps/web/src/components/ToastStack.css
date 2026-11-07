@@ -30,14 +30,34 @@
   pointer-events: auto;
   animation: chops-toast-arrive 180ms ease-out both;
 }
-.chops-toast > svg { flex: none; color: var(--primary-ink); margin-top: 1px; }
-.chops-toast > span { min-width: 0; flex: 1; overflow-wrap: anywhere; }
-.chops-toast[data-kind="success"] { border-left-color: var(--success-ink); }
-.chops-toast[data-kind="success"] > svg { color: var(--success-ink); }
-.chops-toast[data-kind="warning"] { border-left-color: var(--warning-ink); }
-.chops-toast[data-kind="warning"] > svg { color: var(--warning-ink); }
-.chops-toast[data-kind="error"] { border-left-color: var(--danger-ink); }
-.chops-toast[data-kind="error"] > svg { color: var(--danger-ink); }
+.chops-toast > svg {
+  flex: none;
+  color: var(--primary-ink);
+  margin-top: 1px;
+}
+.chops-toast > span {
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.chops-toast[data-kind="success"] {
+  border-left-color: var(--success-ink);
+}
+.chops-toast[data-kind="success"] > svg {
+  color: var(--success-ink);
+}
+.chops-toast[data-kind="warning"] {
+  border-left-color: var(--warning-ink);
+}
+.chops-toast[data-kind="warning"] > svg {
+  color: var(--warning-ink);
+}
+.chops-toast[data-kind="error"] {
+  border-left-color: var(--danger-ink);
+}
+.chops-toast[data-kind="error"] > svg {
+  color: var(--danger-ink);
+}
 .chops-toast button {
   flex: none;
   display: grid;
@@ -51,15 +71,31 @@
   color: var(--text-muted);
   cursor: pointer;
 }
-.chops-toast button:hover { background: var(--primary-soft); color: var(--text); }
-.chops-toast button:focus-visible { outline: 2px solid var(--focus-ring); }
+.chops-toast button:hover {
+  background: var(--primary-soft);
+  color: var(--text);
+}
+.chops-toast button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+}
 @keyframes chops-toast-arrive {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @media (max-width: 520px) {
-  .chops-toasts { right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); }
+  .chops-toasts {
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .chops-toast { animation: none; }
+  .chops-toast {
+    animation: none;
+  }
 }

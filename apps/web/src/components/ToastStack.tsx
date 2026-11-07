@@ -7,13 +7,7 @@ import {
   useState,
 } from "react";
 import type { ReactNode } from "react";
-import {
-  AlertTriangle,
-  CheckCircle2,
-  Info,
-  X,
-  XCircle,
-} from "lucide-react";
+import { AlertTriangle, CheckCircle2, Info, X, XCircle } from "lucide-react";
 
 import { useLanguage } from "../i18n/LanguageContext";
 import "./ToastStack.css";

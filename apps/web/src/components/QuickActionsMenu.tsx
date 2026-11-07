@@ -14,10 +14,22 @@ import { useLanguage } from "../i18n/LanguageContext";
 import "./QuickActionsMenu.css";
 
 const actions = [
-  { label: "Receive Goods", route: "/stock-movements?action=in", icon: PackagePlus },
-  { label: "Transfer Stock", route: "/stock-movements?action=transfer", icon: ArrowLeftRight },
+  {
+    label: "Receive Goods",
+    route: "/stock-movements?action=in",
+    icon: PackagePlus,
+  },
+  {
+    label: "Transfer Stock",
+    route: "/stock-movements?action=transfer",
+    icon: ArrowLeftRight,
+  },
   { label: "Sales", route: "/checkout", icon: ShoppingCart },
-  { label: "Physical Stock Count", route: "/inventory/count", icon: ClipboardCheck },
+  {
+    label: "Physical Stock Count",
+    route: "/inventory/count",
+    icon: ClipboardCheck,
+  },
   { label: "Record a Loss", route: "/losses", icon: TrendingDown },
   { label: "Reports & Analytics", route: "/reports", icon: FileBarChart2 },
 ];
@@ -71,7 +83,11 @@ export default function QuickActionsMenu() {
         <span>{t("Quick actions")}</span>
       </button>
       {open && (
-        <div id={menuId} className="chops-quick-panel" aria-label={t("Quick actions")}>
+        <div
+          id={menuId}
+          className="chops-quick-panel"
+          aria-label={t("Quick actions")}
+        >
           {actions.map(({ label, route, icon: Icon }) => (
             <button type="button" key={route} onClick={() => go(route)}>
               <Icon size={16} aria-hidden="true" />

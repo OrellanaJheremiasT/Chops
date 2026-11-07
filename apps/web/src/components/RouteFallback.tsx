@@ -7,7 +7,12 @@ export default function RouteFallback() {
   const { t } = useLanguage();
 
   return (
-    <div className="route-fallback" role="status" aria-live="polite" aria-busy="true">
+    <div
+      className="route-fallback"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
       <PageSkeleton />
       <span className="sr-only">{t("Loading…")}</span>
     </div>

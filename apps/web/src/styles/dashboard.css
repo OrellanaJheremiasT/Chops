@@ -13,13 +13,15 @@
   gap: 16px;
 }
 
-.page-title h2, .section-placeholder h2 {
+.page-title h2,
+.section-placeholder h2 {
   margin: 0;
   font-size: 20px;
   line-height: 1.25;
 }
 
-.page-title p, .section-placeholder p {
+.page-title p,
+.section-placeholder p {
   margin: 5px 0 0;
   color: var(--text-muted);
   font-size: 13px;
@@ -75,7 +77,8 @@
   color: var(--warning-ink);
 }
 
-.recent-products, .card {
+.recent-products,
+.card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;

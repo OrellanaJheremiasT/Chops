@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { Pencil, Plus, RefreshCcw, Search, Trash2, X } from "lucide-react";
@@ -99,8 +98,8 @@ export default function ProductsPage() {
         product.name.toLowerCase().includes(query) ||
         product.category.toLowerCase().includes(query) ||
         product.variants.some((variant) =>
-          variant.sku.toLowerCase().includes(query)
-        )
+          variant.sku.toLowerCase().includes(query),
+        ),
     );
   }, [products, search]);
 
@@ -120,7 +119,7 @@ export default function ProductsPage() {
   function updateVariant(
     index: number,
     field: keyof ProductVariant,
-    value: string
+    value: string,
   ) {
     setEditing((current) => {
       if (!current) return null;
@@ -128,7 +127,7 @@ export default function ProductsPage() {
       return {
         ...current,
         variants: current.variants.map((variant, position) =>
-          position === index ? { ...variant, [field]: value } : variant
+          position === index ? { ...variant, [field]: value } : variant,
         ),
       };
     });
@@ -166,7 +165,7 @@ export default function ProductsPage() {
       setFormError(
         spanish
           ? "El precio debe ser válido, no negativo y tener máximo 2 decimales."
-          : "Price must be non-negative with up to 2 decimal places."
+          : "Price must be non-negative with up to 2 decimal places.",
       );
       return;
     }
@@ -194,7 +193,7 @@ export default function ProductsPage() {
       } else {
         const updated = await updateProduct(editing.id, payload);
         setProducts((current) =>
-          current.map((item) => (item.id === updated.id ? updated : item))
+          current.map((item) => (item.id === updated.id ? updated : item)),
         );
       }
 
@@ -210,7 +209,7 @@ export default function ProductsPage() {
     const confirmed = window.confirm(
       spanish
         ? `¿Seguro que deseas eliminar "${product.name}"?`
-        : `Are you sure you want to delete "${product.name}"?`
+        : `Are you sure you want to delete "${product.name}"?`,
     );
 
     if (!confirmed || working) return;
@@ -221,7 +220,7 @@ export default function ProductsPage() {
     try {
       await deleteProduct(product.id);
       setProducts((current) =>
-        current.filter((item) => item.id !== product.id)
+        current.filter((item) => item.id !== product.id),
       );
     } catch (error) {
       setLoadError(error);
@@ -241,7 +240,9 @@ export default function ProductsPage() {
         <span className="badge badge-info">
           {productsDemoMode
             ? t("Demo Data")
-            : spanish ? "API conectada" : "API data"}
+            : spanish
+              ? "API conectada"
+              : "API data"}
         </span>
       </div>
 
@@ -305,71 +306,77 @@ export default function ProductsPage() {
               </tr>
             )}
 
-            {!loading && loadError === null && filteredProducts.map((product) => (
-              <tr key={product.id}>
-                <td>
-                  <strong>{product.name}</strong>
-                </td>
-                <td>{product.category}</td>
+            {!loading &&
+              loadError === null &&
+              filteredProducts.map((product) => (
+                <tr key={product.id}>
+                  <td>
+                    <strong>{product.name}</strong>
+                  </td>
+                  <td>{product.category}</td>
 
-                <td>
-                  <div className="product-variants">
-                    {product.variants.map((variant) => (
-                      <span key={variant.sku}>
-                        {variant.name}: <code>{variant.sku}</code>
-                      </span>
-                    ))}
-                  </div>
-                </td>
+                  <td>
+                    <div className="product-variants">
+                      {product.variants.map((variant) => (
+                        <span key={variant.sku}>
+                          {variant.name}: <code>{variant.sku}</code>
+                        </span>
+                      ))}
+                    </div>
+                  </td>
 
-                <td>S/ {product.price.toFixed(2)}</td>
+                  <td>S/ {product.price.toFixed(2)}</td>
 
-                <td>
-                  <span
-                    className="badge badge-info"
-                    title={spanish
-                      ? "El stock se conectará en la etapa de Inventory"
-                      : "Stock will be connected during Inventory integration"}
-                  >
-                    —
-                  </span>
-                </td>
-
-                <td>
-                  <div className="product-actions">
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      disabled={working}
-                      onClick={() => openEdit(product)}
-                      aria-label={`${t("Edit")} ${product.name}`}
+                  <td>
+                    <span
+                      className="badge badge-info"
+                      title={
+                        spanish
+                          ? "El stock se conectará en la etapa de Inventory"
+                          : "Stock will be connected during Inventory integration"
+                      }
                     >
-                      <Pencil size={15} />
-                      {t("Edit")}
-                    </button>
+                      —
+                    </span>
+                  </td>
 
-                    <button
-                      type="button"
-                      className="btn btn-danger"
-                      disabled={working}
-                      onClick={() => removeProduct(product)}
-                      aria-label={`${t("Delete")} ${product.name}`}
-                    >
-                      <Trash2 size={15} />
-                      {t("Delete")}
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  <td>
+                    <div className="product-actions">
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        disabled={working}
+                        onClick={() => openEdit(product)}
+                        aria-label={`${t("Edit")} ${product.name}`}
+                      >
+                        <Pencil size={15} />
+                        {t("Edit")}
+                      </button>
 
-            {!loading && loadError === null && filteredProducts.length === 0 && (
-              <tr>
-                <td colSpan={6} className="products-empty">
-                  {t("No products found.")}
-                </td>
-              </tr>
-            )}
+                      <button
+                        type="button"
+                        className="btn btn-danger"
+                        disabled={working}
+                        onClick={() => removeProduct(product)}
+                        aria-label={`${t("Delete")} ${product.name}`}
+                      >
+                        <Trash2 size={15} />
+                        {t("Delete")}
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+
+            {!loading &&
+              loadError === null &&
+              filteredProducts.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="products-empty">
+                    {t("No products found.")}
+                  </td>
+                </tr>
+              )}
 
             {!loading && loadError !== null && (
               <tr>
@@ -418,9 +425,7 @@ export default function ProductsPage() {
 
             <form onSubmit={saveProduct}>
               <div className="field">
-                <label htmlFor="product-name">
-                  {t("Product Name")}
-                </label>
+                <label htmlFor="product-name">{t("Product Name")}</label>
                 <input
                   id="product-name"
                   maxLength={150}
@@ -434,9 +439,7 @@ export default function ProductsPage() {
               </div>
 
               <div className="field">
-                <label htmlFor="product-category">
-                  {t("Category")}
-                </label>
+                <label htmlFor="product-category">{t("Category")}</label>
                 <input
                   id="product-category"
                   maxLength={100}
@@ -450,9 +453,7 @@ export default function ProductsPage() {
               </div>
 
               <div className="field">
-                <label htmlFor="product-price">
-                  {t("Base Price (S/)")}
-                </label>
+                <label htmlFor="product-price">{t("Base Price (S/)")}</label>
                 <input
                   id="product-price"
                   type="number"
@@ -476,10 +477,12 @@ export default function ProductsPage() {
                   type="button"
                   className="btn btn-secondary"
                   disabled={working || editing.variants.length >= 100}
-                  onClick={() => setEditing({
-                    ...editing,
-                    variants: [...editing.variants, { sku: "", name: "" }],
-                  })}
+                  onClick={() =>
+                    setEditing({
+                      ...editing,
+                      variants: [...editing.variants, { sku: "", name: "" }],
+                    })
+                  }
                 >
                   <Plus size={15} />
                   {t("Add Variant")}
@@ -506,9 +509,7 @@ export default function ProductsPage() {
                   </div>
 
                   <div className="field">
-                    <label htmlFor={`variant-sku-${index}`}>
-                      SKU
-                    </label>
+                    <label htmlFor={`variant-sku-${index}`}>SKU</label>
                     <input
                       id={`variant-sku-${index}`}
                       placeholder={t("e.g. BEV-COKE-500")}
@@ -527,12 +528,14 @@ export default function ProductsPage() {
                       type="button"
                       className="product-remove-variant"
                       disabled={working}
-                      onClick={() => setEditing({
-                        ...editing,
-                        variants: editing.variants.filter(
-                          (_, position) => position !== index
-                        ),
-                      })}
+                      onClick={() =>
+                        setEditing({
+                          ...editing,
+                          variants: editing.variants.filter(
+                            (_, position) => position !== index,
+                          ),
+                        })
+                      }
                     >
                       {t("Remove variant")}
                     </button>
@@ -562,7 +565,9 @@ export default function ProductsPage() {
                   disabled={working}
                 >
                   {working
-                    ? (spanish ? "Guardando…" : "Saving…")
+                    ? spanish
+                      ? "Guardando…"
+                      : "Saving…"
                     : t("Save Product")}
                 </button>
               </div>
