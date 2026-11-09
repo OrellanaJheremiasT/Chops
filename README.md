@@ -2,7 +2,7 @@
 
 # 🍖 Chops
 
-**[Short description: what Chops is and what problem it solves.]**
+**The app for musicians who want to practice consistently and see their progress.**
 
 [![License: MIT](https://img.shields.io/github/license/OrellanaJheremiasT/Chops?style=for-the-badge&color=blue)](LICENSE)
 [![Last commit](https://img.shields.io/github/last-commit/OrellanaJheremiasT/Chops?style=for-the-badge)](https://github.com/OrellanaJheremiasT/Chops/commits/main)
@@ -35,13 +35,15 @@
 
 ## 🎯 About the project
 
-[Explain in 2–3 lines what Chops does, who it's for, and what its goal is.]
+Chops (as in *chops*, a musician's technical skill) is a web platform for logging and organizing music practice. It is built for students and self-taught musicians who want to keep a routine, measure their improvement, and keep track of what they are working on. It pairs a fast web interface with an API that stores sessions, exercises, and goals.
 
 ### Features
 
-- [ ] [Feature 1]
-- [ ] [Feature 2]
-- [ ] [Feature 3]
+- [ ] 📝 Practice session logging (duration, instrument, and notes)
+- [ ] 🎯 Weekly goals and daily practice streaks
+- [ ] 📚 Exercise and repertoire library with tempo (BPM) tracking
+- [ ] 📈 Statistics and progress charts over time
+- [ ] 🥁 Built-in metronome
 
 ## 🧰 Tech stack
 
