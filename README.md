@@ -2,7 +2,7 @@
 
 # 🍖 Chops
 
-**[Descripción corta: qué es Chops y qué problema resuelve.]**
+**[Short description: what Chops is and what problem it solves.]**
 
 [![License: MIT](https://img.shields.io/github/license/OrellanaJheremiasT/Chops?style=for-the-badge&color=blue)](LICENSE)
 [![Last commit](https://img.shields.io/github/last-commit/OrellanaJheremiasT/Chops?style=for-the-badge)](https://github.com/OrellanaJheremiasT/Chops/commits/main)
@@ -21,70 +21,70 @@
 
 ---
 
-## 📖 Tabla de contenidos
+## 📖 Table of contents
 
-- [Acerca del proyecto](#-acerca-del-proyecto)
-- [Stack tecnológico](#-stack-tecnológico)
-- [Estructura del repositorio](#-estructura-del-repositorio)
-- [Requisitos](#-requisitos)
-- [Puesta en marcha](#-puesta-en-marcha)
-- [Pruebas](#-pruebas)
-- [Estado del proyecto](#-estado-del-proyecto)
-- [Contribuir](#-contribuir)
-- [Licencia](#-licencia)
+- [About the project](#-about-the-project)
+- [Tech stack](#-tech-stack)
+- [Repository structure](#-repository-structure)
+- [Requirements](#-requirements)
+- [Getting started](#-getting-started)
+- [Testing](#-testing)
+- [Project status](#-project-status)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-## 🎯 Acerca del proyecto
+## 🎯 About the project
 
-[Explicá en 2–3 líneas qué hace Chops, para quién es y cuál es su objetivo.]
+[Explain in 2–3 lines what Chops does, who it's for, and what its goal is.]
 
-### Funcionalidades
+### Features
 
-- [ ] [Funcionalidad 1]
-- [ ] [Funcionalidad 2]
-- [ ] [Funcionalidad 3]
+- [ ] [Feature 1]
+- [ ] [Feature 2]
+- [ ] [Feature 3]
 
-## 🧰 Stack tecnológico
+## 🧰 Tech stack
 
-| Capa | Tecnología | Detalle |
+| Layer | Technology | Details |
 | --- | --- | --- |
-| Frontend | React + Vite | Servidor de desarrollo en el puerto `5173` |
-| Iconos | [lucide-react](https://lucide.dev/) | Dependencia declarada en el `package.json` raíz |
-| Backend | Java 21 + Spring Boot | API en el puerto `8080`, empaquetada con Maven Wrapper |
-| Gestión de dependencias | npm / Maven Wrapper | No requiere instalar Maven de forma global |
+| Frontend | React + Vite | Development server on port `5173` |
+| Icons | [lucide-react](https://lucide.dev/) | Dependency declared in the root `package.json` |
+| Backend | Java 21 + Spring Boot | API on port `8080`, built with Maven Wrapper |
+| Dependency management | npm / Maven Wrapper | No global Maven installation required |
 
-## 🗂 Estructura del repositorio
+## 🗂 Repository structure
 
 ```text
 Chops/
 ├── apps/
-│   └── web/            # Aplicación frontend
+│   └── web/            # Frontend application
 ├── services/
-│   └── api/            # API REST (Spring Boot)
+│   └── api/            # REST API (Spring Boot)
 ├── .gitignore
 ├── LICENSE
-├── package.json        # Dependencias compartidas (lucide-react)
+├── package.json        # Shared dependencies (lucide-react)
 └── README.md
 ```
 
-## ✅ Requisitos
+## ✅ Requirements
 
 - [Git](https://git-scm.com/)
-- [Node.js 24](https://nodejs.org/) y npm
+- [Node.js 24](https://nodejs.org/) and npm
 - [Java JDK 21](https://adoptium.net/)
-- [Visual Studio Code](https://code.visualstudio.com/) (recomendado)
+- [Visual Studio Code](https://code.visualstudio.com/) (recommended)
 
-> 💡 No hace falta instalar Maven: el proyecto incluye Maven Wrapper (`mvnw`).
+> 💡 You don't need to install Maven: the project includes the Maven Wrapper (`mvnw`).
 
-## 🚀 Puesta en marcha
+## 🚀 Getting started
 
-### 1. Clonar el repositorio
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/OrellanaJheremiasT/Chops.git
 cd Chops
 ```
 
-### 2. Ejecutar el frontend
+### 2. Run the frontend
 
 ```bash
 cd apps/web
@@ -92,21 +92,21 @@ npm install
 npm run dev
 ```
 
-Abrir 👉 http://localhost:5173/
+Open 👉 http://localhost:5173/
 
-### 3. Ejecutar el backend
+### 3. Run the backend
 
-En otra terminal, desde la raíz del proyecto:
+In another terminal, from the project root:
 
 ```bash
 cd services/api
 ./mvnw spring-boot:run
 ```
 
-Servidor 👉 http://localhost:8080/
+Server 👉 http://localhost:8080/
 
 <details>
-<summary>🪟 ¿Usás Windows (PowerShell)?</summary>
+<summary>🪟 Using Windows (PowerShell)?</summary>
 
 ```powershell
 # Frontend
@@ -121,11 +121,11 @@ cd services/api
 
 </details>
 
-> ⚠️ **Nota:** la ruta raíz del backend devuelve `404` hasta que se implementen los controladores correspondientes.
+> ⚠️ **Note:** the backend's root route returns `404` until the corresponding controllers are implemented.
 
-## 🧪 Pruebas
+## 🧪 Testing
 
-**Frontend** (verifica que la aplicación compila):
+**Frontend** (checks that the app builds):
 
 ```bash
 cd apps/web
@@ -139,32 +139,32 @@ cd services/api
 ./mvnw clean test
 ```
 
-## 🚧 Estado del proyecto
+## 🚧 Project status
 
-🟡 En desarrollo activo. El frontend y el backend se ejecutan por separado y todavía no hay endpoints implementados.
+🟡 Under active development. The frontend and backend run separately, and no endpoints are implemented yet.
 
-### Hoja de ruta
+### Roadmap
 
-- [x] Estructura base del monorepo (`apps/web` + `services/api`)
-- [x] Configuración de desarrollo local
-- [ ] Controladores y endpoints de la API
-- [ ] Conexión frontend ↔ backend
-- [ ] Pruebas automatizadas
-- [ ] Despliegue
+- [x] Base monorepo structure (`apps/web` + `services/api`)
+- [x] Local development setup
+- [ ] API controllers and endpoints
+- [ ] Frontend ↔ backend connection
+- [ ] Automated tests
+- [ ] Deployment
 
-## 🤝 Contribuir
+## 🤝 Contributing
 
-1. Hacé un fork del proyecto.
-2. Creá una rama para tu cambio: `git checkout -b feature/mi-mejora`
-3. Hacé commit de tus cambios: `git commit -m "feat: agrega mi mejora"`
-4. Subí la rama: `git push origin feature/mi-mejora`
-5. Abrí un Pull Request.
+1. Fork the project.
+2. Create a branch for your change: `git checkout -b feature/my-improvement`
+3. Commit your changes: `git commit -m "feat: add my improvement"`
+4. Push the branch: `git push origin feature/my-improvement`
+5. Open a Pull Request.
 
-## 📄 Licencia
+## 📄 License
 
-Distribuido bajo la licencia **MIT**. Consultá el archivo [LICENSE](LICENSE) para más información.
+Distributed under the **MIT** license. See the [LICENSE](LICENSE) file for more information.
 
-## 👤 Autor
+## 👤 Author
 
 **Jheremias T. Orellana** — [@OrellanaJheremiasT](https://github.com/OrellanaJheremiasT)
 
@@ -172,6 +172,6 @@ Distribuido bajo la licencia **MIT**. Consultá el archivo [LICENSE](LICENSE) pa
 
 <div align="center">
 
-⭐ Si te sirve el proyecto, dejale una estrella.
+⭐ If you find this project useful, give it a star.
 
 </div>
