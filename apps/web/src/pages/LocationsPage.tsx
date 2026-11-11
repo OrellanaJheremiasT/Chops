@@ -1,13 +1,13 @@
-import ChopsSelect from "../components/ChopsSelect";
-import { useLanguage } from "../i18n/LanguageContext";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
+
 import {
   Building2,
   MapPin,
   Pencil,
   Plus,
+  RefreshCcw,
   Search,
   Store,
   Trash2,
@@ -15,73 +15,162 @@ import {
   X,
 } from "lucide-react";
 
-type Branch = {
-  id: number;
-  name: string;
-  address: string;
-  active: boolean;
-};
+import ChopsSelect from "../components/ChopsSelect";
+import { useLanguage } from "../i18n/LanguageContext";
+import { ApiError } from "../api/client";
 
-type StorageLocation = {
-  id: number;
-  name: string;
-  description: string;
-  type: "exhibition" | "warehouse";
-  branchId: number | null;
-  active: boolean;
-};
+import {
+  createBranch,
+  createLocation,
+  deleteBranch,
+  deleteLocation,
+  listBranches,
+  listLocations,
+  locationsDemoMode,
+  updateBranch,
+  updateLocation,
+} from "../api/locations";
 
-const initialBranches: Branch[] = [
-  {
-    id: 1,
-    name: "Main Store",
-    address: "Lima, Peru",
-    active: true,
-  },
-];
+import type {
+  Branch,
+  BranchInput,
+  LocationType,
+  StorageLocation,
+  StorageLocationInput,
+} from "../api/locations";
 
-const initialLocations: StorageLocation[] = [
-  {
-    id: 1,
-    name: "Exhibition",
-    description: "Products displayed for customers",
-    type: "exhibition",
-    branchId: 1,
-    active: true,
-  },
-  {
-    id: 2,
-    name: "Warehouse",
-    description: "Reserve inventory",
-    type: "warehouse",
-    branchId: 1,
-    active: true,
-  },
-];
+type Tab = "branches" | "locations";
 
-function nextId(items: { id: number }[]) {
-  return Math.max(0, ...items.map((item) => item.id)) + 1;
+function describeError(
+  error: unknown,
+  spanish: boolean
+): string {
+  if (error instanceof ApiError) {
+    if (error.status === 409) {
+      return spanish
+        ? "Conflicto: nombre duplicado o ubicación obligatoria."
+        : "Conflict: duplicate name or required location.";
+    }
+
+    if (error.status === 400) {
+      return spanish
+        ? "Datos inválidos. Revisa el formulario."
+        : "Invalid data. Check the form.";
+    }
+
+    if (error.status === 404) {
+      return spanish
+        ? "Sucursal o ubicación no encontrada."
+        : "Branch or location not found.";
+    }
+  }
+
+  return spanish
+    ? "No se pudo completar la operación. Comprueba Spring Boot."
+    : "Request failed. Check that Spring Boot is running.";
+}
+
+function retainsRequiredLocations(
+  branchId: number,
+  candidate: StorageLocation[]
+): boolean {
+  return (["exhibition", "warehouse"] as const).every(
+    (type) =>
+      candidate.some(
+        (location) =>
+          location.branchId === branchId &&
+          location.type === type &&
+          location.active
+      )
+  );
 }
 
 export default function LocationsPage() {
   const { t, language } = useLanguage();
-  const [branches, setBranches] = useState(initialBranches);
-  const [locations, setLocations] = useState(initialLocations);
-  const [search, setSearch] = useState("");
-  const [tab, setTab] = useState<"branches" | "locations">("branches");
+  const spanish = language === "es";
 
-  const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
+  const [branches, setBranches] = useState<Branch[]>([]);
+  const [locations, setLocations] = useState<StorageLocation[]>([]);
+
+  const [search, setSearch] = useState("");
+  const [tab, setTab] = useState<Tab>("branches");
+
+  const [editingBranch, setEditingBranch] =
+    useState<Branch | null>(null);
+
   const [editingLocation, setEditingLocation] =
     useState<StorageLocation | null>(null);
 
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [loadError, setLoadError] = useState("");
+
+  const [loading, setLoading] = useState(true);
+  const [working, setWorking] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    Promise.all([
+      listBranches(controller.signal),
+      listLocations(controller.signal),
+    ])
+      .then(([loadedBranches, loadedLocations]) => {
+        if (controller.signal.aborted) return;
+
+        setBranches(loadedBranches);
+        setLocations(loadedLocations);
+      })
+      .catch((cause: unknown) => {
+        if (!controller.signal.aborted) {
+          setLoadError(
+            describeError(cause, language === "es")
+          );
+        }
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      });
+
+    return () => controller.abort();
+  }, [language]);
+
+  async function refreshData() {
+    const [loadedBranches, loadedLocations] =
+      await Promise.all([
+        listBranches(),
+        listLocations(),
+      ]);
+
+    setBranches(loadedBranches);
+    setLocations(loadedLocations);
+    setLoadError("");
+  }
+
+  async function reload() {
+    if (loading || working) return;
+
+    setLoading(true);
+    setLoadError("");
+
+    try {
+      await refreshData();
+    } catch (cause) {
+      setLoadError(describeError(cause, spanish));
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const filteredBranches = useMemo(() => {
     const query = search.trim().toLowerCase();
 
     return branches.filter((branch) =>
-      `${branch.name} ${branch.address}`.toLowerCase().includes(query),
+      `${branch.name} ${branch.address}`
+        .toLowerCase()
+        .includes(query)
     );
   }, [branches, search]);
 
@@ -90,15 +179,21 @@ export default function LocationsPage() {
 
     return locations.filter((location) => {
       const branchName =
-        branches.find((branch) => branch.id === location.branchId)?.name ??
-        t("Central / Independent");
+        branches.find(
+          (branch) => branch.id === location.branchId
+        )?.name ?? t("Central / Independent");
 
-      return [location.name, location.description, location.type, branchName]
+      return [
+        location.name,
+        location.description,
+        location.type,
+        branchName,
+      ]
         .join(" ")
         .toLowerCase()
         .includes(query);
     });
-  }, [locations, branches, search]);
+  }, [locations, branches, search, t]);
 
   function openBranch(branch?: Branch) {
     setEditingBranch(
@@ -109,7 +204,7 @@ export default function LocationsPage() {
             name: "",
             address: "",
             active: true,
-          },
+          }
     );
 
     setError("");
@@ -127,22 +222,28 @@ export default function LocationsPage() {
             type: "warehouse",
             branchId: branches[0]?.id ?? null,
             active: true,
-          },
+          }
     );
 
     setError("");
     setNotice("");
   }
 
-  function saveBranch(event: FormEvent<HTMLFormElement>) {
+  async function saveBranch(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
-    if (!editingBranch) return;
 
-    const name = editingBranch.name.trim();
-    const address = editingBranch.address.trim();
+    if (!editingBranch || working) return;
 
-    if (!name || !address) {
-      setError("Name and address are required.");
+    const payload: BranchInput = {
+      name: editingBranch.name.trim(),
+      address: editingBranch.address.trim(),
+      active: editingBranch.active,
+    };
+
+    if (!payload.name || !payload.address) {
+      setError(t("Name and address are required."));
       return;
     }
 
@@ -150,106 +251,118 @@ export default function LocationsPage() {
       branches.some(
         (branch) =>
           branch.id !== editingBranch.id &&
-          branch.name.toLowerCase() === name.toLowerCase(),
+          branch.name.toLowerCase() ===
+            payload.name.toLowerCase()
       )
     ) {
-      setError("A branch with this name already exists.");
-      return;
-    }
-
-    if (editingBranch.id === 0) {
-      const branchId = nextId(branches);
-      const locationId = nextId(locations);
-
-      setBranches((current) => [
-        ...current,
-        {
-          ...editingBranch,
-          id: branchId,
-          name,
-          address,
-        },
-      ]);
-
-      setLocations((current) => [
-        ...current,
-        {
-          id: locationId,
-          name: "Exhibition",
-          description: "Products displayed for customers",
-          type: "exhibition",
-          branchId,
-          active: true,
-        },
-        {
-          id: locationId + 1,
-          name: "Warehouse",
-          description: "Reserve inventory",
-          type: "warehouse",
-          branchId,
-          active: true,
-        },
-      ]);
-    } else {
-      setBranches((current) =>
-        current.map((branch) =>
-          branch.id === editingBranch.id
-            ? { ...editingBranch, name, address }
-            : branch,
-        ),
+      setError(
+        t("A branch with this name already exists.")
       );
+      return;
     }
 
-    setEditingBranch(null);
+    setWorking(true);
     setError("");
-    setNotice("Branch saved successfully.");
+
+    try {
+      if (editingBranch.id === 0) {
+        await createBranch(payload);
+      } else {
+        await updateBranch(editingBranch.id, payload);
+      }
+
+      setEditingBranch(null);
+      setNotice(t("Branch saved successfully."));
+
+      try {
+        await refreshData();
+      } catch (cause) {
+        setLoadError(describeError(cause, spanish));
+      }
+    } catch (cause) {
+      setError(describeError(cause, spanish));
+    } finally {
+      setWorking(false);
+    }
   }
 
-  function hasRequiredLocations(
-    branchId: number,
-    candidateLocations: StorageLocation[],
-  ) {
-    return (
-      candidateLocations.some(
-        (location) =>
-          location.branchId === branchId &&
-          location.type === "exhibition" &&
-          location.active,
-      ) &&
-      candidateLocations.some(
-        (location) =>
-          location.branchId === branchId &&
-          location.type === "warehouse" &&
-          location.active,
-      )
+  // NEW: DELETE BRANCH
+
+  async function removeBranch(branch: Branch) {
+    if (working) return;
+
+    const locationCount = locations.filter(
+      (location) => location.branchId === branch.id
+    ).length;
+
+    const confirmed = window.confirm(
+      spanish
+        ? `¿Eliminar la sucursal "${branch.name}" y sus ${locationCount} ubicaciones? Esta acción no se puede deshacer.`
+        : `Delete branch "${branch.name}" and its ${locationCount} locations? This action cannot be undone.`
     );
+
+    if (!confirmed) return;
+
+    setWorking(true);
+    setNotice("");
+    setLoadError("");
+
+    try {
+      await deleteBranch(branch.id);
+
+      setNotice(
+        spanish
+          ? `Sucursal "${branch.name}" eliminada correctamente.`
+          : `Branch "${branch.name}" deleted successfully.`
+      );
+
+      try {
+        await refreshData();
+      } catch (cause) {
+        setLoadError(describeError(cause, spanish));
+      }
+    } catch (cause) {
+      setLoadError(describeError(cause, spanish));
+    } finally {
+      setWorking(false);
+    }
   }
 
-  function saveLocation(event: FormEvent<HTMLFormElement>) {
+  async function saveLocation(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
-    if (!editingLocation) return;
 
-    const name = editingLocation.name.trim();
-    const description = editingLocation.description.trim();
+    if (!editingLocation || working) return;
 
-    if (!name) {
-      setError("Location name is required.");
+    const payload: StorageLocationInput = {
+      name: editingLocation.name.trim(),
+      description: editingLocation.description.trim(),
+      type: editingLocation.type,
+      branchId: editingLocation.branchId,
+      active: editingLocation.active,
+    };
+
+    if (!payload.name) {
+      setError(t("Location name is required."));
       return;
     }
 
     if (
-      editingLocation.type === "exhibition" &&
-      editingLocation.branchId === null
+      payload.type === "exhibition" &&
+      payload.branchId === null
     ) {
-      setError("Exhibition must belong to a branch.");
+      setError(t("Exhibition must belong to a branch."));
       return;
     }
 
     if (
-      editingLocation.branchId !== null &&
-      !branches.some((branch) => branch.id === editingLocation.branchId)
+      payload.branchId !== null &&
+      !branches.some(
+        (branch) => branch.id === payload.branchId
+      )
     ) {
-      setError("Select a valid branch.");
+      setError(t("Select a valid branch."));
       return;
     }
 
@@ -257,91 +370,134 @@ export default function LocationsPage() {
       locations.some(
         (location) =>
           location.id !== editingLocation.id &&
-          location.branchId === editingLocation.branchId &&
-          location.name.toLowerCase() === name.toLowerCase(),
+          location.branchId === payload.branchId &&
+          location.name.toLowerCase() ===
+            payload.name.toLowerCase()
       )
     ) {
-      setError("This location name already exists in the selected branch.");
+      setError(
+        t("This location name already exists in the selected branch.")
+      );
       return;
     }
 
-    const savedLocation: StorageLocation = {
-      ...editingLocation,
-      name,
-      description,
-    };
+    if (editingLocation.id !== 0) {
+      const updated = {
+        ...editingLocation,
+        ...payload,
+      };
 
-    if (editingLocation.id === 0) {
-      setLocations((current) => [
-        ...current,
-        {
-          ...savedLocation,
-          id: nextId(current),
-        },
-      ]);
-    } else {
-      const candidateLocations = locations.map((location) =>
-        location.id === editingLocation.id ? savedLocation : location,
+      const candidate = locations.map((location) =>
+        location.id === editingLocation.id
+          ? updated
+          : location
       );
 
-      const affectedBranchIds = new Set(
-        [
-          locations.find((location) => location.id === editingLocation.id)
-            ?.branchId,
-          editingLocation.branchId,
-        ].filter((id): id is number => id !== null && id !== undefined),
+      const previous = locations.find(
+        (location) => location.id === editingLocation.id
       );
 
-      for (const branchId of affectedBranchIds) {
-        if (!hasRequiredLocations(branchId, candidateLocations)) {
-          setError(
-            "Each branch must retain an active exhibition and warehouse.",
-          );
-          return;
-        }
+      const branchIds = [
+        previous?.branchId,
+        payload.branchId,
+      ].filter(
+        (id): id is number =>
+          id !== null && id !== undefined
+      );
+
+      if (
+        branchIds.some(
+          (id) => !retainsRequiredLocations(id, candidate)
+        )
+      ) {
+        setError(
+          t("Each branch must retain an active exhibition and warehouse.")
+        );
+        return;
       }
-
-      setLocations(candidateLocations);
     }
 
-    setEditingLocation(null);
+    setWorking(true);
     setError("");
-    setNotice("Location saved successfully.");
+
+    try {
+      if (editingLocation.id === 0) {
+        await createLocation(payload);
+      } else {
+        await updateLocation(
+          editingLocation.id,
+          payload
+        );
+      }
+
+      setEditingLocation(null);
+      setNotice(t("Location saved successfully."));
+
+      try {
+        await refreshData();
+      } catch (cause) {
+        setLoadError(describeError(cause, spanish));
+      }
+    } catch (cause) {
+      setError(describeError(cause, spanish));
+    } finally {
+      setWorking(false);
+    }
   }
 
-  function deleteLocation(location: StorageLocation) {
-    setNotice("");
+  async function removeLocation(
+    location: StorageLocation
+  ) {
+    if (working) return;
 
-    const candidateLocations = locations.filter(
-      (item) => item.id !== location.id,
+    const candidate = locations.filter(
+      (item) => item.id !== location.id
     );
 
     if (
       location.branchId !== null &&
-      !hasRequiredLocations(location.branchId, candidateLocations)
+      !retainsRequiredLocations(
+        location.branchId,
+        candidate
+      )
     ) {
       window.alert(
-        t(
-          "Cannot delete this location. Each branch must retain an active exhibition and warehouse.",
-        ),
+        t("Cannot delete this location. Each branch must retain an active exhibition and warehouse.")
       );
       return;
     }
 
     const confirmed = window.confirm(
-      language === "es"
+      spanish
         ? `¿Seguro que deseas eliminar "${location.name}"?`
-        : `Are you sure you want to delete "${location.name}"?`,
+        : `Are you sure you want to delete "${location.name}"?`
     );
 
     if (!confirmed) return;
 
-    setLocations(candidateLocations);
-    setNotice(
-      language === "es"
-        ? `Ubicación "${location.name}" eliminada correctamente.`
-        : `Location "${location.name}" deleted successfully.`,
-    );
+    setWorking(true);
+    setNotice("");
+    setLoadError("");
+
+    try {
+      await deleteLocation(location.id);
+
+      setNotice(
+        spanish
+          ? "Ubicación eliminada correctamente."
+          : "Location deleted successfully."
+      );
+
+      try {
+        await refreshData();
+      } catch (cause) {
+        setLoadError(describeError(cause, spanish));
+      }
+    } catch (cause) {
+      setLoadError(describeError(cause, spanish));
+    } finally {
+      setWorking(false);
+    }
   }
 
   return (
@@ -349,22 +505,39 @@ export default function LocationsPage() {
       <div className="page-title">
         <div>
           <h2>{t("Locations")}</h2>
-          <p>{t("Manage branches and inventory storage locations.")}</p>
+          <p>
+            {t("Manage branches and inventory storage locations.")}
+          </p>
         </div>
-        <span className="badge badge-info">{t("Demo Data")}</span>
+
+        <span className="badge badge-info">
+          {locationsDemoMode
+            ? t("Demo Data")
+            : spanish
+              ? "Datos API"
+              : "API Data"}
+        </span>
       </div>
 
       <div className="location-summary">
         <article className="stat">
           <Store size={18} className="stat-icon" />
-          <div className="stat-label">{t("Branches")}</div>
-          <div className="stat-value">{branches.length}</div>
+          <div className="stat-label">
+            {t("Branches")}
+          </div>
+          <div className="stat-value">
+            {branches.length}
+          </div>
         </article>
 
         <article className="stat">
           <Warehouse size={18} className="stat-icon" />
-          <div className="stat-label">{t("Storage Locations")}</div>
-          <div className="stat-value">{locations.length}</div>
+          <div className="stat-label">
+            {t("Storage Locations")}
+          </div>
+          <div className="stat-value">
+            {locations.length}
+          </div>
         </article>
       </div>
 
@@ -378,7 +551,9 @@ export default function LocationsPage() {
           role="tab"
           aria-selected={tab === "branches"}
           className={
-            tab === "branches" ? "location-tab active" : "location-tab"
+            tab === "branches"
+              ? "location-tab active"
+              : "location-tab"
           }
           onClick={() => {
             setTab("branches");
@@ -395,7 +570,9 @@ export default function LocationsPage() {
           role="tab"
           aria-selected={tab === "locations"}
           className={
-            tab === "locations" ? "location-tab active" : "location-tab"
+            tab === "locations"
+              ? "location-tab active"
+              : "location-tab"
           }
           onClick={() => {
             setTab("locations");
@@ -419,23 +596,52 @@ export default function LocationsPage() {
                 : t("Search storage locations...")
             }
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) =>
+              setSearch(event.target.value)
+            }
           />
         </div>
 
         <button
           type="button"
+          className="btn btn-secondary"
+          disabled={loading || working}
+          onClick={reload}
+        >
+          <RefreshCcw size={16} />
+          {spanish ? "Actualizar" : "Refresh"}
+        </button>
+
+        <button
+          type="button"
           className="btn btn-primary"
-          onClick={() => (tab === "branches" ? openBranch() : openLocation())}
+          disabled={
+            loading || working || Boolean(loadError)
+          }
+          onClick={() =>
+            tab === "branches"
+              ? openBranch()
+              : openLocation()
+          }
         >
           <Plus size={17} />
-          {t(tab === "branches" ? "Add Branch" : "Add Location")}
+          {t(
+            tab === "branches"
+              ? "Add Branch"
+              : "Add Location"
+          )}
         </button>
       </div>
 
       {notice && (
         <p className="location-notice" role="status">
-          {t(notice)}
+          {notice}
+        </p>
+      )}
+
+      {loadError && (
+        <p className="product-form-error" role="alert">
+          {loadError}
         </p>
       )}
 
@@ -453,47 +659,104 @@ export default function LocationsPage() {
             </thead>
 
             <tbody>
-              {filteredBranches.map((branch) => (
-                <tr key={branch.id}>
-                  <td>
-                    <strong>{branch.name}</strong>
-                  </td>
-                  <td>{branch.address}</td>
-                  <td>
-                    {
-                      locations.filter(
-                        (location) => location.branchId === branch.id,
-                      ).length
-                    }
-                  </td>
-                  <td>
-                    <span
-                      className={`badge ${
-                        branch.active ? "badge-success" : "badge-warning"
-                      }`}
-                    >
-                      {t(branch.active ? "Active" : "Inactive")}
-                    </span>
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => openBranch(branch)}
-                    >
-                      <Pencil size={15} />
-                      {t("Edit")}
-                    </button>
-                  </td>
-                </tr>
-              ))}
-
-              {filteredBranches.length === 0 && (
+              {loading ? (
                 <tr>
-                  <td colSpan={5} className="products-empty">
-                    {t("No branches found.")}
+                  <td
+                    colSpan={5}
+                    className="products-empty"
+                  >
+                    {spanish
+                      ? "Cargando..."
+                      : "Loading..."}
                   </td>
                 </tr>
+              ) : loadError ? (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="products-empty"
+                  >
+                    {spanish
+                      ? "No se pudo cargar. Pulsa Actualizar."
+                      : "Could not load data. Click Refresh."}
+                  </td>
+                </tr>
+              ) : (
+                <>
+                  {filteredBranches.map((branch) => (
+                    <tr key={branch.id}>
+                      <td>
+                        <strong>{branch.name}</strong>
+                      </td>
+
+                      <td>{branch.address}</td>
+
+                      <td>
+                        {
+                          locations.filter(
+                            (location) =>
+                              location.branchId === branch.id
+                          ).length
+                        }
+                      </td>
+
+                      <td>
+                        <span
+                          className={`badge ${
+                            branch.active
+                              ? "badge-success"
+                              : "badge-warning"
+                          }`}
+                        >
+                          {t(
+                            branch.active
+                              ? "Active"
+                              : "Inactive"
+                          )}
+                        </span>
+                      </td>
+
+                      <td>
+                        <div className="location-actions">
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            disabled={working}
+                            onClick={() =>
+                              openBranch(branch)
+                            }
+                          >
+                            <Pencil size={15} />
+                            {t("Edit")}
+                          </button>
+
+                          <button
+                            type="button"
+                            className="btn btn-danger"
+                            disabled={working}
+                            onClick={() =>
+                              void removeBranch(branch)
+                            }
+                          >
+                            <Trash2 size={15} />
+                            {t("Delete")}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {filteredBranches.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="products-empty"
+                      >
+                        {t("No branches found.")}
+                      </td>
+                    </tr>
+                  )}
+                </>
               )}
             </tbody>
           </table>
@@ -513,72 +776,123 @@ export default function LocationsPage() {
             </thead>
 
             <tbody>
-              {filteredLocations.map((location) => (
-                <tr key={location.id}>
-                  <td>
-                    <strong>{location.name}</strong>
-                  </td>
-
-                  <td>
-                    <span className="location-type">
-                      {location.type === "exhibition" ? (
-                        <Store size={15} />
-                      ) : (
-                        <Warehouse size={15} />
-                      )}
-                      {location.type === "exhibition"
-                        ? t("Exhibition")
-                        : t("Warehouse")}
-                    </span>
-                  </td>
-
-                  <td>
-                    {branches.find((branch) => branch.id === location.branchId)
-                      ?.name ?? t("Central / Independent")}
-                  </td>
-
-                  <td>{location.description || "—"}</td>
-
-                  <td>
-                    <span
-                      className={`badge ${
-                        location.active ? "badge-success" : "badge-warning"
-                      }`}
-                    >
-                      {t(location.active ? "Active" : "Inactive")}
-                    </span>
-                  </td>
-
-                  <td>
-                    <div className="location-actions">
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={() => openLocation(location)}
-                      >
-                        <Pencil size={15} />
-                        {t("Edit")}
-                      </button>
-
-                      <button
-                        type="button"
-                        className="btn btn-danger"
-                        onClick={() => deleteLocation(location)}
-                      >
-                        <Trash2 size={15} />
-                        {t("Delete")}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-
-              {filteredLocations.length === 0 && (
+              {loading ? (
                 <tr>
-                  <td colSpan={6} className="products-empty">
-                    {t("No storage locations found.")}
+                  <td
+                    colSpan={6}
+                    className="products-empty"
+                  >
+                    {spanish
+                      ? "Cargando..."
+                      : "Loading..."}
                   </td>
                 </tr>
+              ) : loadError ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="products-empty"
+                  >
+                    {spanish
+                      ? "No se pudo cargar. Pulsa Actualizar."
+                      : "Could not load data. Click Refresh."}
+                  </td>
+                </tr>
+              ) : (
+                <>
+                  {filteredLocations.map((location) => (
+                    <tr key={location.id}>
+                      <td>
+                        <strong>{location.name}</strong>
+                      </td>
+
+                      <td>
+                        <span className="location-type">
+                          {location.type ===
+                          "exhibition" ? (
+                            <Store size={15} />
+                          ) : (
+                            <Warehouse size={15} />
+                          )}
+                          {t(
+                            location.type ===
+                              "exhibition"
+                              ? "Exhibition"
+                              : "Warehouse"
+                          )}
+                        </span>
+                      </td>
+
+                      <td>
+                        {branches.find(
+                          (branch) =>
+                            branch.id ===
+                            location.branchId
+                        )?.name ??
+                          t("Central / Independent")}
+                      </td>
+
+                      <td>
+                        {location.description || "—"}
+                      </td>
+
+                      <td>
+                        <span
+                          className={`badge ${
+                            location.active
+                              ? "badge-success"
+                              : "badge-warning"
+                          }`}
+                        >
+                          {t(
+                            location.active
+                              ? "Active"
+                              : "Inactive"
+                          )}
+                        </span>
+                      </td>
+
+                      <td>
+                        <div className="location-actions">
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            disabled={working}
+                            onClick={() =>
+                              openLocation(location)
+                            }
+                          >
+                            <Pencil size={15} />
+                            {t("Edit")}
+                          </button>
+
+                          <button
+                            type="button"
+                            className="btn btn-danger"
+                            disabled={working}
+                            onClick={() =>
+                              void removeLocation(location)
+                            }
+                          >
+                            <Trash2 size={15} />
+                            {t("Delete")}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {filteredLocations.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="products-empty"
+                      >
+                        {t("No storage locations found.")}
+                      </td>
+                    </tr>
+                  )}
+                </>
               )}
             </tbody>
           </table>
@@ -586,7 +900,13 @@ export default function LocationsPage() {
       )}
 
       <p className="products-note">
-        {t("Demo data. Changes reset when the page is reloaded.")}
+        {locationsDemoMode
+          ? t(
+              "Demo data. Changes reset when the page is reloaded."
+            )
+          : spanish
+            ? "Los datos se guardan temporalmente en Spring Boot. Inventory aún no está conectado a estas ubicaciones."
+            : "Data is stored temporarily in Spring Boot. Inventory is not connected to these locations yet."}
       </p>
 
       {editingBranch && (
@@ -599,14 +919,21 @@ export default function LocationsPage() {
           >
             <div className="product-modal-header">
               <h3 id="branch-form-title">
-                {t(editingBranch.id === 0 ? "Add Branch" : "Edit Branch")}
+                {t(
+                  editingBranch.id === 0
+                    ? "Add Branch"
+                    : "Edit Branch"
+                )}
               </h3>
 
               <button
                 type="button"
                 className="product-icon-button"
+                disabled={working}
                 aria-label={t("Close form")}
-                onClick={() => setEditingBranch(null)}
+                onClick={() =>
+                  setEditingBranch(null)
+                }
               >
                 <X size={20} />
               </button>
@@ -614,10 +941,14 @@ export default function LocationsPage() {
 
             <form onSubmit={saveBranch}>
               <div className="field">
-                <label htmlFor="branch-name">{t("Branch Name")}</label>
+                <label htmlFor="branch-name">
+                  {t("Branch Name")}
+                </label>
                 <input
                   id="branch-name"
                   required
+                  maxLength={120}
+                  disabled={working}
                   value={editingBranch.name}
                   onChange={(event) =>
                     setEditingBranch({
@@ -629,10 +960,14 @@ export default function LocationsPage() {
               </div>
 
               <div className="field">
-                <label htmlFor="branch-address">{t("Address")}</label>
+                <label htmlFor="branch-address">
+                  {t("Address")}
+                </label>
                 <input
                   id="branch-address"
                   required
+                  maxLength={240}
+                  disabled={working}
                   value={editingBranch.address}
                   onChange={(event) =>
                     setEditingBranch({
@@ -644,14 +979,26 @@ export default function LocationsPage() {
               </div>
 
               <div className="field">
-                <label htmlFor="branch-status">{t("Status")}</label>
+                <label htmlFor="branch-status">
+                  {t("Status")}
+                </label>
                 <ChopsSelect
                   id="branch-status"
                   ariaLabel={t("Status")}
-                  value={editingBranch.active ? "active" : "inactive"}
+                  value={
+                    editingBranch.active
+                      ? "active"
+                      : "inactive"
+                  }
                   options={[
-                    { value: "active", label: t("Active") },
-                    { value: "inactive", label: t("Inactive") },
+                    {
+                      value: "active",
+                      label: t("Active"),
+                    },
+                    {
+                      value: "inactive",
+                      label: t("Inactive"),
+                    },
                   ]}
                   onChange={(next) =>
                     setEditingBranch({
@@ -665,13 +1012,18 @@ export default function LocationsPage() {
               {editingBranch.id === 0 && (
                 <p className="location-hint">
                   <MapPin size={15} />
-                  {t("Exhibition and Warehouse will be created automatically.")}
+                  {t(
+                    "Exhibition and Warehouse will be created automatically."
+                  )}
                 </p>
               )}
 
               {error && (
-                <p className="product-form-error" role="alert">
-                  {t(error)}
+                <p
+                  className="product-form-error"
+                  role="alert"
+                >
+                  {error}
                 </p>
               )}
 
@@ -679,13 +1031,24 @@ export default function LocationsPage() {
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={() => setEditingBranch(null)}
+                  disabled={working}
+                  onClick={() =>
+                    setEditingBranch(null)
+                  }
                 >
                   {t("Cancel")}
                 </button>
 
-                <button type="submit" className="btn btn-primary">
-                  {t("Save Branch")}
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={working}
+                >
+                  {working
+                    ? spanish
+                      ? "Guardando..."
+                      : "Saving..."
+                    : t("Save Branch")}
                 </button>
               </div>
             </form>
@@ -703,14 +1066,21 @@ export default function LocationsPage() {
           >
             <div className="product-modal-header">
               <h3 id="location-form-title">
-                {t(editingLocation.id === 0 ? "Add Location" : "Edit Location")}
+                {t(
+                  editingLocation.id === 0
+                    ? "Add Location"
+                    : "Edit Location"
+                )}
               </h3>
 
               <button
                 type="button"
                 className="product-icon-button"
+                disabled={working}
                 aria-label={t("Close form")}
-                onClick={() => setEditingLocation(null)}
+                onClick={() =>
+                  setEditingLocation(null)
+                }
               >
                 <X size={20} />
               </button>
@@ -718,10 +1088,14 @@ export default function LocationsPage() {
 
             <form onSubmit={saveLocation}>
               <div className="field">
-                <label htmlFor="location-name">{t("Location Name")}</label>
+                <label htmlFor="location-name">
+                  {t("Location Name")}
+                </label>
                 <input
                   id="location-name"
                   required
+                  maxLength={120}
+                  disabled={working}
                   value={editingLocation.name}
                   onChange={(event) =>
                     setEditingLocation({
@@ -733,9 +1107,13 @@ export default function LocationsPage() {
               </div>
 
               <div className="field">
-                <label htmlFor="location-description">{t("Description")}</label>
+                <label htmlFor="location-description">
+                  {t("Description")}
+                </label>
                 <input
                   id="location-description"
+                  maxLength={240}
+                  disabled={working}
                   value={editingLocation.description}
                   onChange={(event) =>
                     setEditingLocation({
@@ -747,24 +1125,32 @@ export default function LocationsPage() {
               </div>
 
               <div className="field">
-                <label htmlFor="location-type">{t("Location Type")}</label>
+                <label htmlFor="location-type">
+                  {t("Location Type")}
+                </label>
                 <ChopsSelect
                   id="location-type"
                   ariaLabel={t("Location Type")}
                   value={editingLocation.type}
                   options={[
-                    { value: "exhibition", label: t("Exhibition") },
-                    { value: "warehouse", label: t("Warehouse") },
+                    {
+                      value: "exhibition",
+                      label: t("Exhibition"),
+                    },
+                    {
+                      value: "warehouse",
+                      label: t("Warehouse"),
+                    },
                   ]}
                   onChange={(next) =>
                     setEditingLocation({
                       ...editingLocation,
-                      type: next as StorageLocation["type"],
+                      type: next as LocationType,
                       branchId:
                         next === "exhibition"
-                          ? (editingLocation.branchId ??
+                          ? editingLocation.branchId ??
                             branches[0]?.id ??
-                            null)
+                            null
                           : editingLocation.branchId,
                     })
                   }
@@ -772,14 +1158,26 @@ export default function LocationsPage() {
               </div>
 
               <div className="field">
-                <label htmlFor="location-branch">{t("Branch")}</label>
+                <label htmlFor="location-branch">
+                  {t("Branch")}
+                </label>
                 <ChopsSelect
                   id="location-branch"
                   ariaLabel={t("Branch")}
-                  value={String(editingLocation.branchId ?? "")}
+                  value={String(
+                    editingLocation.branchId ?? ""
+                  )}
                   options={[
-                    ...(editingLocation.type === "warehouse"
-                      ? [{ value: "", label: t("Central / Independent") }]
+                    ...(editingLocation.type ===
+                    "warehouse"
+                      ? [
+                          {
+                            value: "",
+                            label: t(
+                              "Central / Independent"
+                            ),
+                          },
+                        ]
                       : []),
                     ...branches.map((branch) => ({
                       value: String(branch.id),
@@ -789,21 +1187,36 @@ export default function LocationsPage() {
                   onChange={(next) =>
                     setEditingLocation({
                       ...editingLocation,
-                      branchId: next === "" ? null : Number(next),
+                      branchId:
+                        next === ""
+                          ? null
+                          : Number(next),
                     })
                   }
                 />
               </div>
 
               <div className="field">
-                <label htmlFor="location-status">{t("Status")}</label>
+                <label htmlFor="location-status">
+                  {t("Status")}
+                </label>
                 <ChopsSelect
                   id="location-status"
                   ariaLabel={t("Status")}
-                  value={editingLocation.active ? "active" : "inactive"}
+                  value={
+                    editingLocation.active
+                      ? "active"
+                      : "inactive"
+                  }
                   options={[
-                    { value: "active", label: t("Active") },
-                    { value: "inactive", label: t("Inactive") },
+                    {
+                      value: "active",
+                      label: t("Active"),
+                    },
+                    {
+                      value: "inactive",
+                      label: t("Inactive"),
+                    },
                   ]}
                   onChange={(next) =>
                     setEditingLocation({
@@ -815,8 +1228,11 @@ export default function LocationsPage() {
               </div>
 
               {error && (
-                <p className="product-form-error" role="alert">
-                  {t(error)}
+                <p
+                  className="product-form-error"
+                  role="alert"
+                >
+                  {error}
                 </p>
               )}
 
@@ -824,13 +1240,24 @@ export default function LocationsPage() {
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  onClick={() => setEditingLocation(null)}
+                  disabled={working}
+                  onClick={() =>
+                    setEditingLocation(null)
+                  }
                 >
                   {t("Cancel")}
                 </button>
 
-                <button type="submit" className="btn btn-primary">
-                  {t("Save Location")}
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={working}
+                >
+                  {working
+                    ? spanish
+                      ? "Guardando..."
+                      : "Saving..."
+                    : t("Save Location")}
                 </button>
               </div>
             </form>

@@ -61,6 +61,16 @@ public class LocationsController {
         return service.updateBranch(id, request);
     }
 
+    // NEW: DELETE BRANCH
+
+    @DeleteMapping("/api/v1/branches/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteBranch(
+            @PathVariable long id
+    ) {
+        service.deleteBranch(id);
+    }
+
     // STORAGE LOCATIONS
 
     @GetMapping("/api/v1/locations")

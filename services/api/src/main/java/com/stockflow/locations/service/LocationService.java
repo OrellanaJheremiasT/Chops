@@ -66,7 +66,6 @@ public class LocationService {
 
         branches.put(branchId, branch);
 
-        // Mandatory locations for each new branch.
         addDefaultLocation(
                 branchId,
                 "Exhibition",
@@ -102,6 +101,20 @@ public class LocationService {
 
         branches.put(id, updated);
         return updated;
+    }
+
+    // NEW: Delete a branch and all its storage locations.
+    public synchronized void deleteBranch(long id) {
+        findBranch(id);
+
+        locations.entrySet().removeIf(
+                entry -> Objects.equals(
+                        entry.getValue().branchId(),
+                        id
+                )
+        );
+
+        branches.remove(id);
     }
 
     private void validateBranchName(
@@ -205,7 +218,6 @@ public class LocationService {
 
         candidate.put(id, updated);
 
-        // Check both the original and destination branch.
         validateRequiredLocations(
                 previous.branchId(),
                 candidate
