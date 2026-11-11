@@ -19,10 +19,10 @@ import java.util.Set;
 @Service
 public class ProductService {
 
-    private final Map<Long, ProductResponse> products =
-            new LinkedHashMap<>();
+        private final Map<Long, ProductResponse> products =
+                new LinkedHashMap<>();
 
-    private long nextId = 1;
+        private long nextId = 1;
 
     public synchronized List<ProductResponse> findAll() {
         return List.copyOf(products.values());
