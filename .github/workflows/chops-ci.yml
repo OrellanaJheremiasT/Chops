@@ -44,8 +44,7 @@ jobs:
         run: npm run build
 
       # Existing ESLint errors are informational for now.
-      - name: Lint frontend (informational)
-        continue-on-error: true
+      - name: Lint frontend
         run: npm run lint
 
   backend:
