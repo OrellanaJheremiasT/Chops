@@ -17,8 +17,7 @@ public class CorsConfig implements WebMvcConfigurer {
     private final String[] allowedOrigins;
 
     public CorsConfig(
-            @Value("${chops.cors.allowed-origins:}") String[] allowedOrigins
-    ) {
+            @Value("${chops.cors.allowed-origins:}") String[] allowedOrigins) {
         this.allowedOrigins = Arrays.stream(allowedOrigins)
                 .map(String::trim)
                 .filter(origin -> !origin.isEmpty())
