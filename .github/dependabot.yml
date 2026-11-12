@@ -1,5 +1,8 @@
+
 version: 2
+
 updates:
+  # Frontend - React, TypeScript, Vite
   - package-ecosystem: "npm"
     directory: "/apps/web"
     schedule:
@@ -14,6 +17,7 @@ updates:
           - "minor"
           - "patch"
 
+  # Backend - Spring Boot, Maven
   - package-ecosystem: "maven"
     directory: "/services/api"
     schedule:
@@ -28,6 +32,7 @@ updates:
           - "minor"
           - "patch"
 
+  # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
