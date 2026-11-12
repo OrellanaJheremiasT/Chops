@@ -1,18 +1,13 @@
+
 name: Chops CI
 
 on:
   push:
     branches: [main]
-    paths:
-      - "apps/web/**"
-      - "services/api/**"
-      - ".github/workflows/ci.yml"
+
   pull_request:
     branches: [main]
-    paths:
-      - "apps/web/**"
-      - "services/api/**"
-      - ".github/workflows/ci.yml"
+
   workflow_dispatch:
 
 permissions:
@@ -26,9 +21,11 @@ jobs:
   frontend:
     name: Frontend - Build
     runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: apps/web
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -46,8 +43,7 @@ jobs:
       - name: Build frontend (TypeScript + Vite)
         run: npm run build
 
-      # There are existing ESLint errors in this repository.
-      # Report them without failing CI until the code is cleaned up.
+      # Existing ESLint errors are informational for now.
       - name: Lint frontend (informational)
         continue-on-error: true
         run: npm run lint
@@ -55,9 +51,11 @@ jobs:
   backend:
     name: Backend - Test and Package
     runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: services/api
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
