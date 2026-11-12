@@ -12,7 +12,7 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../i18n/languageHook";
 import { demoInitialBalances, demoItems } from "../demo/catalog";
 
 type PaymentMethod = "cash" | "card";

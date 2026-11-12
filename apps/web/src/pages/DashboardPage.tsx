@@ -7,10 +7,10 @@ import {
   BarChart3,
   TrendingDown,
 } from "lucide-react";
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../i18n/languageHook";
 import ChopsSelect from "../components/ChopsSelect";
 import StackedBars from "../components/StackedBars";
-import { useOperations } from "../demo/OperationsContext";
+import { useOperations } from "../demo/operationsHook";
 import "../styles/dashboard-enhancements.css";
 const sampleSales = [750, 920, 850, 1100, 1430, 1750, 1200];
 const sampleSellers = [

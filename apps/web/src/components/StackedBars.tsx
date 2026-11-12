@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 import type { Operation, OperationKind } from "../demo/OperationsContext";
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../i18n/languageHook";
 
 import "./StackedBars.css";
 

@@ -1,14 +1,10 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { AlertTriangle, Search } from "lucide-react";
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../i18n/languageHook";
 import ChopsSelect from "../components/ChopsSelect";
-import {
-  useOperations,
-  demoItems,
-  itemLabel,
-  matchesItem,
-} from "../demo/OperationsContext";
+import { useOperations } from "../demo/operationsHook";
+import { demoItems, itemLabel, matchesItem } from "../demo/operationsHelpers";
 import type { Area, LossReason } from "../demo/OperationsContext";
 import "../styles/losses.css";
 const reasons: LossReason[] = [

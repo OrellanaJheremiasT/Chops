@@ -11,6 +11,8 @@ updates:
       time: "09:00"
       timezone: "America/Lima"
     open-pull-requests-limit: 5
+    assignees:
+      - "OrellanaJheremiasT"
     groups:
       frontend-minor-patch:
         update-types:
@@ -26,6 +28,8 @@ updates:
       time: "09:00"
       timezone: "America/Lima"
     open-pull-requests-limit: 5
+    assignees:
+      - "OrellanaJheremiasT"
     groups:
       backend-minor-patch:
         update-types:
@@ -41,6 +45,8 @@ updates:
       time: "09:00"
       timezone: "America/Lima"
     open-pull-requests-limit: 5
+    assignees:
+      - "OrellanaJheremiasT"
     groups:
       actions-minor-patch:
         update-types:

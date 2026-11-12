@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { Pencil, Plus, RefreshCcw, Search, Trash2, X } from "lucide-react";
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../i18n/languageHook";
 import { ApiError } from "../api/client";
 import { useAppDialog } from "../components/dialog/dialogContext";
-import { useToast } from "../components/ToastStack";
+import { useToast } from "../components/toastContext";
 import {
   createProduct,
   deleteProduct,

@@ -1,7 +1,4 @@
 import {
-  createContext,
-  useContext,
-  useMemo,
   useState,
   useEffect,
 } from "react";
@@ -10,8 +7,8 @@ import type { ReactNode } from "react";
 
 import { demoInitialBalances as initial, demoItems } from "./catalog";
 import type { InventoryState, Item } from "./catalog";
+import { Context } from "./operationsHook";
 
-export { demoItems };
 export type { Item };
 
 export type Area = "exhibition" | "warehouse";
@@ -54,7 +51,7 @@ type Action = {
   reason?: string;
 };
 
-type OperationApi = {
+export type OperationApi = {
   balances: InventoryState;
   operations: Operation[];
   items: Item[];
@@ -79,7 +76,6 @@ type SavedState = {
   operations: Operation[];
 };
 
-const Context = createContext<OperationApi | null>(null);
 
 const locationValid = (area: unknown): area is Area =>
   area === "exhibition" || area === "warehouse";
@@ -386,17 +382,9 @@ export function OperationsProvider({
     return null;
   }
 
-  const api = useMemo(
-    () => ({
-      balances,
-      operations,
-      items: demoItems,
-      register,
-      reportLoss,
-      countStock,
-    }),
-    [balances, operations, nextId]
-  );
+  const api: OperationApi = {
+    balances, operations, items: demoItems, register, reportLoss, countStock,
+  };
 
   return (
     <Context.Provider value={api}>
@@ -405,32 +393,3 @@ export function OperationsProvider({
   );
 }
 
-export function useOperations() {
-  const context = useContext(Context);
-
-  if (!context) {
-    throw new Error("Missing OperationsProvider");
-  }
-
-  return context;
-}
-
-export function itemLabel(item: Item) {
-  return `${item.name} · ${item.variant} · ${item.sku}`;
-}
-
-export function matchesItem(
-  item: Item,
-  search: string
-) {
-  return [
-    item.name,
-    item.variant,
-    item.sku,
-    item.barcode,
-    item.category,
-  ]
-    .join(" ")
-    .toLowerCase()
-    .includes(search.toLowerCase().trim());
-}

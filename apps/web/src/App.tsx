@@ -39,10 +39,8 @@ import { ToastProvider } from "./components/ToastStack";
 import NotFound from "./components/NotFound";
 import RouteFallback from "./components/RouteFallback";
 
-import {
-  LanguageProvider,
-  useLanguage,
-} from "./i18n/LanguageContext";
+import { LanguageProvider } from "./i18n/LanguageContext";
+import { useLanguage } from "./i18n/languageHook";
 
 import { OperationsProvider } from "./demo/OperationsContext";
 
@@ -149,14 +147,15 @@ function AppContent() {
 
   const location = useLocation();
 
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [openMenuPath, setOpenMenuPath] = useState<string | null>(null);
+  const menuOpen = openMenuPath === location.pathname;
+  const setMenuOpen = (value: boolean | ((open: boolean) => boolean)) => {
+    const next = typeof value === "function" ? value(menuOpen) : value;
+    setOpenMenuPath(next ? location.pathname : null);
+  };
 
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [location.pathname]);
 
   useEffect(() => {
     if (!menuOpen) return;

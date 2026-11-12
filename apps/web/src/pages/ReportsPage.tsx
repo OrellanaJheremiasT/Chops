@@ -9,10 +9,10 @@ import {
   AlertTriangle,
 } from "lucide-react";
 
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../i18n/languageHook";
 import ChopsSelect from "../components/ChopsSelect";
 import ChopsDatePicker from "../components/ChopsDatePicker";
-import { useOperations } from "../demo/OperationsContext";
+import { useOperations } from "../demo/operationsHook";
 
 import type { Operation } from "../demo/OperationsContext";
 
@@ -132,10 +132,6 @@ export default function ReportsPage() {
     });
   }, [operations, period, start, end, validPeriod]);
 
-  function findProduct(sku: string) {
-    return items.find((item) => item.sku === sku);
-  }
-
   const stats = useMemo(() => {
     const byType = (kind: Operation["kind"]) =>
       selectedOperations.filter((op) => op.kind === kind);
@@ -150,7 +146,7 @@ export default function ReportsPage() {
     const lossUnits = losses.reduce((sum, op) => sum + op.quantity, 0);
 
     const lossCost = losses.reduce(
-      (sum, op) => sum + op.quantity * (findProduct(op.sku)?.cost ?? 0),
+      (sum, op) => sum + op.quantity * (items.find((item) => item.sku === op.sku)?.cost ?? 0),
       0,
     );
 

@@ -16,8 +16,8 @@ import {
 
 import ChopsSelect from "../components/ChopsSelect";
 import { useAppDialog } from "../components/dialog/dialogContext";
-import { useToast } from "../components/ToastStack";
-import { useLanguage } from "../i18n/LanguageContext";
+import { useToast } from "../components/toastContext";
+import { useLanguage } from "../i18n/languageHook";
 import { ApiError } from "../api/client";
 
 import {

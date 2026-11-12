@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Boxes, Search, ClipboardCheck } from "lucide-react";
-import { useLanguage } from "../i18n/LanguageContext";
-import { useOperations, matchesItem } from "../demo/OperationsContext";
+import { useLanguage } from "../i18n/languageHook";
+import { useOperations } from "../demo/operationsHook";
+import { matchesItem } from "../demo/operationsHelpers";
 import ChopsSelect from "../components/ChopsSelect";
 import "../styles/inventory-enhancements.css";
 type Tab = "total" | "exhibition" | "warehouse";
@@ -16,9 +17,7 @@ export default function InventoryPage() {
     tab === "total"
       ? balances[sku].exhibition + balances[sku].warehouse
       : balances[sku][tab];
-  const filtered = useMemo(
-    () =>
-      items.filter((i) => {
+  const filtered = items.filter((i) => {
         const units = quantity(i.sku);
         return (
           matchesItem(i, search) &&
@@ -26,9 +25,7 @@ export default function InventoryPage() {
             (status === "out" && units === 0) ||
             (status === "low" && units > 0 && units <= 5))
         );
-      }),
-    [items, balances, search, tab, status],
-  );
+      });
   const units = items.reduce((sum, i) => sum + quantity(i.sku), 0);
   const low = items.filter(
     (i) => quantity(i.sku) > 0 && quantity(i.sku) <= 5,

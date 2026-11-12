@@ -1,7 +1,5 @@
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useRef,
   useState,
@@ -9,10 +7,11 @@ import {
 import type { ReactNode } from "react";
 import { AlertTriangle, CheckCircle2, Info, X, XCircle } from "lucide-react";
 
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../i18n/languageHook";
 import "./ToastStack.css";
+import { ToastContext } from "./toastContext";
 
-type ToastKind = "success" | "info" | "warning" | "error";
+import type { ToastKind, ToastAPI } from "./toastContext";
 
 type Toast = {
   id: number;
@@ -20,11 +19,6 @@ type Toast = {
   message: string;
 };
 
-type ToastAPI = {
-  notify: (message: string, kind?: ToastKind) => void;
-};
-
-const ToastContext = createContext<ToastAPI | null>(null);
 const MAX_VISIBLE = 3;
 const DURATION_MS = 4500;
 
@@ -96,8 +90,3 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useToast() {
-  const context = useContext(ToastContext);
-  if (!context) throw new Error("Missing ToastProvider");
-  return context;
-}
