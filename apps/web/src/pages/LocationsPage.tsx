@@ -15,7 +15,8 @@ import {
 } from "lucide-react";
 
 import ChopsSelect from "../components/ChopsSelect";
-import ConfirmDialog from "../components/ConfirmDialog";
+import { useAppDialog } from "../components/dialog/dialogContext";
+import { useToast } from "../components/ToastStack";
 import { useLanguage } from "../i18n/LanguageContext";
 import { ApiError } from "../api/client";
 
@@ -40,11 +41,6 @@ import type {
 } from "../api/locations";
 
 type Tab = "branches" | "locations";
-
-type DialogState =
-  | { kind: "branch"; item: Branch }
-  | { kind: "location"; item: StorageLocation }
-  | { kind: "blocked"; message: string };
 
 function describeError(error: unknown, spanish: boolean): string {
   if (error instanceof ApiError) {
@@ -89,6 +85,8 @@ function retainsRequiredLocations(
 export default function LocationsPage() {
   const { t, language } = useLanguage();
   const spanish = language === "es";
+  const dialog = useAppDialog();
+  const { notify } = useToast();
 
   const [branches, setBranches] = useState<Branch[]>([]);
   const [locations, setLocations] = useState<StorageLocation[]>([]);
@@ -100,9 +98,6 @@ export default function LocationsPage() {
 
   const [editingLocation, setEditingLocation] =
     useState<StorageLocation | null>(null);
-
-  const [dialog, setDialog] = useState<DialogState | null>(null);
-  const [dialogError, setDialogError] = useState("");
 
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -259,6 +254,7 @@ export default function LocationsPage() {
 
       setEditingBranch(null);
       setNotice(t("Branch saved successfully."));
+      notify(t("Branch saved successfully."), "success");
 
       try {
         await refreshData();
@@ -349,6 +345,7 @@ export default function LocationsPage() {
 
       setEditingLocation(null);
       setNotice(t("Location saved successfully."));
+      notify(t("Location saved successfully."), "success");
 
       try {
         await refreshData();
@@ -362,105 +359,94 @@ export default function LocationsPage() {
     }
   }
 
-  function requestDeleteBranch(branch: Branch) {
+  async function requestDeleteBranch(branch: Branch) {
     if (working) return;
 
-    setDialogError("");
-    setDialog({ kind: "branch", item: branch });
-  }
+    const locationCount = locations.filter(
+      (location) => location.branchId === branch.id,
+    ).length;
 
-  function requestDeleteLocation(location: StorageLocation) {
-    if (working) return;
-
-    const candidate = locations.filter((item) => item.id !== location.id);
-
-    if (
-      location.branchId !== null &&
-      !retainsRequiredLocations(location.branchId, candidate)
-    ) {
-      setDialog({
-        kind: "blocked",
-        message: t(
-          "Cannot delete this location. Each branch must retain an active exhibition and warehouse.",
-        ),
-      });
-      return;
-    }
-
-    setDialogError("");
-    setDialog({ kind: "location", item: location });
-  }
-
-  async function confirmDeletion() {
-    if (!dialog || working) return;
-
-    if (dialog.kind === "blocked") {
-      setDialog(null);
-      return;
-    }
+    const accepted = await dialog.confirm({
+      title: spanish ? "¿Eliminar sucursal?" : "Delete branch?",
+      message: spanish
+        ? `¿Eliminar la sucursal "${branch.name}" y sus ${locationCount} ubicaciones? Esta acción no se puede deshacer.`
+        : `Delete branch "${branch.name}" and its ${locationCount} locations? This action cannot be undone.`,
+      confirmLabel: spanish ? "Eliminar" : "Delete",
+      cancelLabel: t("Cancel"),
+      closeLabel: spanish ? "Cerrar" : "Close",
+      tone: "danger",
+    });
+    if (!accepted || working) return;
 
     setWorking(true);
-    setDialogError("");
     setNotice("");
-
+    setLoadError("");
     try {
-      if (dialog.kind === "branch") {
-        await deleteBranch(dialog.item.id);
-
-        setNotice(
-          spanish
-            ? `Sucursal "${dialog.item.name}" eliminada correctamente.`
-            : `Branch "${dialog.item.name}" deleted successfully.`,
-        );
-      } else {
-        await deleteLocation(dialog.item.id);
-
-        setNotice(
-          spanish
-            ? `Ubicación "${dialog.item.name}" eliminada correctamente.`
-            : `Location "${dialog.item.name}" deleted successfully.`,
-        );
-      }
-
-      setDialog(null);
-
-      try {
-        await refreshData();
-      } catch (cause) {
-        setLoadError(describeError(cause, spanish));
-      }
+      await deleteBranch(branch.id);
+      notify(
+        spanish ? `Sucursal "${branch.name}" eliminada.` : `Branch "${branch.name}" deleted.`,
+        "success",
+      );
+      await refreshData();
     } catch (cause) {
-      setDialogError(describeError(cause, spanish));
+      const message = describeError(cause, spanish);
+      setLoadError(message);
+      notify(message, "error");
     } finally {
       setWorking(false);
     }
   }
 
-  const dialogTitle =
-    dialog?.kind === "blocked"
-      ? spanish
-        ? "Acción no permitida"
-        : "Action not allowed"
-      : spanish
-        ? "¿Confirmar eliminación?"
-        : "Confirm deletion";
+  async function requestDeleteLocation(location: StorageLocation) {
+    if (working) return;
 
-  const dialogMessage =
-    dialog?.kind === "branch"
-      ? spanish
-        ? `¿Eliminar la sucursal "${dialog.item.name}" y sus ${
-            locations.filter((location) => location.branchId === dialog.item.id)
-              .length
-          } ubicaciones? Esta acción no se puede deshacer.`
-        : `Delete branch "${dialog.item.name}" and its ${
-            locations.filter((location) => location.branchId === dialog.item.id)
-              .length
-          } locations? This action cannot be undone.`
-      : dialog?.kind === "location"
-        ? spanish
-          ? `¿Eliminar la ubicación "${dialog.item.name}"? Esta acción no se puede deshacer.`
-          : `Delete location "${dialog.item.name}"? This action cannot be undone.`
-        : (dialog?.message ?? "");
+    const candidate = locations.filter((item) => item.id !== location.id);
+    if (
+      location.branchId !== null &&
+      !retainsRequiredLocations(location.branchId, candidate)
+    ) {
+      await dialog.alert({
+        title: spanish ? "Acción no permitida" : "Action not allowed",
+        message: t(
+          "Cannot delete this location. Each branch must retain an active exhibition and warehouse.",
+        ),
+        confirmLabel: spanish ? "Entendido" : "Got it",
+        closeLabel: spanish ? "Cerrar" : "Close",
+        tone: "warning",
+      });
+      return;
+    }
+
+    const accepted = await dialog.confirm({
+      title: spanish ? "¿Eliminar ubicación?" : "Delete location?",
+      message: spanish
+        ? `¿Eliminar la ubicación "${location.name}"? Esta acción no se puede deshacer.`
+        : `Delete location "${location.name}"? This action cannot be undone.`,
+      confirmLabel: spanish ? "Eliminar" : "Delete",
+      cancelLabel: t("Cancel"),
+      closeLabel: spanish ? "Cerrar" : "Close",
+      tone: "danger",
+    });
+    if (!accepted || working) return;
+
+    setWorking(true);
+    setNotice("");
+    setLoadError("");
+    try {
+      await deleteLocation(location.id);
+      notify(
+        spanish ? `Ubicación "${location.name}" eliminada.` : `Location "${location.name}" deleted.`,
+        "success",
+      );
+      await refreshData();
+    } catch (cause) {
+      const message = describeError(cause, spanish);
+      setLoadError(message);
+      notify(message, "error");
+    } finally {
+      setWorking(false);
+    }
+  }
 
   return (
     <>
@@ -1113,32 +1099,6 @@ export default function LocationsPage() {
         )}
       </section>
 
-      {dialog && (
-        <ConfirmDialog
-          title={dialogTitle}
-          message={dialogMessage}
-          tone={dialog.kind === "blocked" ? "warning" : "danger"}
-          confirmText={
-            dialog.kind === "blocked"
-              ? spanish
-                ? "Entendido"
-                : "Got it"
-              : spanish
-                ? "Eliminar"
-                : "Delete"
-          }
-          cancelText={dialog.kind === "blocked" ? undefined : t("Cancel")}
-          loading={working}
-          error={dialogError}
-          onCancel={() => {
-            if (!working) {
-              setDialog(null);
-              setDialogError("");
-            }
-          }}
-          onConfirm={() => void confirmDeletion()}
-        />
-      )}
     </>
   );
 }

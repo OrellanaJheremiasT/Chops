@@ -3,6 +3,8 @@ import type { FormEvent } from "react";
 import { Pencil, Plus, RefreshCcw, Search, Trash2, X } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext";
 import { ApiError } from "../api/client";
+import { useAppDialog } from "../components/dialog/dialogContext";
+import { useToast } from "../components/ToastStack";
 import {
   createProduct,
   deleteProduct,
@@ -51,6 +53,8 @@ function errorMessage(error: unknown, spanish: boolean): string {
 export default function ProductsPage() {
   const { t, language } = useLanguage();
   const spanish = language === "es";
+  const dialog = useAppDialog();
+  const { notify } = useToast();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [search, setSearch] = useState("");
@@ -198,6 +202,7 @@ export default function ProductsPage() {
       }
 
       setEditing(null);
+      notify(spanish ? "Producto guardado correctamente." : "Product saved successfully.", "success");
     } catch (error) {
       setFormError(errorMessage(error, spanish));
     } finally {
@@ -206,11 +211,17 @@ export default function ProductsPage() {
   }
 
   async function removeProduct(product: Product) {
-    const confirmed = window.confirm(
-      spanish
-        ? `¿Seguro que deseas eliminar "${product.name}"?`
-        : `Are you sure you want to delete "${product.name}"?`,
-    );
+    if (working) return;
+    const confirmed = await dialog.confirm({
+      title: spanish ? "¿Eliminar producto?" : "Delete product?",
+      message: spanish
+        ? `¿Eliminar "${product.name}"? Esta acción no se puede deshacer.`
+        : `Delete "${product.name}"? This action cannot be undone.`,
+      confirmLabel: spanish ? "Eliminar" : "Delete",
+      cancelLabel: t("Cancel"),
+      closeLabel: spanish ? "Cerrar" : "Close",
+      tone: "danger",
+    });
 
     if (!confirmed || working) return;
 
@@ -222,6 +233,7 @@ export default function ProductsPage() {
       setProducts((current) =>
         current.filter((item) => item.id !== product.id),
       );
+      notify(spanish ? "Producto eliminado." : "Product deleted.", "success");
     } catch (error) {
       setLoadError(error);
     } finally {

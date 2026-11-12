@@ -34,6 +34,7 @@ import {
 import ApiConnectionStatus from "./components/ApiConnectionStatus";
 import ChopsSelect from "./components/ChopsSelect";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { ToastProvider } from "./components/ToastStack";
 import NotFound from "./components/NotFound";
 import RouteFallback from "./components/RouteFallback";
 
@@ -446,9 +447,11 @@ function AppContent() {
 export default function App() {
   return (
     <LanguageProvider>
-      <OperationsProvider>
-        <AppContent />
-      </OperationsProvider>
+      <ToastProvider>
+        <OperationsProvider>
+          <AppContent />
+        </OperationsProvider>
+      </ToastProvider>
     </LanguageProvider>
   );
 }
