@@ -7,13 +7,10 @@ import {
   Search,
   PackageCheck,
 } from "lucide-react";
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../i18n/languageHook";
 import ChopsSelect from "../components/ChopsSelect";
-import {
-  useOperations,
-  itemLabel,
-  matchesItem,
-} from "../demo/OperationsContext";
+import { useOperations } from "../demo/operationsHook";
+import { itemLabel, matchesItem } from "../demo/operationsHelpers";
 import type { Area } from "../demo/OperationsContext";
 import "../styles/stock-movements.css";
 

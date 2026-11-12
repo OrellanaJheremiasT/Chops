@@ -43,13 +43,38 @@
 }
 
 /* Unified responsive controls: prevent wrapping and overflow. */
-.header-controls { flex: 0 0 auto; min-width: 0; }
-.language-picker { flex: 0 0 auto; min-width: 119px; white-space: nowrap; }
-.language-picker .chops-select--compact { flex: 0 0 90px; }
-.language-picker .chops-select__value { white-space: nowrap; }
+.header-controls {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+.language-picker {
+  flex: 0 0 auto;
+  min-width: 119px;
+  white-space: nowrap;
+}
+.language-picker .chops-select--compact {
+  flex: 0 0 90px;
+}
+.language-picker .chops-select__value {
+  white-space: nowrap;
+}
 @media (max-width: 520px) {
-  .language-picker { min-width: 112px; padding: 0 4px; gap: 2px; }
-  .language-picker .chops-select--compact { flex-basis: 84px; width: 84px; min-width: 84px; }
-  .header-controls .theme-toggle span { display: none; }
-  .header-controls .theme-toggle { min-width: 38px; min-height: 38px; justify-content: center; }
+  .language-picker {
+    min-width: 112px;
+    padding: 0 4px;
+    gap: 2px;
+  }
+  .language-picker .chops-select--compact {
+    flex-basis: 84px;
+    width: 84px;
+    min-width: 84px;
+  }
+  .header-controls .theme-toggle span {
+    display: none;
+  }
+  .header-controls .theme-toggle {
+    min-width: 38px;
+    min-height: 38px;
+    justify-content: center;
+  }
 }

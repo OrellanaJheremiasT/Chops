@@ -2,7 +2,7 @@ import { Component } from "react";
 import type { ErrorInfo, ReactNode } from "react";
 import { AlertTriangle, RotateCw } from "lucide-react";
 
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../i18n/languageHook";
 import "./StatusPanel.css";
 
 type Props = { children: ReactNode };

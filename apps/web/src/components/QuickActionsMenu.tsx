@@ -10,7 +10,7 @@ import {
   TrendingDown,
 } from "lucide-react";
 
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../i18n/languageHook";
 import "./QuickActionsMenu.css";
 
 const actions = [
