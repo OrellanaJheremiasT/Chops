@@ -1,4 +1,4 @@
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../i18n/languageHook";
 import { PageSkeleton } from "./Skeleton";
 import "./StatusPanel.css";
 

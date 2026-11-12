@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Compass } from "lucide-react";
 
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../i18n/languageHook";
 import "./StatusPanel.css";
 
 export default function NotFound() {

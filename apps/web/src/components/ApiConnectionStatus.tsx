@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { CheckCircle2, XCircle, LoaderCircle } from "lucide-react";
 
 import { getApiHealth } from "../api/client";
-import { useLanguage } from "../i18n/LanguageContext";
+import { useLanguage } from "../i18n/languageHook";
 
 type ConnectionStatus = "checking" | "online" | "offline";
 
