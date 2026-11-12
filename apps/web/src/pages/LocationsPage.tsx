@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 
@@ -16,6 +15,7 @@ import {
 } from "lucide-react";
 
 import ChopsSelect from "../components/ChopsSelect";
+import ConfirmDialog from "../components/ConfirmDialog";
 import { useLanguage } from "../i18n/LanguageContext";
 import { ApiError } from "../api/client";
 
@@ -41,10 +41,12 @@ import type {
 
 type Tab = "branches" | "locations";
 
-function describeError(
-  error: unknown,
-  spanish: boolean
-): string {
+type DialogState =
+  | { kind: "branch"; item: Branch }
+  | { kind: "location"; item: StorageLocation }
+  | { kind: "blocked"; message: string };
+
+function describeError(error: unknown, spanish: boolean): string {
   if (error instanceof ApiError) {
     if (error.status === 409) {
       return spanish
@@ -72,16 +74,15 @@ function describeError(
 
 function retainsRequiredLocations(
   branchId: number,
-  candidate: StorageLocation[]
+  candidate: StorageLocation[],
 ): boolean {
-  return (["exhibition", "warehouse"] as const).every(
-    (type) =>
-      candidate.some(
-        (location) =>
-          location.branchId === branchId &&
-          location.type === type &&
-          location.active
-      )
+  return (["exhibition", "warehouse"] as const).every((type) =>
+    candidate.some(
+      (location) =>
+        location.branchId === branchId &&
+        location.type === type &&
+        location.active,
+    ),
   );
 }
 
@@ -95,11 +96,13 @@ export default function LocationsPage() {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState<Tab>("branches");
 
-  const [editingBranch, setEditingBranch] =
-    useState<Branch | null>(null);
+  const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
 
   const [editingLocation, setEditingLocation] =
     useState<StorageLocation | null>(null);
+
+  const [dialog, setDialog] = useState<DialogState | null>(null);
+  const [dialogError, setDialogError] = useState("");
 
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -123,9 +126,7 @@ export default function LocationsPage() {
       })
       .catch((cause: unknown) => {
         if (!controller.signal.aborted) {
-          setLoadError(
-            describeError(cause, language === "es")
-          );
+          setLoadError(describeError(cause, language === "es"));
         }
       })
       .finally(() => {
@@ -138,11 +139,10 @@ export default function LocationsPage() {
   }, [language]);
 
   async function refreshData() {
-    const [loadedBranches, loadedLocations] =
-      await Promise.all([
-        listBranches(),
-        listLocations(),
-      ]);
+    const [loadedBranches, loadedLocations] = await Promise.all([
+      listBranches(),
+      listLocations(),
+    ]);
 
     setBranches(loadedBranches);
     setLocations(loadedLocations);
@@ -168,9 +168,7 @@ export default function LocationsPage() {
     const query = search.trim().toLowerCase();
 
     return branches.filter((branch) =>
-      `${branch.name} ${branch.address}`
-        .toLowerCase()
-        .includes(query)
+      `${branch.name} ${branch.address}`.toLowerCase().includes(query),
     );
   }, [branches, search]);
 
@@ -179,16 +177,10 @@ export default function LocationsPage() {
 
     return locations.filter((location) => {
       const branchName =
-        branches.find(
-          (branch) => branch.id === location.branchId
-        )?.name ?? t("Central / Independent");
+        branches.find((branch) => branch.id === location.branchId)?.name ??
+        t("Central / Independent");
 
-      return [
-        location.name,
-        location.description,
-        location.type,
-        branchName,
-      ]
+      return [location.name, location.description, location.type, branchName]
         .join(" ")
         .toLowerCase()
         .includes(query);
@@ -204,7 +196,7 @@ export default function LocationsPage() {
             name: "",
             address: "",
             active: true,
-          }
+          },
     );
 
     setError("");
@@ -222,18 +214,15 @@ export default function LocationsPage() {
             type: "warehouse",
             branchId: branches[0]?.id ?? null,
             active: true,
-          }
+          },
     );
 
     setError("");
     setNotice("");
   }
 
-  async function saveBranch(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  async function saveBranch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     if (!editingBranch || working) return;
 
     const payload: BranchInput = {
@@ -251,13 +240,10 @@ export default function LocationsPage() {
       branches.some(
         (branch) =>
           branch.id !== editingBranch.id &&
-          branch.name.toLowerCase() ===
-            payload.name.toLowerCase()
+          branch.name.toLowerCase() === payload.name.toLowerCase(),
       )
     ) {
-      setError(
-        t("A branch with this name already exists.")
-      );
+      setError(t("A branch with this name already exists."));
       return;
     }
 
@@ -286,53 +272,8 @@ export default function LocationsPage() {
     }
   }
 
-  // NEW: DELETE BRANCH
-
-  async function removeBranch(branch: Branch) {
-    if (working) return;
-
-    const locationCount = locations.filter(
-      (location) => location.branchId === branch.id
-    ).length;
-
-    const confirmed = window.confirm(
-      spanish
-        ? `¿Eliminar la sucursal "${branch.name}" y sus ${locationCount} ubicaciones? Esta acción no se puede deshacer.`
-        : `Delete branch "${branch.name}" and its ${locationCount} locations? This action cannot be undone.`
-    );
-
-    if (!confirmed) return;
-
-    setWorking(true);
-    setNotice("");
-    setLoadError("");
-
-    try {
-      await deleteBranch(branch.id);
-
-      setNotice(
-        spanish
-          ? `Sucursal "${branch.name}" eliminada correctamente.`
-          : `Branch "${branch.name}" deleted successfully.`
-      );
-
-      try {
-        await refreshData();
-      } catch (cause) {
-        setLoadError(describeError(cause, spanish));
-      }
-    } catch (cause) {
-      setLoadError(describeError(cause, spanish));
-    } finally {
-      setWorking(false);
-    }
-  }
-
-  async function saveLocation(
-    event: FormEvent<HTMLFormElement>
-  ) {
+  async function saveLocation(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     if (!editingLocation || working) return;
 
     const payload: StorageLocationInput = {
@@ -348,19 +289,14 @@ export default function LocationsPage() {
       return;
     }
 
-    if (
-      payload.type === "exhibition" &&
-      payload.branchId === null
-    ) {
+    if (payload.type === "exhibition" && payload.branchId === null) {
       setError(t("Exhibition must belong to a branch."));
       return;
     }
 
     if (
       payload.branchId !== null &&
-      !branches.some(
-        (branch) => branch.id === payload.branchId
-      )
+      !branches.some((branch) => branch.id === payload.branchId)
     ) {
       setError(t("Select a valid branch."));
       return;
@@ -371,47 +307,31 @@ export default function LocationsPage() {
         (location) =>
           location.id !== editingLocation.id &&
           location.branchId === payload.branchId &&
-          location.name.toLowerCase() ===
-            payload.name.toLowerCase()
+          location.name.toLowerCase() === payload.name.toLowerCase(),
       )
     ) {
-      setError(
-        t("This location name already exists in the selected branch.")
-      );
+      setError(t("This location name already exists in the selected branch."));
       return;
     }
 
     if (editingLocation.id !== 0) {
-      const updated = {
-        ...editingLocation,
-        ...payload,
-      };
+      const updated = { ...editingLocation, ...payload };
 
       const candidate = locations.map((location) =>
-        location.id === editingLocation.id
-          ? updated
-          : location
+        location.id === editingLocation.id ? updated : location,
       );
 
       const previous = locations.find(
-        (location) => location.id === editingLocation.id
+        (location) => location.id === editingLocation.id,
       );
 
-      const branchIds = [
-        previous?.branchId,
-        payload.branchId,
-      ].filter(
-        (id): id is number =>
-          id !== null && id !== undefined
+      const branchIds = [previous?.branchId, payload.branchId].filter(
+        (id): id is number => id !== null && id !== undefined,
       );
 
-      if (
-        branchIds.some(
-          (id) => !retainsRequiredLocations(id, candidate)
-        )
-      ) {
+      if (branchIds.some((id) => !retainsRequiredLocations(id, candidate))) {
         setError(
-          t("Each branch must retain an active exhibition and warehouse.")
+          t("Each branch must retain an active exhibition and warehouse."),
         );
         return;
       }
@@ -424,10 +344,7 @@ export default function LocationsPage() {
       if (editingLocation.id === 0) {
         await createLocation(payload);
       } else {
-        await updateLocation(
-          editingLocation.id,
-          payload
-        );
+        await updateLocation(editingLocation.id, payload);
       }
 
       setEditingLocation(null);
@@ -445,48 +362,67 @@ export default function LocationsPage() {
     }
   }
 
-  async function removeLocation(
-    location: StorageLocation
-  ) {
+  function requestDeleteBranch(branch: Branch) {
     if (working) return;
 
-    const candidate = locations.filter(
-      (item) => item.id !== location.id
-    );
+    setDialogError("");
+    setDialog({ kind: "branch", item: branch });
+  }
+
+  function requestDeleteLocation(location: StorageLocation) {
+    if (working) return;
+
+    const candidate = locations.filter((item) => item.id !== location.id);
 
     if (
       location.branchId !== null &&
-      !retainsRequiredLocations(
-        location.branchId,
-        candidate
-      )
+      !retainsRequiredLocations(location.branchId, candidate)
     ) {
-      window.alert(
-        t("Cannot delete this location. Each branch must retain an active exhibition and warehouse.")
-      );
+      setDialog({
+        kind: "blocked",
+        message: t(
+          "Cannot delete this location. Each branch must retain an active exhibition and warehouse.",
+        ),
+      });
       return;
     }
 
-    const confirmed = window.confirm(
-      spanish
-        ? `¿Seguro que deseas eliminar "${location.name}"?`
-        : `Are you sure you want to delete "${location.name}"?`
-    );
+    setDialogError("");
+    setDialog({ kind: "location", item: location });
+  }
 
-    if (!confirmed) return;
+  async function confirmDeletion() {
+    if (!dialog || working) return;
+
+    if (dialog.kind === "blocked") {
+      setDialog(null);
+      return;
+    }
 
     setWorking(true);
+    setDialogError("");
     setNotice("");
-    setLoadError("");
 
     try {
-      await deleteLocation(location.id);
+      if (dialog.kind === "branch") {
+        await deleteBranch(dialog.item.id);
 
-      setNotice(
-        spanish
-          ? "Ubicación eliminada correctamente."
-          : "Location deleted successfully."
-      );
+        setNotice(
+          spanish
+            ? `Sucursal "${dialog.item.name}" eliminada correctamente.`
+            : `Branch "${dialog.item.name}" deleted successfully.`,
+        );
+      } else {
+        await deleteLocation(dialog.item.id);
+
+        setNotice(
+          spanish
+            ? `Ubicación "${dialog.item.name}" eliminada correctamente.`
+            : `Location "${dialog.item.name}" deleted successfully.`,
+        );
+      }
+
+      setDialog(null);
 
       try {
         await refreshData();
@@ -494,776 +430,715 @@ export default function LocationsPage() {
         setLoadError(describeError(cause, spanish));
       }
     } catch (cause) {
-      setLoadError(describeError(cause, spanish));
+      setDialogError(describeError(cause, spanish));
     } finally {
       setWorking(false);
     }
   }
 
+  const dialogTitle =
+    dialog?.kind === "blocked"
+      ? spanish
+        ? "Acción no permitida"
+        : "Action not allowed"
+      : spanish
+        ? "¿Confirmar eliminación?"
+        : "Confirm deletion";
+
+  const dialogMessage =
+    dialog?.kind === "branch"
+      ? spanish
+        ? `¿Eliminar la sucursal "${dialog.item.name}" y sus ${
+            locations.filter((location) => location.branchId === dialog.item.id)
+              .length
+          } ubicaciones? Esta acción no se puede deshacer.`
+        : `Delete branch "${dialog.item.name}" and its ${
+            locations.filter((location) => location.branchId === dialog.item.id)
+              .length
+          } locations? This action cannot be undone.`
+      : dialog?.kind === "location"
+        ? spanish
+          ? `¿Eliminar la ubicación "${dialog.item.name}"? Esta acción no se puede deshacer.`
+          : `Delete location "${dialog.item.name}"? This action cannot be undone.`
+        : (dialog?.message ?? "");
+
   return (
-    <section className="locations-page">
-      <div className="page-title">
-        <div>
-          <h2>{t("Locations")}</h2>
-          <p>
-            {t("Manage branches and inventory storage locations.")}
-          </p>
+    <>
+      <section className="locations-page">
+        <div className="page-title">
+          <div>
+            <h2>{t("Locations")}</h2>
+            <p>{t("Manage branches and inventory storage locations.")}</p>
+          </div>
+
+          <span className="badge badge-info">
+            {locationsDemoMode
+              ? t("Demo Data")
+              : spanish
+                ? "Datos API"
+                : "API Data"}
+          </span>
         </div>
 
-        <span className="badge badge-info">
-          {locationsDemoMode
-            ? t("Demo Data")
-            : spanish
-              ? "Datos API"
-              : "API Data"}
-        </span>
-      </div>
+        <div className="location-summary">
+          <article className="stat">
+            <Store size={18} className="stat-icon" />
+            <div className="stat-label">{t("Branches")}</div>
+            <div className="stat-value">{branches.length}</div>
+          </article>
 
-      <div className="location-summary">
-        <article className="stat">
-          <Store size={18} className="stat-icon" />
-          <div className="stat-label">
+          <article className="stat">
+            <Warehouse size={18} className="stat-icon" />
+            <div className="stat-label">{t("Storage Locations")}</div>
+            <div className="stat-value">{locations.length}</div>
+          </article>
+        </div>
+
+        <div
+          className="location-tabs"
+          role="tablist"
+          aria-label={t("Location views")}
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "branches"}
+            className={
+              tab === "branches" ? "location-tab active" : "location-tab"
+            }
+            onClick={() => {
+              setTab("branches");
+              setSearch("");
+              setNotice("");
+            }}
+          >
+            <Building2 size={16} />
             {t("Branches")}
-          </div>
-          <div className="stat-value">
-            {branches.length}
-          </div>
-        </article>
+          </button>
 
-        <article className="stat">
-          <Warehouse size={18} className="stat-icon" />
-          <div className="stat-label">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === "locations"}
+            className={
+              tab === "locations" ? "location-tab active" : "location-tab"
+            }
+            onClick={() => {
+              setTab("locations");
+              setSearch("");
+              setNotice("");
+            }}
+          >
+            <Warehouse size={16} />
             {t("Storage Locations")}
+          </button>
+        </div>
+
+        <div className="products-toolbar">
+          <div className="products-search">
+            <Search size={17} aria-hidden="true" />
+
+            <input
+              aria-label={t("Search locations")}
+              placeholder={
+                tab === "branches"
+                  ? t("Search branches...")
+                  : t("Search storage locations...")
+              }
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
           </div>
-          <div className="stat-value">
-            {locations.length}
-          </div>
-        </article>
-      </div>
 
-      <div
-        className="location-tabs"
-        role="tablist"
-        aria-label={t("Location views")}
-      >
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === "branches"}
-          className={
-            tab === "branches"
-              ? "location-tab active"
-              : "location-tab"
-          }
-          onClick={() => {
-            setTab("branches");
-            setSearch("");
-            setNotice("");
-          }}
-        >
-          <Building2 size={16} />
-          {t("Branches")}
-        </button>
-
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === "locations"}
-          className={
-            tab === "locations"
-              ? "location-tab active"
-              : "location-tab"
-          }
-          onClick={() => {
-            setTab("locations");
-            setSearch("");
-            setNotice("");
-          }}
-        >
-          <Warehouse size={16} />
-          {t("Storage Locations")}
-        </button>
-      </div>
-
-      <div className="products-toolbar">
-        <div className="products-search">
-          <Search size={17} aria-hidden="true" />
-          <input
-            aria-label={t("Search locations")}
-            placeholder={
-              tab === "branches"
-                ? t("Search branches...")
-                : t("Search storage locations...")
-            }
-            value={search}
-            onChange={(event) =>
-              setSearch(event.target.value)
-            }
-          />
-        </div>
-
-        <button
-          type="button"
-          className="btn btn-secondary"
-          disabled={loading || working}
-          onClick={reload}
-        >
-          <RefreshCcw size={16} />
-          {spanish ? "Actualizar" : "Refresh"}
-        </button>
-
-        <button
-          type="button"
-          className="btn btn-primary"
-          disabled={
-            loading || working || Boolean(loadError)
-          }
-          onClick={() =>
-            tab === "branches"
-              ? openBranch()
-              : openLocation()
-          }
-        >
-          <Plus size={17} />
-          {t(
-            tab === "branches"
-              ? "Add Branch"
-              : "Add Location"
-          )}
-        </button>
-      </div>
-
-      {notice && (
-        <p className="location-notice" role="status">
-          {notice}
-        </p>
-      )}
-
-      {loadError && (
-        <p className="product-form-error" role="alert">
-          {loadError}
-        </p>
-      )}
-
-      {tab === "branches" ? (
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>{t("Branch")}</th>
-                <th>{t("Address")}</th>
-                <th>{t("Locations")}</th>
-                <th>{t("Status")}</th>
-                <th>{t("Actions")}</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="products-empty"
-                  >
-                    {spanish
-                      ? "Cargando..."
-                      : "Loading..."}
-                  </td>
-                </tr>
-              ) : loadError ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="products-empty"
-                  >
-                    {spanish
-                      ? "No se pudo cargar. Pulsa Actualizar."
-                      : "Could not load data. Click Refresh."}
-                  </td>
-                </tr>
-              ) : (
-                <>
-                  {filteredBranches.map((branch) => (
-                    <tr key={branch.id}>
-                      <td>
-                        <strong>{branch.name}</strong>
-                      </td>
-
-                      <td>{branch.address}</td>
-
-                      <td>
-                        {
-                          locations.filter(
-                            (location) =>
-                              location.branchId === branch.id
-                          ).length
-                        }
-                      </td>
-
-                      <td>
-                        <span
-                          className={`badge ${
-                            branch.active
-                              ? "badge-success"
-                              : "badge-warning"
-                          }`}
-                        >
-                          {t(
-                            branch.active
-                              ? "Active"
-                              : "Inactive"
-                          )}
-                        </span>
-                      </td>
-
-                      <td>
-                        <div className="location-actions">
-                          <button
-                            type="button"
-                            className="btn btn-secondary"
-                            disabled={working}
-                            onClick={() =>
-                              openBranch(branch)
-                            }
-                          >
-                            <Pencil size={15} />
-                            {t("Edit")}
-                          </button>
-
-                          <button
-                            type="button"
-                            className="btn btn-danger"
-                            disabled={working}
-                            onClick={() =>
-                              void removeBranch(branch)
-                            }
-                          >
-                            <Trash2 size={15} />
-                            {t("Delete")}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-
-                  {filteredBranches.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={5}
-                        className="products-empty"
-                      >
-                        {t("No branches found.")}
-                      </td>
-                    </tr>
-                  )}
-                </>
-              )}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>{t("Location")}</th>
-                <th>{t("Type")}</th>
-                <th>{t("Branch")}</th>
-                <th>{t("Description")}</th>
-                <th>{t("Status")}</th>
-                <th>{t("Actions")}</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="products-empty"
-                  >
-                    {spanish
-                      ? "Cargando..."
-                      : "Loading..."}
-                  </td>
-                </tr>
-              ) : loadError ? (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="products-empty"
-                  >
-                    {spanish
-                      ? "No se pudo cargar. Pulsa Actualizar."
-                      : "Could not load data. Click Refresh."}
-                  </td>
-                </tr>
-              ) : (
-                <>
-                  {filteredLocations.map((location) => (
-                    <tr key={location.id}>
-                      <td>
-                        <strong>{location.name}</strong>
-                      </td>
-
-                      <td>
-                        <span className="location-type">
-                          {location.type ===
-                          "exhibition" ? (
-                            <Store size={15} />
-                          ) : (
-                            <Warehouse size={15} />
-                          )}
-                          {t(
-                            location.type ===
-                              "exhibition"
-                              ? "Exhibition"
-                              : "Warehouse"
-                          )}
-                        </span>
-                      </td>
-
-                      <td>
-                        {branches.find(
-                          (branch) =>
-                            branch.id ===
-                            location.branchId
-                        )?.name ??
-                          t("Central / Independent")}
-                      </td>
-
-                      <td>
-                        {location.description || "—"}
-                      </td>
-
-                      <td>
-                        <span
-                          className={`badge ${
-                            location.active
-                              ? "badge-success"
-                              : "badge-warning"
-                          }`}
-                        >
-                          {t(
-                            location.active
-                              ? "Active"
-                              : "Inactive"
-                          )}
-                        </span>
-                      </td>
-
-                      <td>
-                        <div className="location-actions">
-                          <button
-                            type="button"
-                            className="btn btn-secondary"
-                            disabled={working}
-                            onClick={() =>
-                              openLocation(location)
-                            }
-                          >
-                            <Pencil size={15} />
-                            {t("Edit")}
-                          </button>
-
-                          <button
-                            type="button"
-                            className="btn btn-danger"
-                            disabled={working}
-                            onClick={() =>
-                              void removeLocation(location)
-                            }
-                          >
-                            <Trash2 size={15} />
-                            {t("Delete")}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-
-                  {filteredLocations.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan={6}
-                        className="products-empty"
-                      >
-                        {t("No storage locations found.")}
-                      </td>
-                    </tr>
-                  )}
-                </>
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      <p className="products-note">
-        {locationsDemoMode
-          ? t(
-              "Demo data. Changes reset when the page is reloaded."
-            )
-          : spanish
-            ? "Los datos se guardan temporalmente en Spring Boot. Inventory aún no está conectado a estas ubicaciones."
-            : "Data is stored temporarily in Spring Boot. Inventory is not connected to these locations yet."}
-      </p>
-
-      {editingBranch && (
-        <div className="product-modal-backdrop">
-          <section
-            className="product-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="branch-form-title"
+          <button
+            type="button"
+            className="btn btn-secondary"
+            disabled={loading || working}
+            onClick={reload}
           >
-            <div className="product-modal-header">
-              <h3 id="branch-form-title">
-                {t(
-                  editingBranch.id === 0
-                    ? "Add Branch"
-                    : "Edit Branch"
-                )}
-              </h3>
+            <RefreshCcw size={16} />
+            {spanish ? "Actualizar" : "Refresh"}
+          </button>
 
-              <button
-                type="button"
-                className="product-icon-button"
-                disabled={working}
-                aria-label={t("Close form")}
-                onClick={() =>
-                  setEditingBranch(null)
-                }
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <form onSubmit={saveBranch}>
-              <div className="field">
-                <label htmlFor="branch-name">
-                  {t("Branch Name")}
-                </label>
-                <input
-                  id="branch-name"
-                  required
-                  maxLength={120}
-                  disabled={working}
-                  value={editingBranch.name}
-                  onChange={(event) =>
-                    setEditingBranch({
-                      ...editingBranch,
-                      name: event.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <div className="field">
-                <label htmlFor="branch-address">
-                  {t("Address")}
-                </label>
-                <input
-                  id="branch-address"
-                  required
-                  maxLength={240}
-                  disabled={working}
-                  value={editingBranch.address}
-                  onChange={(event) =>
-                    setEditingBranch({
-                      ...editingBranch,
-                      address: event.target.value,
-                    })
-                  }
-                />
-              </div>
-
-              <div className="field">
-                <label htmlFor="branch-status">
-                  {t("Status")}
-                </label>
-                <ChopsSelect
-                  id="branch-status"
-                  ariaLabel={t("Status")}
-                  value={
-                    editingBranch.active
-                      ? "active"
-                      : "inactive"
-                  }
-                  options={[
-                    {
-                      value: "active",
-                      label: t("Active"),
-                    },
-                    {
-                      value: "inactive",
-                      label: t("Inactive"),
-                    },
-                  ]}
-                  onChange={(next) =>
-                    setEditingBranch({
-                      ...editingBranch,
-                      active: next === "active",
-                    })
-                  }
-                />
-              </div>
-
-              {editingBranch.id === 0 && (
-                <p className="location-hint">
-                  <MapPin size={15} />
-                  {t(
-                    "Exhibition and Warehouse will be created automatically."
-                  )}
-                </p>
-              )}
-
-              {error && (
-                <p
-                  className="product-form-error"
-                  role="alert"
-                >
-                  {error}
-                </p>
-              )}
-
-              <div className="product-form-actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  disabled={working}
-                  onClick={() =>
-                    setEditingBranch(null)
-                  }
-                >
-                  {t("Cancel")}
-                </button>
-
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={working}
-                >
-                  {working
-                    ? spanish
-                      ? "Guardando..."
-                      : "Saving..."
-                    : t("Save Branch")}
-                </button>
-              </div>
-            </form>
-          </section>
-        </div>
-      )}
-
-      {editingLocation && (
-        <div className="product-modal-backdrop">
-          <section
-            className="product-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="location-form-title"
+          <button
+            type="button"
+            className="btn btn-primary"
+            disabled={loading || working || Boolean(loadError)}
+            onClick={() => (tab === "branches" ? openBranch() : openLocation())}
           >
-            <div className="product-modal-header">
-              <h3 id="location-form-title">
-                {t(
-                  editingLocation.id === 0
-                    ? "Add Location"
-                    : "Edit Location"
-                )}
-              </h3>
+            <Plus size={17} />
+            {t(tab === "branches" ? "Add Branch" : "Add Location")}
+          </button>
+        </div>
 
-              <button
-                type="button"
-                className="product-icon-button"
-                disabled={working}
-                aria-label={t("Close form")}
-                onClick={() =>
-                  setEditingLocation(null)
-                }
-              >
-                <X size={20} />
-              </button>
-            </div>
+        {notice && (
+          <p className="location-notice" role="status">
+            {notice}
+          </p>
+        )}
 
-            <form onSubmit={saveLocation}>
-              <div className="field">
-                <label htmlFor="location-name">
-                  {t("Location Name")}
-                </label>
-                <input
-                  id="location-name"
-                  required
-                  maxLength={120}
-                  disabled={working}
-                  value={editingLocation.name}
-                  onChange={(event) =>
-                    setEditingLocation({
-                      ...editingLocation,
-                      name: event.target.value,
-                    })
-                  }
-                />
-              </div>
+        {loadError && (
+          <p className="product-form-error" role="alert">
+            {loadError}
+          </p>
+        )}
 
-              <div className="field">
-                <label htmlFor="location-description">
-                  {t("Description")}
-                </label>
-                <input
-                  id="location-description"
-                  maxLength={240}
-                  disabled={working}
-                  value={editingLocation.description}
-                  onChange={(event) =>
-                    setEditingLocation({
-                      ...editingLocation,
-                      description: event.target.value,
-                    })
-                  }
-                />
-              </div>
+        {tab === "branches" ? (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>{t("Branch")}</th>
+                  <th>{t("Address")}</th>
+                  <th>{t("Locations")}</th>
+                  <th>{t("Status")}</th>
+                  <th>{t("Actions")}</th>
+                </tr>
+              </thead>
 
-              <div className="field">
-                <label htmlFor="location-type">
-                  {t("Location Type")}
-                </label>
-                <ChopsSelect
-                  id="location-type"
-                  ariaLabel={t("Location Type")}
-                  value={editingLocation.type}
-                  options={[
-                    {
-                      value: "exhibition",
-                      label: t("Exhibition"),
-                    },
-                    {
-                      value: "warehouse",
-                      label: t("Warehouse"),
-                    },
-                  ]}
-                  onChange={(next) =>
-                    setEditingLocation({
-                      ...editingLocation,
-                      type: next as LocationType,
-                      branchId:
-                        next === "exhibition"
-                          ? editingLocation.branchId ??
-                            branches[0]?.id ??
-                            null
-                          : editingLocation.branchId,
-                    })
-                  }
-                />
-              </div>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={5} className="products-empty">
+                      {spanish ? "Cargando..." : "Loading..."}
+                    </td>
+                  </tr>
+                ) : loadError ? (
+                  <tr>
+                    <td colSpan={5} className="products-empty">
+                      {spanish
+                        ? "No se pudo cargar. Pulsa Actualizar."
+                        : "Could not load data. Click Refresh."}
+                    </td>
+                  </tr>
+                ) : (
+                  <>
+                    {filteredBranches.map((branch) => (
+                      <tr key={branch.id}>
+                        <td>
+                          <strong>{branch.name}</strong>
+                        </td>
 
-              <div className="field">
-                <label htmlFor="location-branch">
-                  {t("Branch")}
-                </label>
-                <ChopsSelect
-                  id="location-branch"
-                  ariaLabel={t("Branch")}
-                  value={String(
-                    editingLocation.branchId ?? ""
-                  )}
-                  options={[
-                    ...(editingLocation.type ===
-                    "warehouse"
-                      ? [
+                        <td>{branch.address}</td>
+
+                        <td>
                           {
-                            value: "",
-                            label: t(
-                              "Central / Independent"
-                            ),
-                          },
-                        ]
-                      : []),
-                    ...branches.map((branch) => ({
-                      value: String(branch.id),
-                      label: branch.name,
-                    })),
-                  ]}
-                  onChange={(next) =>
-                    setEditingLocation({
-                      ...editingLocation,
-                      branchId:
-                        next === ""
-                          ? null
-                          : Number(next),
-                    })
-                  }
-                />
-              </div>
+                            locations.filter(
+                              (location) => location.branchId === branch.id,
+                            ).length
+                          }
+                        </td>
 
-              <div className="field">
-                <label htmlFor="location-status">
-                  {t("Status")}
-                </label>
-                <ChopsSelect
-                  id="location-status"
-                  ariaLabel={t("Status")}
-                  value={
-                    editingLocation.active
-                      ? "active"
-                      : "inactive"
-                  }
-                  options={[
-                    {
-                      value: "active",
-                      label: t("Active"),
-                    },
-                    {
-                      value: "inactive",
-                      label: t("Inactive"),
-                    },
-                  ]}
-                  onChange={(next) =>
-                    setEditingLocation({
-                      ...editingLocation,
-                      active: next === "active",
-                    })
-                  }
-                />
-              </div>
+                        <td>
+                          <span
+                            className={`badge ${
+                              branch.active ? "badge-success" : "badge-warning"
+                            }`}
+                          >
+                            {t(branch.active ? "Active" : "Inactive")}
+                          </span>
+                        </td>
 
-              {error && (
-                <p
-                  className="product-form-error"
-                  role="alert"
-                >
-                  {error}
-                </p>
-              )}
+                        <td>
+                          <div className="location-actions">
+                            <button
+                              type="button"
+                              className="btn btn-secondary"
+                              disabled={working}
+                              onClick={() => openBranch(branch)}
+                            >
+                              <Pencil size={15} />
+                              {t("Edit")}
+                            </button>
 
-              <div className="product-form-actions">
+                            <button
+                              type="button"
+                              className="btn btn-danger"
+                              disabled={working}
+                              onClick={() => requestDeleteBranch(branch)}
+                            >
+                              <Trash2 size={15} />
+                              {t("Delete")}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+
+                    {filteredBranches.length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="products-empty">
+                          {t("No branches found.")}
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>{t("Location")}</th>
+                  <th>{t("Type")}</th>
+                  <th>{t("Branch")}</th>
+                  <th>{t("Description")}</th>
+                  <th>{t("Status")}</th>
+                  <th>{t("Actions")}</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="products-empty">
+                      {spanish ? "Cargando..." : "Loading..."}
+                    </td>
+                  </tr>
+                ) : loadError ? (
+                  <tr>
+                    <td colSpan={6} className="products-empty">
+                      {spanish
+                        ? "No se pudo cargar. Pulsa Actualizar."
+                        : "Could not load data. Click Refresh."}
+                    </td>
+                  </tr>
+                ) : (
+                  <>
+                    {filteredLocations.map((location) => (
+                      <tr key={location.id}>
+                        <td>
+                          <strong>{location.name}</strong>
+                        </td>
+
+                        <td>
+                          <span className="location-type">
+                            {location.type === "exhibition" ? (
+                              <Store size={15} />
+                            ) : (
+                              <Warehouse size={15} />
+                            )}
+
+                            {t(
+                              location.type === "exhibition"
+                                ? "Exhibition"
+                                : "Warehouse",
+                            )}
+                          </span>
+                        </td>
+
+                        <td>
+                          {branches.find(
+                            (branch) => branch.id === location.branchId,
+                          )?.name ?? t("Central / Independent")}
+                        </td>
+
+                        <td>{location.description || "—"}</td>
+
+                        <td>
+                          <span
+                            className={`badge ${
+                              location.active
+                                ? "badge-success"
+                                : "badge-warning"
+                            }`}
+                          >
+                            {t(location.active ? "Active" : "Inactive")}
+                          </span>
+                        </td>
+
+                        <td>
+                          <div className="location-actions">
+                            <button
+                              type="button"
+                              className="btn btn-secondary"
+                              disabled={working}
+                              onClick={() => openLocation(location)}
+                            >
+                              <Pencil size={15} />
+                              {t("Edit")}
+                            </button>
+
+                            <button
+                              type="button"
+                              className="btn btn-danger"
+                              disabled={working}
+                              onClick={() => requestDeleteLocation(location)}
+                            >
+                              <Trash2 size={15} />
+                              {t("Delete")}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+
+                    {filteredLocations.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="products-empty">
+                          {t("No storage locations found.")}
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <p className="products-note">
+          {locationsDemoMode
+            ? t("Demo data. Changes reset when the page is reloaded.")
+            : spanish
+              ? "Los datos se guardan temporalmente en Spring Boot. Inventory aún no está conectado a estas ubicaciones."
+              : "Data is stored temporarily in Spring Boot. Inventory is not connected to these locations yet."}
+        </p>
+
+        {editingBranch && (
+          <div className="product-modal-backdrop">
+            <section
+              className="product-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="branch-form-title"
+            >
+              <div className="product-modal-header">
+                <h3 id="branch-form-title">
+                  {t(editingBranch.id === 0 ? "Add Branch" : "Edit Branch")}
+                </h3>
+
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="product-icon-button"
                   disabled={working}
-                  onClick={() =>
-                    setEditingLocation(null)
-                  }
+                  aria-label={t("Close form")}
+                  onClick={() => setEditingBranch(null)}
                 >
-                  {t("Cancel")}
-                </button>
-
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={working}
-                >
-                  {working
-                    ? spanish
-                      ? "Guardando..."
-                      : "Saving..."
-                    : t("Save Location")}
+                  <X size={20} />
                 </button>
               </div>
-            </form>
-          </section>
-        </div>
+
+              <form onSubmit={saveBranch}>
+                <div className="field">
+                  <label htmlFor="branch-name">{t("Branch Name")}</label>
+
+                  <input
+                    id="branch-name"
+                    required
+                    maxLength={120}
+                    disabled={working}
+                    value={editingBranch.name}
+                    onChange={(event) =>
+                      setEditingBranch({
+                        ...editingBranch,
+                        name: event.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="field">
+                  <label htmlFor="branch-address">{t("Address")}</label>
+
+                  <input
+                    id="branch-address"
+                    required
+                    maxLength={240}
+                    disabled={working}
+                    value={editingBranch.address}
+                    onChange={(event) =>
+                      setEditingBranch({
+                        ...editingBranch,
+                        address: event.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="field">
+                  <label htmlFor="branch-status">{t("Status")}</label>
+
+                  <ChopsSelect
+                    id="branch-status"
+                    ariaLabel={t("Status")}
+                    value={editingBranch.active ? "active" : "inactive"}
+                    options={[
+                      {
+                        value: "active",
+                        label: t("Active"),
+                      },
+                      {
+                        value: "inactive",
+                        label: t("Inactive"),
+                      },
+                    ]}
+                    onChange={(next) =>
+                      setEditingBranch({
+                        ...editingBranch,
+                        active: next === "active",
+                      })
+                    }
+                  />
+                </div>
+
+                {editingBranch.id === 0 && (
+                  <p className="location-hint">
+                    <MapPin size={15} />
+                    {t(
+                      "Exhibition and Warehouse will be created automatically.",
+                    )}
+                  </p>
+                )}
+
+                {error && (
+                  <p className="product-form-error" role="alert">
+                    {error}
+                  </p>
+                )}
+
+                <div className="product-form-actions">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    disabled={working}
+                    onClick={() => setEditingBranch(null)}
+                  >
+                    {t("Cancel")}
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={working}
+                  >
+                    {working
+                      ? spanish
+                        ? "Guardando..."
+                        : "Saving..."
+                      : t("Save Branch")}
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+        )}
+
+        {editingLocation && (
+          <div className="product-modal-backdrop">
+            <section
+              className="product-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="location-form-title"
+            >
+              <div className="product-modal-header">
+                <h3 id="location-form-title">
+                  {t(
+                    editingLocation.id === 0 ? "Add Location" : "Edit Location",
+                  )}
+                </h3>
+
+                <button
+                  type="button"
+                  className="product-icon-button"
+                  disabled={working}
+                  aria-label={t("Close form")}
+                  onClick={() => setEditingLocation(null)}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <form onSubmit={saveLocation}>
+                <div className="field">
+                  <label htmlFor="location-name">{t("Location Name")}</label>
+
+                  <input
+                    id="location-name"
+                    required
+                    maxLength={120}
+                    disabled={working}
+                    value={editingLocation.name}
+                    onChange={(event) =>
+                      setEditingLocation({
+                        ...editingLocation,
+                        name: event.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="field">
+                  <label htmlFor="location-description">
+                    {t("Description")}
+                  </label>
+
+                  <input
+                    id="location-description"
+                    maxLength={240}
+                    disabled={working}
+                    value={editingLocation.description}
+                    onChange={(event) =>
+                      setEditingLocation({
+                        ...editingLocation,
+                        description: event.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="field">
+                  <label htmlFor="location-type">{t("Location Type")}</label>
+
+                  <ChopsSelect
+                    id="location-type"
+                    ariaLabel={t("Location Type")}
+                    value={editingLocation.type}
+                    options={[
+                      {
+                        value: "exhibition",
+                        label: t("Exhibition"),
+                      },
+                      {
+                        value: "warehouse",
+                        label: t("Warehouse"),
+                      },
+                    ]}
+                    onChange={(next) =>
+                      setEditingLocation({
+                        ...editingLocation,
+                        type: next as LocationType,
+                        branchId:
+                          next === "exhibition"
+                            ? (editingLocation.branchId ??
+                              branches[0]?.id ??
+                              null)
+                            : editingLocation.branchId,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="field">
+                  <label htmlFor="location-branch">{t("Branch")}</label>
+
+                  <ChopsSelect
+                    id="location-branch"
+                    ariaLabel={t("Branch")}
+                    value={String(editingLocation.branchId ?? "")}
+                    options={[
+                      ...(editingLocation.type === "warehouse"
+                        ? [
+                            {
+                              value: "",
+                              label: t("Central / Independent"),
+                            },
+                          ]
+                        : []),
+                      ...branches.map((branch) => ({
+                        value: String(branch.id),
+                        label: branch.name,
+                      })),
+                    ]}
+                    onChange={(next) =>
+                      setEditingLocation({
+                        ...editingLocation,
+                        branchId: next === "" ? null : Number(next),
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="field">
+                  <label htmlFor="location-status">{t("Status")}</label>
+
+                  <ChopsSelect
+                    id="location-status"
+                    ariaLabel={t("Status")}
+                    value={editingLocation.active ? "active" : "inactive"}
+                    options={[
+                      {
+                        value: "active",
+                        label: t("Active"),
+                      },
+                      {
+                        value: "inactive",
+                        label: t("Inactive"),
+                      },
+                    ]}
+                    onChange={(next) =>
+                      setEditingLocation({
+                        ...editingLocation,
+                        active: next === "active",
+                      })
+                    }
+                  />
+                </div>
+
+                {error && (
+                  <p className="product-form-error" role="alert">
+                    {error}
+                  </p>
+                )}
+
+                <div className="product-form-actions">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    disabled={working}
+                    onClick={() => setEditingLocation(null)}
+                  >
+                    {t("Cancel")}
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={working}
+                  >
+                    {working
+                      ? spanish
+                        ? "Guardando..."
+                        : "Saving..."
+                      : t("Save Location")}
+                  </button>
+                </div>
+              </form>
+            </section>
+          </div>
+        )}
+      </section>
+
+      {dialog && (
+        <ConfirmDialog
+          title={dialogTitle}
+          message={dialogMessage}
+          tone={dialog.kind === "blocked" ? "warning" : "danger"}
+          confirmText={
+            dialog.kind === "blocked"
+              ? spanish
+                ? "Entendido"
+                : "Got it"
+              : spanish
+                ? "Eliminar"
+                : "Delete"
+          }
+          cancelText={dialog.kind === "blocked" ? undefined : t("Cancel")}
+          loading={working}
+          error={dialogError}
+          onCancel={() => {
+            if (!working) {
+              setDialog(null);
+              setDialogError("");
+            }
+          }}
+          onConfirm={() => void confirmDeletion()}
+        />
       )}
-    </section>
+    </>
   );
 }

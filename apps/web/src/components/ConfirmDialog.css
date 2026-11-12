@@ -1,0 +1,188 @@
+.chops-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.chops-confirm-dialog {
+  width: 100%;
+  max-width: 440px;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+  animation: chops-confirm-enter 180ms ease-out;
+}
+
+.chops-confirm-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.chops-confirm-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 12px;
+}
+
+.chops-confirm-icon--danger {
+  background: var(--danger-soft);
+  color: var(--danger-ink);
+}
+
+.chops-confirm-icon--warning {
+  background: var(--warning-soft);
+  color: var(--warning-ink);
+}
+
+.chops-confirm-close {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.chops-confirm-close:hover {
+  background: var(--surface-raised);
+  color: var(--text);
+}
+
+.chops-confirm-title {
+  margin: 0 0 10px;
+  color: var(--text);
+  font-size: 19px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.chops-confirm-message {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.chops-confirm-error {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--danger-soft);
+  color: var(--danger-ink);
+  font-size: 13px;
+}
+
+.chops-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+.chops-confirm-cancel,
+.chops-confirm-submit {
+  min-height: 40px;
+  padding: 9px 18px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    opacity 150ms ease,
+    transform 150ms ease;
+}
+
+.chops-confirm-cancel {
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  color: var(--text);
+}
+
+.chops-confirm-cancel:hover {
+  background: var(--primary-soft);
+}
+
+.chops-confirm-submit {
+  border: 1px solid transparent;
+  color: #fff;
+}
+
+.chops-confirm-submit--danger {
+  background: var(--danger-solid);
+}
+
+.chops-confirm-submit--primary {
+  background: var(--primary);
+}
+
+.chops-confirm-submit:hover:not(:disabled) {
+  opacity: 0.88;
+}
+
+.chops-confirm-submit:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.chops-confirm-submit:disabled,
+.chops-confirm-cancel:disabled,
+.chops-confirm-close:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes chops-confirm-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .chops-confirm-overlay {
+    padding: 14px;
+  }
+
+  .chops-confirm-dialog {
+    padding: 22px;
+  }
+
+  .chops-confirm-actions {
+    flex-direction: column-reverse;
+  }
+
+  .chops-confirm-cancel,
+  .chops-confirm-submit {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chops-confirm-dialog {
+    animation: none;
+  }
+}

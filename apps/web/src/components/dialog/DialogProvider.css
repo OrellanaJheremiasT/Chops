@@ -1,0 +1,181 @@
+
+.chops-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.chops-dialog-panel {
+  width: 100%;
+  max-width: 440px;
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  padding: 26px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
+  animation: chops-dialog-enter 180ms ease-out;
+}
+
+.chops-dialog-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.chops-dialog-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 12px;
+}
+
+.chops-dialog-panel[data-tone="danger"] .chops-dialog-icon {
+  background: var(--danger-soft);
+  color: var(--danger-ink);
+}
+
+.chops-dialog-panel[data-tone="warning"] .chops-dialog-icon {
+  background: var(--warning-soft);
+  color: var(--warning-ink);
+}
+
+.chops-dialog-panel[data-tone="info"] .chops-dialog-icon {
+  background: var(--primary-soft);
+  color: var(--primary-ink);
+}
+
+.chops-dialog-close {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.chops-dialog-close:hover {
+  background: var(--surface-raised);
+  color: var(--text);
+}
+
+.chops-dialog-title {
+  margin: 0 0 10px;
+  font-size: 19px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.chops-dialog-message {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.chops-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.chops-dialog-cancel,
+.chops-dialog-confirm {
+  min-height: 40px;
+  padding: 9px 18px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    opacity 150ms ease,
+    background 150ms ease,
+    transform 150ms ease;
+}
+
+.chops-dialog-cancel {
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  color: var(--text);
+}
+
+.chops-dialog-cancel:hover {
+  background: var(--primary-soft);
+}
+
+.chops-dialog-confirm {
+  border: 1px solid transparent;
+  background: var(--primary);
+  color: #fff;
+}
+
+.chops-dialog-panel[data-tone="danger"]
+.chops-dialog-confirm {
+  background: var(--danger-solid);
+}
+
+.chops-dialog-panel[data-tone="warning"]
+.chops-dialog-confirm {
+  background: var(--primary);
+}
+
+.chops-dialog-confirm:hover {
+  opacity: 0.88;
+}
+
+.chops-dialog-confirm:active {
+  transform: scale(0.98);
+}
+
+@keyframes chops-dialog-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .chops-dialog-overlay {
+    padding: 14px;
+  }
+
+  .chops-dialog-panel {
+    padding: 22px;
+  }
+
+  .chops-dialog-actions {
+    flex-direction: column-reverse;
+  }
+
+  .chops-dialog-cancel,
+  .chops-dialog-confirm {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chops-dialog-panel {
+    animation: none;
+  }
+}
