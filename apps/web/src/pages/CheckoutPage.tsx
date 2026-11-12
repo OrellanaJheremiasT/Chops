@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { useLanguage } from "../i18n/LanguageContext";
+import { demoInitialBalances, demoItems } from "../demo/catalog";
 
 type PaymentMethod = "cash" | "card";
 
@@ -53,40 +54,14 @@ type SaleReceipt = {
 };
 
 // Demo stock represents the exhibition area of Main Store.
-const initialCatalog: CatalogItem[] = [
-  {
-    sku: "BEV-COKE-500",
-    barcode: "7750010000011",
-    name: "Coca-Cola",
-    variant: "500 ml",
-    priceCents: 450,
-    exhibitionStock: 14,
-  },
-  {
-    sku: "BEV-COKE-1500",
-    barcode: "7750010000028",
-    name: "Coca-Cola",
-    variant: "1.5 L",
-    priceCents: 450,
-    exhibitionStock: 0,
-  },
-  {
-    sku: "SNK-CHIPS-45",
-    barcode: "7750010000035",
-    name: "Potato Chips",
-    variant: "45 g",
-    priceCents: 350,
-    exhibitionStock: 12,
-  },
-  {
-    sku: "DAI-MILK-1L",
-    barcode: "7750010000042",
-    name: "Whole Milk",
-    variant: "1 L",
-    priceCents: 520,
-    exhibitionStock: 2,
-  },
-];
+const initialCatalog: CatalogItem[] = demoItems.map((item) => ({
+  sku: item.sku,
+  barcode: item.barcode,
+  name: item.name,
+  variant: item.variant,
+  priceCents: Math.round(item.price * 100),
+  exhibitionStock: demoInitialBalances[item.sku].exhibition,
+}));
 
 function formatMoney(cents: number) {
   return `S/ ${(cents / 100).toFixed(2)}`;

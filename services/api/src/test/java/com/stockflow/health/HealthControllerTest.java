@@ -1,4 +1,4 @@
-package com.stockflow.controller;
+package com.stockflow.health;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import type { ReactNode } from "react"
+import { readStorage, writeStorage } from "../utils/safeStorage"
 
 export type Language = "en" | "es"
 
@@ -283,10 +284,10 @@ const LanguageContext = createContext<LanguageContextValue | null>(null)
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>(() =>
-    localStorage.getItem("chops-language") === "es" ? "es" : "en",
+    readStorage("chops-language") === "es" ? "es" : "en",
   )
   useEffect(() => {
-    localStorage.setItem("chops-language", language)
+    writeStorage("chops-language", language)
     document.documentElement.lang = language
   }, [language])
   const t = (text: string) => language === "es" ? spanish[text] ?? text : text

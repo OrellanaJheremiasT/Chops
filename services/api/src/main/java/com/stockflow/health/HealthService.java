@@ -1,6 +1,5 @@
-package com.stockflow.service;
+package com.stockflow.health;
 
-import com.stockflow.dto.HealthResponse;
 import org.springframework.stereotype.Service;
 
 @Service

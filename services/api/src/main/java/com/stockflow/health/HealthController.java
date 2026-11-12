@@ -1,7 +1,5 @@
-package com.stockflow.controller;
+package com.stockflow.health;
 
-import com.stockflow.dto.HealthResponse;
-import com.stockflow.service.HealthService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

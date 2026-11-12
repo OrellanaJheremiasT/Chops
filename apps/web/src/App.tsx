@@ -34,6 +34,7 @@ import {
 import ApiConnectionStatus from "./components/ApiConnectionStatus";
 import ChopsSelect from "./components/ChopsSelect";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { readStorage, writeStorage } from "./utils/safeStorage";
 import { ToastProvider } from "./components/ToastStack";
 import NotFound from "./components/NotFound";
 import RouteFallback from "./components/RouteFallback";
@@ -125,7 +126,7 @@ function AppContent() {
   const [theme, setTheme] = useState<
     "light" | "dark"
   >(() =>
-    localStorage.getItem("chops-theme") === "light"
+    readStorage("chops-theme") === "light"
       ? "light"
       : "dark"
   );
@@ -134,7 +135,7 @@ function AppContent() {
     const root = document.documentElement;
 
     root.setAttribute("data-theme", theme);
-    localStorage.setItem("chops-theme", theme);
+    writeStorage("chops-theme", theme);
 
     root.classList.add("theme-transition");
 

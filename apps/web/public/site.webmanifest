@@ -2,26 +2,26 @@
   "name": "Chops",
   "short_name": "Chops",
   "description": "Inventory & Sales Management",
-  "start_url": "/dashboard",
-  "scope": "/",
+  "start_url": "./dashboard",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0A0908",
   "theme_color": "#1B21BB",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-512.png",
+      "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-maskable-512.png",
+      "src": "./icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

@@ -1,5 +1,6 @@
 
 import { apiGet, apiRequest } from "./client";
+import { demoItems } from "../demo/catalog";
 
 export type ProductVariant = {
   sku: string;
@@ -21,34 +22,33 @@ export type ProductInput = Omit<Product, "id">;
 export const productsDemoMode =
   import.meta.env.PROD && !import.meta.env.VITE_API_URL?.trim();
 
-let demoProducts: Product[] = [
-  {
-    id: 1,
-    name: "Coca-Cola",
-    category: "Beverages",
-    price: 4.5,
-    variants: [
-      { sku: "BEV-COKE-500", name: "500 ml" },
-      { sku: "BEV-COKE-1500", name: "1.5 L" },
-    ],
-  },
-  {
-    id: 2,
-    name: "Potato Chips",
-    category: "Snacks",
-    price: 3.5,
-    variants: [{ sku: "SNK-CHIPS-45", name: "45 g" }],
-  },
-  {
-    id: 3,
-    name: "Whole Milk",
-    category: "Dairy",
-    price: 5.2,
-    variants: [{ sku: "DAI-MILK-1L", name: "1 L" }],
-  },
-];
+// Demo catalog derived from the shared demo items (variants grouped by product).
+function buildDemoProducts(): Product[] {
+  const byName = new Map<string, Product>();
 
-let nextDemoId = 4;
+  for (const item of demoItems) {
+    const variant = { sku: item.sku, name: item.variant };
+    const existing = byName.get(item.name);
+
+    if (existing) {
+      existing.variants.push(variant);
+    } else {
+      byName.set(item.name, {
+        id: byName.size + 1,
+        name: item.name,
+        category: item.category,
+        price: item.price,
+        variants: [variant],
+      });
+    }
+  }
+
+  return [...byName.values()];
+}
+
+let demoProducts: Product[] = buildDemoProducts();
+
+let nextDemoId = demoProducts.length + 1;
 
 export async function listProducts(
   signal?: AbortSignal
