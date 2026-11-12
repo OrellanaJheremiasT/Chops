@@ -384,7 +384,9 @@ export default function LocationsPage() {
     try {
       await deleteBranch(branch.id);
       notify(
-        spanish ? `Sucursal "${branch.name}" eliminada.` : `Branch "${branch.name}" deleted.`,
+        spanish
+          ? `Sucursal "${branch.name}" eliminada.`
+          : `Branch "${branch.name}" deleted.`,
         "success",
       );
       await refreshData();
@@ -435,7 +437,9 @@ export default function LocationsPage() {
     try {
       await deleteLocation(location.id);
       notify(
-        spanish ? `Ubicación "${location.name}" eliminada.` : `Location "${location.name}" deleted.`,
+        spanish
+          ? `Ubicación "${location.name}" eliminada.`
+          : `Location "${location.name}" deleted.`,
         "success",
       );
       await refreshData();
@@ -1098,7 +1102,6 @@ export default function LocationsPage() {
           </div>
         )}
       </section>
-
     </>
   );
 }

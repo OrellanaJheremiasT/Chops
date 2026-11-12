@@ -162,7 +162,7 @@ function AppContent() {
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setMenuOpen(false);
+        setOpenMenuPath(null);
         menuButtonRef.current?.focus();
       }
     };
@@ -173,7 +173,7 @@ function AppContent() {
 
     const onChange = () => {
       if (mq.matches) {
-        setMenuOpen(false);
+        setOpenMenuPath(null);
       }
     };
 

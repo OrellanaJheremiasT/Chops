@@ -206,7 +206,7 @@ export default function ReportsPage() {
 
   function operationRows(list: Operation[]): CsvValue[][] {
     return list.map((op) => {
-      const product = findProduct(op.sku);
+      const product = items.find((item) => item.sku === op.sku);
 
       return [
         op.id,
@@ -647,7 +647,7 @@ export default function ReportsPage() {
 
               <tbody>
                 {selectedOperations.map((op) => {
-                  const product = findProduct(op.sku);
+                  const product = items.find((item) => item.sku === op.sku);
 
                   return (
                     <tr key={op.id}>
