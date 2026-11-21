@@ -1,28 +1,33 @@
+name: Chops Release
 
-changelog:
-  exclude:
-    labels:
-      - ignore-for-release
+on:
+  push:
+    tags:
+      - "v*.*.*"
 
-  categories:
-    - title: "New Features"
-      labels:
-        - enhancement
-        - feature
+  workflow_dispatch:
 
-    - title: "Bug Fixes"
-      labels:
-        - bug
-        - fix
+permissions:
+  contents: write
 
-    - title: "Dependencies"
-      labels:
-        - dependencies
+jobs:
+  release:
+    name: Publish GitHub Release
+    runs-on: ubuntu-latest
 
-    - title: "Documentation"
-      labels:
-        - documentation
+    steps:
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
 
-    - title: "Other Changes"
-      labels:
-        - "*"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists."
+            exit 0
+          fi
+
+          gh release create "$TAG" \
+            --title "Chops $TAG" \
+            --generate-notes
