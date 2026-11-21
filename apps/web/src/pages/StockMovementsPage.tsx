@@ -1,317 +1,432 @@
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
+
+import { ApiError } from "../api/client";
 import {
-  ArrowLeftRight,
-  ArrowDownToLine,
-  ArrowUpFromLine,
-  Search,
-  PackageCheck,
-} from "lucide-react";
-import { useLanguage } from "../i18n/languageHook";
+  createInventoryMovement,
+  inventoryDemoMode,
+  listInventoryBalances,
+  listInventoryMovements,
+} from "../api/inventory";
+import type { MovementKind } from "../api/inventory";
+import { listBranches, listLocations } from "../api/locations";
+import { listProducts } from "../api/products";
 import ChopsSelect from "../components/ChopsSelect";
-import { useOperations } from "../demo/operationsHook";
-import { itemLabel, matchesItem } from "../demo/operationsHelpers";
-import type { Area } from "../demo/OperationsContext";
+import { useToast } from "../components/toastContext";
+import { useLanguage } from "../i18n/languageHook";
+import DemoStockMovementsPage from "./DemoStockMovementsPage";
+
 import "../styles/stock-movements.css";
 
-type Kind = "in" | "out" | "transfer";
+const kinds: MovementKind[] = ["IN", "OUT", "TRANSFER"];
+
+const kindLabels: Record<MovementKind, string> = {
+  IN: "Stock In",
+  OUT: "Stock Out",
+  TRANSFER: "Transfer",
+};
+
+async function loadSnapshot(signal: AbortSignal) {
+  const [products, branches, locations, balances, movements] = await Promise.all([
+    listProducts(signal),
+    listBranches(signal),
+    listLocations(signal),
+    listInventoryBalances(signal),
+    listInventoryMovements({}, signal),
+  ]);
+
+  return { products, branches, locations, balances, movements };
+}
+
+type Snapshot = Awaited<ReturnType<typeof loadSnapshot>>;
+
+function describePostError(error: unknown, spanish: boolean): string {
+  if (error instanceof ApiError) {
+    switch (error.status) {
+      case 400:
+        return spanish
+          ? "Movimiento inválido. Revisa la cantidad, el origen y el destino."
+          : "Invalid movement. Check the quantity, source and destination.";
+      case 404:
+        return spanish
+          ? "El SKU o la ubicación ya no existe. Revisa la selección."
+          : "The SKU or location no longer exists. Check your selection.";
+      case 409:
+        if (error.message === "Insufficient stock") {
+          return spanish
+            ? "Stock insuficiente en la ubicación de origen."
+            : "Insufficient stock at the source location.";
+        }
+        if (error.message === "Location is inactive" || error.message === "Branch is inactive") {
+          return spanish
+            ? "La ubicación o su sucursal está inactiva."
+            : "The location or its branch is inactive.";
+        }
+        return spanish
+          ? `Conflicto al registrar el movimiento: ${error.message}`
+          : `Movement conflict: ${error.message}`;
+    }
+  }
+
+  // Si se pierde la respuesta, el servidor podría haber registrado el POST.
+  return spanish
+    ? "No se pudo confirmar el resultado. Revisa el historial antes de volver a enviar."
+    : "The result could not be confirmed. Check the history before submitting again.";
+}
+
 export default function StockMovementsPage() {
+  return inventoryDemoMode ? <DemoStockMovementsPage /> : <ApiStockMovementsPage />;
+}
+
+function ApiStockMovementsPage() {
   const { t, language } = useLanguage();
-  const { balances, operations, items, register } = useOperations();
-  const [kind, setKind] = useState<Kind>("in");
-  const [search, setSearch] = useState("");
+  const { notify } = useToast();
+  const spanish = language === "es";
+  const label = (en: string, es: string) => (spanish ? es : en);
+
+  const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const [loadError, setLoadError] = useState("");
+  const [version, setVersion] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
+
+  const [kind, setKind] = useState<MovementKind>("IN");
+  const [productSearch, setProductSearch] = useState("");
   const [sku, setSku] = useState("");
-  const [from, setFrom] = useState<Area>("warehouse");
-  const [to, setTo] = useState<Area>("exhibition");
+  const [source, setSource] = useState("");
+  const [destination, setDestination] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [note, setNote] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [reason, setReason] = useState("");
+
   const [historySearch, setHistorySearch] = useState("");
-  const candidates = useMemo(
-    () => items.filter((i) => matchesItem(i, search)).slice(0, 40),
-    [items, search],
+  const [branchFilter, setBranchFilter] = useState("");
+  const [locationFilter, setLocationFilter] = useState("");
+
+  const requestController = useRef<AbortController | null>(null);
+  const submitLock = useRef(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    requestController.current = controller;
+
+    loadSnapshot(controller.signal)
+      .then((data) => {
+        if (!controller.signal.aborted) setSnapshot(data);
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) {
+          setLoadError(error instanceof Error ? error.message : "API unavailable");
+        }
+      });
+
+    return () => controller.abort();
+  }, [version]);
+
+  function refresh() {
+    setLoadError("");
+    setSnapshot(null);
+    setVersion((current) => current + 1);
+  }
+
+  const loading = snapshot === null && !loadError;
+  const branches = new Map(snapshot?.branches.map((branch) => [branch.id, branch]));
+  const locations = snapshot?.locations ?? [];
+
+  function locationLabel(id: number | null): string {
+    if (id === null) return t("External");
+
+    const location = locations.find((item) => item.id === id);
+    if (!location) return `#${id}`;
+
+    const branchName = location.branchId === null
+      ? t("Central / Independent")
+      : branches.get(location.branchId)?.name ?? `#${location.branchId}`;
+
+    return `${branchName} · ${location.name}`;
+  }
+
+  const activeLocations = locations.filter(
+    (location) => location.active &&
+      (location.branchId === null || branches.get(location.branchId)?.active),
   );
-  const selected = items.find((i) => i.sku === sku);
-  const today = new Date().toDateString();
-  const daily = operations.filter(
-    (op) => new Date(op.createdAt).toDateString() === today,
+
+  const locationOptions = activeLocations.map((location) => ({
+    value: String(location.id),
+    label: locationLabel(location.id),
+  }));
+
+  const variants = (snapshot?.products ?? []).flatMap((product) =>
+    product.variants.map((variant) => ({
+      value: variant.sku,
+      label: `${product.name} · ${variant.name} · ${variant.sku}`,
+    })),
   );
-  const total = (k: Kind) =>
-    daily
-      .filter((op) => op.kind === k)
-      .reduce((sum, op) => sum + op.quantity, 0);
-  const history = operations.filter((op) => {
-    if (!["in", "out", "transfer"].includes(op.kind)) return false;
-    const text = [
-      op.sku,
-      op.reason,
-      items.find((i) => i.sku === op.sku)?.name ?? "",
-    ]
-      .join(" ")
-      .toLowerCase();
-    return text.includes(historySearch.toLowerCase());
-  });
-  function submit(e: FormEvent) {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
-    const err = register({
-      kind,
-      sku,
-      quantity: Number(quantity),
-      from,
-      to,
-      reason: note,
-    });
-    if (err) {
-      setError(t(err));
+
+  const query = productSearch.trim().toLowerCase();
+  const visibleVariants = variants.filter((item) => item.label.toLowerCase().includes(query));
+  const selectedSku = visibleVariants.some((item) => item.value === sku) ? sku : "";
+
+  const sourceId = kind === "IN"
+    ? null
+    : activeLocations.find((item) => String(item.id) === source)?.id ?? null;
+
+  const destinationOptions = locationOptions.filter(
+    (item) => kind !== "TRANSFER" || item.value !== String(sourceId),
+  );
+
+  const destinationId = kind === "OUT" || !destinationOptions.some(
+    (item) => item.value === destination,
+  ) ? null : Number(destination);
+
+  function balanceAt(locationId: number) {
+    return snapshot?.balances.find(
+      (item) => item.sku === selectedSku && item.locationId === locationId,
+    )?.quantity ?? 0;
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const signal = requestController.current?.signal;
+    if (!snapshot || !signal || signal.aborted || submitLock.current) return;
+
+    const units = Number(quantity);
+    if (!selectedSku || !Number.isSafeInteger(units) || units <= 0) {
+      setFormError(t("Choose a product and a positive whole quantity."));
       return;
     }
-    setSuccess(t("Movement registered successfully."));
-    setQuantity("");
-    setNote("");
+    if ((kind !== "IN" && sourceId === null) ||
+        (kind !== "OUT" && destinationId === null)) {
+      setFormError(t("Choose valid locations."));
+      return;
+    }
+
+    submitLock.current = true;
+    setSaving(true);
+    setFormError("");
+
+    try {
+      const movement = await createInventoryMovement({
+        kind,
+        sku: selectedSku,
+        fromLocationId: sourceId,
+        toLocationId: destinationId,
+        quantity: units,
+        reason: reason.trim(),
+      }, signal);
+
+      if (signal.aborted) return;
+
+      notify(`${t("Movement registered successfully.")} #${movement.id}`, "success");
+      setQuantity("");
+      setReason("");
+      refresh();
+    } catch (error) {
+      if (signal.aborted) return;
+
+      const message = describePostError(error, spanish);
+      setFormError(message);
+      notify(message, "error");
+      // Reconsulta los saldos y el historial. El POST nunca se reintenta aquí.
+      refresh();
+    } finally {
+      submitLock.current = false;
+      if (!signal.aborted) setSaving(false);
+    }
   }
+
+  const filterLocations = locations.filter(
+    (item) => !branchFilter || String(item.branchId) === branchFilter,
+  );
+  const filterIds = new Set(
+    filterLocations
+      .filter((item) => !locationFilter || String(item.id) === locationFilter)
+      .map((item) => item.id),
+  );
+
+  const productLabels = new Map(variants.map((item) => [item.value, item.label]));
+  const historyQuery = historySearch.trim().toLowerCase();
+  const movements = snapshot?.movements ?? [];
+  const history = movements.filter((movement) => {
+    const touchesLocation = [movement.fromLocationId, movement.toLocationId].some(
+      (id) => id !== null && filterIds.has(id),
+    );
+
+    const text = [
+      movement.id,
+      productLabels.get(movement.sku) ?? movement.sku,
+      t(kindLabels[movement.kind]),
+      movement.reason,
+    ].join(" ").toLowerCase();
+
+    return (!(branchFilter || locationFilter) || touchesLocation) &&
+      text.includes(historyQuery);
+  });
+
+  const locale = spanish ? "es-PE" : "en-US";
+  const dayFormat = new Intl.DateTimeFormat(locale, { timeZone: "America/Lima" });
+  const dateFormat = new Intl.DateTimeFormat(locale, {
+    timeZone: "America/Lima", dateStyle: "short", timeStyle: "short",
+  });
+  const today = dayFormat.format(new Date());
+  const dailyUnits = { IN: 0, OUT: 0, TRANSFER: 0 };
+  for (const movement of movements) {
+    if (dayFormat.format(new Date(movement.createdAt)) === today) {
+      dailyUnits[movement.kind] += movement.quantity;
+    }
+  }
+
+  const choose = { value: "", label: label("Select…", "Selecciona…") };
+
   return (
     <section className="ops-page">
       <header className="ops-heading">
-        <div>
-          <h2>{t("Stock Movements")}</h2>
-          <p>
-            {t(
-              "Receive goods, record internal exits and transfer items between storage areas.",
-            )}
-          </p>
-        </div>
-        <span className="badge badge-info">{t("Demo Data")}</span>
+        <h2>{t("Stock Movements")}</h2>
+        <span className="badge badge-info">{label("API Data", "Datos de la API")}</span>
+        <button type="button" className="btn btn-secondary"
+          onClick={refresh} disabled={loading || saving}>
+          {label("Refresh", "Actualizar")}
+        </button>
       </header>
-      <div className="ops-metrics">
-        <article className="ops-metric">
-          <ArrowDownToLine size={18} />
-          <span>{t("Received today")}</span>
-          <strong>{total("in")}</strong>
-          <small>{t("Units")}</small>
-        </article>
-        <article className="ops-metric">
-          <ArrowUpFromLine size={18} />
-          <span>{t("Out today")}</span>
-          <strong>{total("out")}</strong>
-          <small>{t("Units")}</small>
-        </article>
-        <article className="ops-metric">
-          <ArrowLeftRight size={18} />
-          <span>{t("Transferred today")}</span>
-          <strong>{total("transfer")}</strong>
-          <small>{t("Units")}</small>
-        </article>
-        <article className="ops-metric">
-          <PackageCheck size={18} />
-          <span>{t("Latest movement")}</span>
-          <strong className="ops-metric-text">
-            {operations[0]?.id ?? "—"}
-          </strong>
-          <small>
-            {operations.length} {t("records")}
-          </small>
-        </article>
-      </div>
-      <div className="ops-columns">
-        <form className="ops-panel ops-form" onSubmit={submit}>
-          <h3>{t("Register Movement")}</h3>
-          <label>{t("Movement Type")}</label>
-          <div className="ops-segment">
-            {(
-              [
-                ["in", "Stock In"],
-                ["out", "Stock Out"],
-                ["transfer", "Transfer"],
-              ] as const
-            ).map(([value, label]) => (
-              <button
-                type="button"
-                key={value}
-                onClick={() => {
-                  setKind(value);
-                  setError("");
-                }}
-                className={kind === value ? "active" : ""}
-              >
-                {t(label)}
-              </button>
-            ))}
-          </div>
-          <label htmlFor="sm-find">{t("Search product / SKU / barcode")}</label>
-          <div className="ops-search">
-            <Search size={17} />
-            <input
-              id="sm-find"
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setSku("");
-              }}
-              placeholder={t("Type to find a product...")}
-              autoComplete="off"
-            />
-          </div>
-          <div
-            className="ops-options"
-            role="listbox"
-            aria-label={t("Products")}
-          >
-            {candidates.map((item) => (
-              <button
-                type="button"
-                role="option"
-                aria-selected={sku === item.sku}
-                key={item.sku}
-                className={sku === item.sku ? "selected" : ""}
-                onClick={() => {
-                  setSku(item.sku);
-                  setSearch(`${item.name} ${item.variant}`);
-                }}
-              >
-                <span>{itemLabel(item)}</span>
-                <small>
-                  {t("Exhibition")}: {balances[item.sku]?.exhibition ?? 0} ·{" "}
-                  {t("Warehouse")}: {balances[item.sku]?.warehouse ?? 0}
-                </small>
-              </button>
-            ))}
-            {!candidates.length && <p>{t("No products found.")}</p>}
-          </div>
-          {selected && (
-            <div className="ops-selected">
-              <strong>{itemLabel(selected)}</strong>
-              <span>
-                {t("Current stock")}:{" "}
-                {balances[sku].exhibition + balances[sku].warehouse}
-              </span>
-            </div>
-          )}
-          {kind !== "in" && (
-            <>
-              <label htmlFor="sm-source">{t("Source Location")}</label>
-              <ChopsSelect
-                id="sm-source"
-                ariaLabel={t("Source Location")}
-                value={from}
-                onChange={(value) => setFrom(value as Area)}
-                options={[
-                  { value: "warehouse", label: t("Warehouse") },
-                  { value: "exhibition", label: t("Exhibition") },
-                ]}
-              />
-            </>
-          )}
-          {kind !== "out" && (
-            <>
-              <label htmlFor="sm-destination">
-                {t("Destination Location")}
-              </label>
-              <ChopsSelect
-                id="sm-destination"
-                ariaLabel={t("Destination Location")}
-                value={to}
-                onChange={(value) => setTo(value as Area)}
-                options={[
-                  { value: "warehouse", label: t("Warehouse") },
-                  { value: "exhibition", label: t("Exhibition") },
-                ]}
-              />
-            </>
-          )}
-          <label htmlFor="sm-qty">{t("Quantity")}</label>
-          <input
-            id="sm-qty"
-            required
-            type="number"
-            min="1"
-            step="1"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-          />
-          <label htmlFor="sm-note">{t("Reason / Notes")}</label>
-          <textarea
-            id="sm-note"
-            rows={2}
-            maxLength={250}
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder={t("Optional movement description...")}
-          />
-          {error && (
-            <p className="ops-error" role="alert">
-              {error}
-            </p>
-          )}
-          {success && (
-            <p className="ops-success" role="status">
-              {success}
-            </p>
-          )}
-          <button className="btn btn-primary ops-primary" type="submit">
-            {t(kind === "in" ? "Receive Goods" : "Register Movement")}
-          </button>
-        </form>
-        <section className="ops-panel">
-          <h3>{t("Movement History")}</h3>
-          <div className="ops-search">
-            <Search size={17} />
-            <input
-              aria-label={t("Search movements")}
-              placeholder={t("Search movements...")}
-              value={historySearch}
-              onChange={(e) => setHistorySearch(e.target.value)}
-            />
-          </div>
-          <div className="ops-history">
-            {history.map((op) => (
-              <article className="ops-history-row" key={op.id}>
-                <div>
-                  <strong>
-                    {t(
-                      op.kind === "in"
-                        ? "Stock In"
-                        : op.kind === "out"
-                          ? "Stock Out"
-                          : "Transfer",
-                    )}{" "}
-                    · {op.id}
-                  </strong>
-                  <small>
-                    {new Date(op.createdAt).toLocaleString(
-                      language === "es" ? "es-PE" : "en-US",
-                    )}
-                  </small>
-                </div>
-                <p>{itemLabel(items.find((i) => i.sku === op.sku)!)}</p>
-                <p>
-                  {op.from
-                    ? t(op.from === "warehouse" ? "Warehouse" : "Exhibition")
-                    : t("External")}
-                  {" → "}
-                  {op.to
-                    ? t(op.to === "warehouse" ? "Warehouse" : "Exhibition")
-                    : t("External")}
-                </p>
-                <strong>
-                  {op.quantity} {t("Units")}
-                </strong>
-                {op.reason && <small>{op.reason}</small>}
+
+      {loading && <p role="status">{t("Loading…")}</p>}
+      {loadError && (
+        <p className="ops-error" role="alert">
+          {label("Could not load inventory. Use Refresh.", "No se pudo cargar el inventario. Pulsa Actualizar.")}
+          {" "}{loadError}
+        </p>
+      )}
+      {formError && <p className="ops-error" role="alert">{formError}</p>}
+
+      {snapshot && (
+        <>
+          <div className="ops-metrics">
+            {kinds.map((value) => (
+              <article className="ops-metric" key={value}>
+                <span>{t({ IN: "Received today", OUT: "Out today", TRANSFER: "Transferred today" }[value])}</span>
+                <strong>{dailyUnits[value]}</strong>
+                <small>{t("Units")}</small>
               </article>
             ))}
-            {!history.length && (
-              <p className="ops-empty">{t("No movements found.")}</p>
-            )}
+            <article className="ops-metric">
+              <span>{t("Latest movement")}</span>
+              <strong>{movements[0] ? `#${movements[0].id}` : "—"}</strong>
+              <small>{movements.length} {t("records")}</small>
+            </article>
           </div>
-        </section>
-      </div>
-      <p className="ops-footnote">
-        {t(
-          "Demo operations are shared between Inventory, Movements, Losses and Dashboard until page reload.",
-        )}
-      </p>
+
+          <div className="ops-columns">
+            <form onSubmit={submit}>
+              <fieldset className="ops-panel ops-form" disabled={saving}>
+                <legend>{t("Register Movement")}</legend>
+
+                <div className="ops-segment">
+                  {kinds.map((value) => (
+                    <button type="button" key={value}
+                      aria-pressed={kind === value}
+                      className={kind === value ? "active" : ""}
+                      onClick={() => { setKind(value); setFormError(""); }}>
+                      {t(kindLabels[value])}
+                    </button>
+                  ))}
+                </div>
+
+                <label htmlFor="sm-search">{t("Search products")}</label>
+                <input id="sm-search" type="search" value={productSearch}
+                  onChange={(event) => { setProductSearch(event.target.value); setSku(""); }} />
+
+                <label htmlFor="sm-sku">SKU</label>
+                <ChopsSelect id="sm-sku" ariaLabel="SKU" value={selectedSku}
+                  options={[choose, ...visibleVariants]} onChange={setSku} />
+                {!visibleVariants.length && <small>{t("No products found.")}</small>}
+
+                {kind !== "IN" && (
+                  <>
+                    <label htmlFor="sm-from">{t("Source Location")}</label>
+                    <ChopsSelect id="sm-from" ariaLabel={t("Source Location")}
+                      value={sourceId === null ? "" : String(sourceId)}
+                      options={[choose, ...locationOptions]} onChange={setSource} />
+                    {selectedSku && sourceId !== null && (
+                      <small>{t("Available Stock")}: {balanceAt(sourceId)}</small>
+                    )}
+                  </>
+                )}
+
+                {kind !== "OUT" && (
+                  <>
+                    <label htmlFor="sm-to">{t("Destination Location")}</label>
+                    <ChopsSelect id="sm-to" ariaLabel={t("Destination Location")}
+                      value={destinationId === null ? "" : String(destinationId)}
+                      options={[choose, ...destinationOptions]} onChange={setDestination} />
+                    {selectedSku && destinationId !== null && (
+                      <small>{t("Current stock")}: {balanceAt(destinationId)}</small>
+                    )}
+                  </>
+                )}
+
+                {!activeLocations.length && (
+                  <p role="status">{label("No active locations.", "No hay ubicaciones activas.")}</p>
+                )}
+
+                <label htmlFor="sm-qty">{t("Quantity")}</label>
+                <input id="sm-qty" type="number" min="1" step="1" required
+                  max={Number.MAX_SAFE_INTEGER}
+                  value={quantity} onChange={(event) => setQuantity(event.target.value)} />
+
+                <label htmlFor="sm-reason">{t("Reason / Notes")}</label>
+                <textarea id="sm-reason" rows={2} maxLength={240}
+                  value={reason} onChange={(event) => setReason(event.target.value)} />
+
+                <button type="submit" className="btn btn-primary"
+                  disabled={!selectedSku || !activeLocations.length}>
+                  {saving ? label("Saving…", "Guardando…") : t("Register Movement")}
+                </button>
+              </fieldset>
+            </form>
+
+            <section className="ops-panel ops-form">
+              <h3>{t("Movement History")}</h3>
+
+              <label htmlFor="sm-history">{t("Search movements")}</label>
+              <input id="sm-history" type="search" value={historySearch}
+                onChange={(event) => setHistorySearch(event.target.value)} />
+
+              <label htmlFor="sm-branch">{t("Branch")}</label>
+              <ChopsSelect id="sm-branch" ariaLabel={t("Branch")} value={branchFilter}
+                options={[
+                  { value: "", label: t("All branches") },
+                  ...snapshot.branches.map((item) => ({ value: String(item.id), label: item.name })),
+                  { value: "null", label: t("Central / Independent") },
+                ]}
+                onChange={(value) => { setBranchFilter(value); setLocationFilter(""); }} />
+
+              <label htmlFor="sm-location">{t("Location")}</label>
+              <ChopsSelect id="sm-location" ariaLabel={t("Location")} value={locationFilter}
+                options={[
+                  { value: "", label: label("All locations", "Todas las ubicaciones") },
+                  ...filterLocations.map((item) => ({
+                    value: String(item.id), label: locationLabel(item.id),
+                  })),
+                ]}
+                onChange={setLocationFilter} />
+
+              <div className="ops-history">
+                {history.map((movement) => (
+                  <article className="ops-history-row" key={movement.id}>
+                    <strong>#{movement.id} · {t(kindLabels[movement.kind])}</strong>
+                    <small>{dateFormat.format(new Date(movement.createdAt))}</small>
+                    <p>{productLabels.get(movement.sku) ?? movement.sku}</p>
+                    <p>{locationLabel(movement.fromLocationId)} → {locationLabel(movement.toLocationId)}</p>
+                    <strong>{movement.quantity} {t("Units")}</strong>
+                    {movement.reason && <small>{movement.reason}</small>}
+                  </article>
+                ))}
+                {!history.length && <p className="ops-empty">{t("No movements found.")}</p>}
+              </div>
+            </section>
+          </div>
+        </>
+      )}
     </section>
   );
 }

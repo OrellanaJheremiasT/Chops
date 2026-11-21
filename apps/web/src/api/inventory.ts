@@ -1,7 +1,8 @@
-
-import { apiGet } from "./client";
+import { apiGet, apiRequest } from "./client";
 import { productsDemoMode } from "./products";
 import type { LocationType } from "./locations";
+
+export const inventoryDemoMode = productsDemoMode;
 
 export type InventoryBalance = {
   sku: string;
@@ -11,16 +12,70 @@ export type InventoryBalance = {
   quantity: number;
 };
 
-// GitHub Pages has no API yet; it must keep its existing local demo.
-export const inventoryDemoMode = productsDemoMode;
+export type MovementKind = "IN" | "OUT" | "TRANSFER";
+
+export type InventoryMovementRequest = {
+  kind: MovementKind;
+  sku: string;
+  fromLocationId: number | null;
+  toLocationId: number | null;
+  quantity: number;
+  reason: string;
+};
+
+export type InventoryMovement = InventoryMovementRequest & {
+  id: number;
+  createdAt: string;
+};
+
+type MovementFilters = {
+  sku?: string;
+  locationId?: number;
+};
 
 export async function listInventoryBalances(
   signal?: AbortSignal,
 ): Promise<InventoryBalance[]> {
   if (inventoryDemoMode) return [];
 
-  return apiGet<InventoryBalance[]>(
-    "/api/v1/inventory/balances",
+  return apiGet<InventoryBalance[]>("/api/v1/inventory/balances", signal);
+}
+
+export async function listInventoryMovements(
+  filters: MovementFilters = {},
+  signal?: AbortSignal,
+): Promise<InventoryMovement[]> {
+  if (inventoryDemoMode) return [];
+
+  const params = new URLSearchParams();
+
+  if (filters.sku?.trim()) {
+    params.set("sku", filters.sku.trim());
+  }
+
+  if (filters.locationId !== undefined) {
+    params.set("locationId", String(filters.locationId));
+  }
+
+  const query = params.toString();
+
+  return apiGet<InventoryMovement[]>(
+    `/api/v1/inventory/movements${query ? `?${query}` : ""}`,
     signal,
   );
+}
+
+export async function createInventoryMovement(
+  input: InventoryMovementRequest,
+  signal?: AbortSignal,
+): Promise<InventoryMovement> {
+  if (inventoryDemoMode) {
+    throw new Error("The inventory API is unavailable in demo mode.");
+  }
+
+  return apiRequest<InventoryMovement>("/api/v1/inventory/movements", {
+    method: "POST",
+    body: JSON.stringify(input),
+    signal,
+  });
 }
