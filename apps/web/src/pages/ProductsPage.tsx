@@ -13,6 +13,10 @@ import {
   updateProduct,
 } from "../api/products";
 import type { Product, ProductInput, ProductVariant } from "../api/products";
+import {
+  inventoryDemoMode,
+  listInventoryBalances,
+} from "../api/inventory";
 
 type ProductDraft = ProductInput & { id: number | null };
 
@@ -64,6 +68,12 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
 
+  // En el modo API, las existencias se consultan por SKU en Inventory.
+  const [stockBySku, setStockBySku] = useState<Record<string, number>>({});
+  const [stockLoading, setStockLoading] = useState(!inventoryDemoMode);
+  const [stockError, setStockError] = useState(false);
+  const [stockRefreshKey, setStockRefreshKey] = useState(0);
+
   useEffect(() => {
     const controller = new AbortController();
 
@@ -81,9 +91,50 @@ export default function ProductsPage() {
     return () => controller.abort();
   }, []);
 
+  useEffect(() => {
+    if (inventoryDemoMode) return;
+
+    const controller = new AbortController();
+
+    listInventoryBalances(controller.signal)
+      .then((balances) => {
+        if (controller.signal.aborted) return;
+
+        const totals: Record<string, number> = {};
+        for (const balance of balances) {
+          totals[balance.sku] = (totals[balance.sku] ?? 0) + balance.quantity;
+        }
+        setStockBySku(totals);
+      })
+      .catch(() => {
+        if (controller.signal.aborted) return;
+        setStockBySku({});
+        setStockError(true);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setStockLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [stockRefreshKey]);
+
+  function totalStock(product: Product): number {
+    const uniqueSkus = new Set(product.variants.map((variant) => variant.sku));
+    return Array.from(uniqueSkus).reduce(
+      (total, sku) => total + (stockBySku[sku] ?? 0),
+      0,
+    );
+  }
+
   async function reloadProducts() {
     setLoading(true);
     setLoadError(null);
+
+    if (!inventoryDemoMode) {
+      setStockLoading(true);
+      setStockError(false);
+      setStockRefreshKey((current) => current + 1);
+    }
 
     try {
       setProducts(await listProducts());
@@ -296,6 +347,14 @@ export default function ProductsPage() {
         </p>
       )}
 
+      {!inventoryDemoMode && stockError && (
+        <p className="product-form-error" role="alert">
+          {spanish
+            ? "No se pudieron cargar las existencias. Pulsa Actualizar para reintentar."
+            : "Could not load inventory balances. Use Refresh to try again."}
+        </p>
+      )}
+
       <div className="table-wrap">
         <table>
           <thead>
@@ -343,12 +402,28 @@ export default function ProductsPage() {
                     <span
                       className="badge badge-info"
                       title={
-                        spanish
-                          ? "El stock se conectará en la etapa de Inventory"
-                          : "Stock will be connected during Inventory integration"
+                        inventoryDemoMode
+                          ? spanish
+                            ? "Stock no disponible en modo demo"
+                            : "Stock unavailable in demo mode"
+                          : stockLoading
+                            ? spanish
+                              ? "Cargando existencias…"
+                              : "Loading stock…"
+                            : stockError
+                              ? spanish
+                                ? "No se pudieron consultar las existencias"
+                                : "Could not retrieve stock balances"
+                              : spanish
+                                ? "Existencias totales en todas las ubicaciones"
+                                : "Total stock across all locations"
                       }
                     >
-                      —
+                      {inventoryDemoMode || stockError
+                        ? "—"
+                        : stockLoading
+                          ? "…"
+                          : totalStock(product)}
                     </span>
                   </td>
 
@@ -407,8 +482,8 @@ export default function ProductsPage() {
         {productsDemoMode
           ? t("Demo catalog. Changes are temporary and reset on page reload.")
           : spanish
-            ? "Catálogo almacenado temporalmente en Spring Boot: se reinicia al apagar la API. Las existencias se conectarán desde Inventory."
-            : "Catalog stored temporarily in Spring Boot: data resets when the API restarts. Stock will be connected through Inventory."}
+            ? "Catálogo almacenado temporalmente en Spring Boot: se reinicia al apagar la API. El stock mostrado es el total de todas las ubicaciones."
+            : "Catalog stored temporarily in Spring Boot: data resets when the API restarts. Displayed stock is the total across all locations."}
       </p>
 
       {editing && (
