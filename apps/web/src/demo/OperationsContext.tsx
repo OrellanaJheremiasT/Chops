@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 
 import { demoInitialBalances as initial, demoItems } from "./catalog";
 import type { InventoryState, Item } from "./catalog";
+import { applyMovement, isStockArea, type DemoMovement } from "./applyMovement";
 import { Context } from "./operationsHook";
 
 export type { Item };
@@ -42,20 +43,11 @@ export type Operation = {
 
 const STORAGE_KEY = "chops-operations-demo-v1";
 
-type Action = {
-  kind: "in" | "out" | "transfer";
-  sku: string;
-  quantity: number;
-  from?: Area;
-  to?: Area;
-  reason?: string;
-};
-
 export type OperationApi = {
   balances: InventoryState;
   operations: Operation[];
   items: Item[];
-  register: (input: Action) => string | null;
+  register: (input: DemoMovement) => string | null;
   reportLoss: (
     sku: string,
     area: Area,
@@ -76,9 +68,6 @@ type SavedState = {
   operations: Operation[];
 };
 
-
-const locationValid = (area: unknown): area is Area =>
-  area === "exhibition" || area === "warehouse";
 
 const positive = (value: number) =>
   Number.isSafeInteger(value) && value > 0;
@@ -144,9 +133,9 @@ function loadSavedState(): SavedState {
         Number.isSafeInteger(operation.quantity) &&
         operation.quantity > 0 &&
         (operation.from === null ||
-          locationValid(operation.from)) &&
+          isStockArea(operation.from)) &&
         (operation.to === null ||
-          locationValid(operation.to)) &&
+          isStockArea(operation.to)) &&
         typeof operation.reason === "string"
     );
 
@@ -179,14 +168,10 @@ export function OperationsProvider({
   );
 
   const [nextId, setNextId] = useState(() => {
-    const ids = savedState.operations.map(
-      (operation) => {
-        const match = /^MOV-(\d+)$/.exec(operation.id);
-        return match ? Number(match[1]) : 0;
-      }
-    );
-
-    return Math.max(0, ...ids) + 1;
+    return savedState.operations.reduce((highestId, operation) => {
+      const match = /^MOV-(\d+)$/.exec(operation.id);
+      return match ? Math.max(highestId, Number(match[1])) : highestId;
+    }, 0) + 1;
   });
 
   // Automatically save whenever stock or history changes.
@@ -238,58 +223,12 @@ export function OperationsProvider({
     setOperations((current) => [operation, ...current]);
   }
 
-  function register(action: Action): string | null {
+  function register(action: DemoMovement): string | null {
+    const result = applyMovement(balances, action);
+    if (typeof result === "string") return result;
+
     const { kind, sku, quantity } = action;
-
-    if (!balances[sku] || !positive(quantity)) {
-      return "Choose a product and a positive whole quantity.";
-    }
-
-    const from =
-      kind === "in" ? null : action.from;
-
-    const to =
-      kind === "out" ? null : action.to;
-
-    if (
-      (from && !locationValid(from)) ||
-      (to && !locationValid(to)) ||
-      (!from && !to)
-    ) {
-      return "Choose valid locations.";
-    }
-
-    if (
-      kind === "transfer" &&
-      (!from || !to || from === to)
-    ) {
-      return "Source and destination must be different.";
-    }
-
-    if (
-      (kind === "out" && !from) ||
-      (kind === "in" && !to)
-    ) {
-      return "Choose a location.";
-    }
-
-    if (
-      from &&
-      balances[sku][from] < quantity
-    ) {
-      return "Insufficient stock at the source location.";
-    }
-
-    const updated = structuredClone(balances);
-
-    if (from) {
-      updated[sku][from] -= quantity;
-    }
-
-    if (to) {
-      updated[sku][to] += quantity;
-    }
-
+    const { updated, from, to } = result;
     save(
       kind,
       sku,
@@ -312,7 +251,7 @@ export function OperationsProvider({
   ): string | null {
     if (
       !balances[sku] ||
-      !locationValid(area) ||
+      !isStockArea(area) ||
       !positive(quantity)
     ) {
       return "Choose a product and a positive whole quantity.";
@@ -349,7 +288,7 @@ export function OperationsProvider({
   ): string | null {
     if (
       !balances[sku] ||
-      !locationValid(area) ||
+      !isStockArea(area) ||
       !Number.isSafeInteger(counted) ||
       counted < 0
     ) {
@@ -392,4 +331,3 @@ export function OperationsProvider({
     </Context.Provider>
   );
 }
-
