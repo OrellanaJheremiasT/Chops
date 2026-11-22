@@ -1,6 +1,7 @@
 
 package com.stockflow.inventory.dto;
 
+import tools.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -15,7 +16,7 @@ public record InventoryMovementRequest(
 
         Long toLocationId,
 
-        @Positive long quantity,
+        @Positive @JsonDeserialize(using = MovementQuantityDeserializer.class) long quantity,
 
         @Size(max = 240) String reason) {
     public enum Kind {

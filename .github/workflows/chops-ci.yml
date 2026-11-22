@@ -3,10 +3,10 @@ name: Chops CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
 
   pull_request:
-    branches: [main]
+    branches: [main, dev]
 
   workflow_dispatch:
 
@@ -43,7 +43,9 @@ jobs:
       - name: Build frontend (TypeScript + Vite)
         run: npm run build
 
-      # Existing ESLint errors are informational for now.
+      - name: Test inventory and reporting rules
+        run: npm test
+
       - name: Lint frontend
         run: npm run lint
 
