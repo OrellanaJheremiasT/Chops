@@ -32,10 +32,7 @@ jobs:
         working-directory: apps/web
         run: npm ci
 
-      # Informational for now: 7 pre-existing lint errors. Remove
-      # continue-on-error once they are fixed so lint blocks the deploy.
       - name: Lint
-        continue-on-error: true
         working-directory: apps/web
         run: npm run lint
 
