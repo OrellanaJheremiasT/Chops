@@ -58,16 +58,14 @@ public class LocationsController {
         public BranchResponse updateBranch(
                         @PathVariable long id,
                         @Valid @RequestBody BranchRequest request) {
-                return service.updateBranch(id, request);
+                return inventoryService.updateBranch(id, request);
         }
 
         @DeleteMapping("/api/v1/branches/{id}")
         @ResponseStatus(HttpStatus.NO_CONTENT)
         public void deleteBranch(
                         @PathVariable long id) {
-                inventoryService.ensureBranchCanDelete(id);
-
-                service.deleteBranch(id);
+                inventoryService.deleteBranch(id);
         }
 
         // STORAGE LOCATIONS
@@ -98,17 +96,13 @@ public class LocationsController {
         public StorageLocationResponse updateLocation(
                         @PathVariable long id,
                         @Valid @RequestBody StorageLocationRequest request) {
-                inventoryService.ensureLocationCanUpdate(id, request);
-
-                return service.updateLocation(id, request);
+                return inventoryService.updateLocation(id, request);
         }
 
         @DeleteMapping("/api/v1/locations/{id}")
         @ResponseStatus(HttpStatus.NO_CONTENT)
         public void deleteLocation(
                         @PathVariable long id) {
-                inventoryService.ensureLocationCanDelete(id);
-
-                service.deleteLocation(id);
+                inventoryService.deleteLocation(id);
         }
 }
