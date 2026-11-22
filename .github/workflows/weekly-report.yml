@@ -1,0 +1,252 @@
+
+name: Chops Weekly Development Report
+
+on:
+  schedule:
+    - cron: "17 20 * * 0"
+      timezone: "America/Lima"
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: write
+  actions: read
+
+concurrency:
+  group: chops-weekly-report
+  cancel-in-progress: false
+
+jobs:
+  weekly-report:
+    name: Generate Weekly Report
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate and publish report
+        uses: actions/github-script@v9
+        with:
+          retries: 3
+          script: |
+            const { owner, repo } = context.repo;
+
+            const now = new Date();
+            const since = new Date(
+              now.getTime() - 7 * 24 * 60 * 60 * 1000
+            );
+
+            const within = (date) =>
+              date &&
+              new Date(date) >= since &&
+              new Date(date) <= now;
+
+            const format = (date) =>
+              new Intl.DateTimeFormat("es-PE", {
+                timeZone: "America/Lima",
+                dateStyle: "medium",
+                timeStyle: "short"
+              }).format(date);
+
+            const day = new Intl.DateTimeFormat("sv-SE", {
+              timeZone: "America/Lima",
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit"
+            }).format(now);
+
+            const safe = (text) =>
+              String(text || "")
+                .split("\n")[0]
+                .replace(/[\[\]()]/g, "\\$&")
+                .slice(0, 120);
+
+            const link = (text, url) =>
+              `- [${safe(text)}](${url})`;
+
+            const section = (items, render) =>
+              items.length
+                ? items.slice(0, 10).map(render).join("\n")
+                : "- Sin registros.";
+
+            const isReport = (issue) =>
+              issue.title.startsWith(
+                "Chops Weekly Report —"
+              );
+
+            const { data: repository } =
+              await github.rest.repos.get({
+                owner, repo
+              });
+
+            const [commits, pulls, issues, openItems, runs] =
+              await Promise.all([
+                github.paginate(
+                  github.rest.repos.listCommits,
+                  {
+                    owner, repo,
+                    sha: repository.default_branch,
+                    since: since.toISOString(),
+                    until: now.toISOString(),
+                    per_page: 100
+                  }
+                ),
+                github.paginate(
+                  github.rest.pulls.list,
+                  {
+                    owner, repo,
+                    state: "closed",
+                    sort: "updated",
+                    direction: "desc",
+                    per_page: 100
+                  }
+                ),
+                github.paginate(
+                  github.rest.issues.listForRepo,
+                  {
+                    owner, repo,
+                    state: "all",
+                    since: since.toISOString(),
+                    per_page: 100
+                  }
+                ),
+                github.paginate(
+                  github.rest.issues.listForRepo,
+                  {
+                    owner, repo,
+                    state: "open",
+                    per_page: 100
+                  }
+                ),
+                github.paginate(
+                  github.rest.actions.listWorkflowRunsForRepo,
+                  {
+                    owner, repo,
+                    created:
+                      `${since.toISOString()}..${now.toISOString()}`,
+                    per_page: 100
+                  }
+                )
+              ]);
+
+            const merged = pulls.filter(
+              (pr) => within(pr.merged_at)
+            );
+
+            const realIssues = issues.filter(
+              (i) => !i.pull_request && !isReport(i)
+            );
+
+            const opened = realIssues.filter(
+              (i) => within(i.created_at)
+            );
+
+            const closed = realIssues.filter(
+              (i) => within(i.closed_at)
+            );
+
+            const pending = openItems.filter(
+              (i) => !i.pull_request && !isReport(i)
+            );
+
+            const hasBugLabel = (item) =>
+              item.labels.some(
+                (l) => ["bug", "fix"].includes(
+                  l.name.toLowerCase()
+                )
+              );
+
+            const fixes = [
+              ...merged.filter(hasBugLabel),
+              ...closed.filter(hasBugLabel)
+            ];
+
+            const failures = runs.filter(
+              (r) => r.conclusion === "failure" &&
+                r.name !==
+                "Chops Weekly Development Report"
+            );
+
+            const title =
+              `Chops Weekly Report — ${day}`;
+
+            const body = [
+              "# Chops — Weekly Development Report",
+              `**Período:** ${format(since)} — ${format(now)}`,
+              "## 📊 Resumen",
+              "| Métrica | Total |\n" +
+              "|---|---:|\n" +
+              `| Commits en ${repository.default_branch} | ${commits.length} |\n` +
+              `| PR fusionados | ${merged.length} |\n` +
+              `| Issues creados | ${opened.length} |\n` +
+              `| Issues cerrados | ${closed.length} |\n` +
+              `| Correcciones etiquetadas | ${fixes.length} |\n` +
+              `| Workflows fallidos | ${failures.length} |\n` +
+              `| Issues pendientes | ${pending.length} |`,
+
+              "## 🔨 Commits recientes",
+              section(commits, (c) =>
+                link(
+                  `${c.sha.slice(0, 7)} — ${c.commit.message}`,
+                  c.html_url
+                )
+              ),
+
+              "## 🚀 Pull Requests fusionados",
+              section(merged, (pr) =>
+                link(`#${pr.number} ${pr.title}`, pr.html_url)
+              ),
+
+              "## 🐛 Correcciones identificadas",
+              section(fixes, (item) =>
+                link(`#${item.number} ${item.title}`, item.html_url)
+              ),
+
+              "## ✅ Issues cerrados",
+              section(closed, (i) =>
+                link(`#${i.number} ${i.title}`, i.html_url)
+              ),
+
+              "## ❌ Ejecuciones fallidas",
+              section(failures, (r) =>
+                link(
+                  `${r.name} #${r.run_number}`,
+                  r.html_url
+                )
+              ),
+
+              "## 📌 Pendientes",
+              section(pending, (i) =>
+                link(`#${i.number} ${i.title}`, i.html_url)
+              ),
+
+              "---",
+              "_Reporte generado automáticamente por GitHub Actions._\n" +
+              "_Las correcciones se identifican mediante etiquetas bug/fix._"
+            ].join("\n\n");
+
+            await core.summary.addRaw(body).write();
+
+            const existing = issues.find(
+              (i) => !i.pull_request && i.title === title
+            );
+
+            let result;
+
+            if (existing) {
+              result = await github.rest.issues.update({
+                owner, repo,
+                issue_number: existing.number,
+                body
+              });
+            } else {
+              result = await github.rest.issues.create({
+                owner, repo,
+                title,
+                body
+              });
+            }
+
+            core.notice(
+              `Weekly report: ${result.data.html_url}`
+            );
