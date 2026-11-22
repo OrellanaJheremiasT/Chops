@@ -32,6 +32,11 @@ function blankProduct(): ProductDraft {
 
 function errorMessage(error: unknown, spanish: boolean): string {
   if (error instanceof ApiError) {
+    if (error.status === 409 && error.message.includes("inventory history")) {
+      return spanish
+        ? "El historial de inventario requiere conservar este producto y sus SKU registrados."
+        : "Inventory history requires keeping this product and its recorded SKUs.";
+    }
     if (error.status === 409) {
       return spanish
         ? "El SKU ya existe en el catálogo."
@@ -226,13 +231,13 @@ export default function ProductsPage() {
     }
 
     const skus = payload.variants.map((variant) => variant.sku);
-    const otherSkus = products
+    const otherSkus = new Set(products
       .filter((item) => item.id !== editing.id)
-      .flatMap((item) => item.variants.map((variant) => variant.sku));
+      .flatMap((item) => item.variants.map((variant) => variant.sku)));
 
     if (
       new Set(skus).size !== skus.length ||
-      skus.some((sku) => otherSkus.includes(sku))
+      skus.some((sku) => otherSkus.has(sku))
     ) {
       setFormError(t("Each SKU must be unique."));
       return;
