@@ -1,3 +1,4 @@
+// Probe the health endpoint only in API mode because Pages can run entirely from static assets.
 import { useEffect, useState } from "react";
 import { CheckCircle2, XCircle, LoaderCircle } from "lucide-react";
 
