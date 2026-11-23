@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+/** Branches start with an exhibition and a warehouse. Later location changes must preserve both active areas. */
 @Service
 public class LocationService {
 
@@ -213,6 +214,7 @@ public class LocationService {
                 id
         );
 
+        // Validate a proposed location set before it becomes visible to readers.
         Map<Long, StorageLocationResponse> candidate =
                 new LinkedHashMap<>(locations);
 
