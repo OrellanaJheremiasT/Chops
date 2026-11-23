@@ -1,3 +1,4 @@
+/* Reuse status styling for route-level feedback so loading and recovery controls remain consistent. */
 /* Shared 404 / error / route-loading panels */
 
 .status-panel {
