@@ -224,58 +224,10 @@ export function OperationsProvider({
     setOperations((current) => [operation, ...current]);
   }
 
-  function register(action: Action): string | null {
+  function register(action: DemoMovement): string | null {
     // Validate the proposed balance change before recording it in history.
-    const { kind, sku, quantity } = action;
-
-    if (!balances[sku] || !positive(quantity)) {
-      return "Choose a product and a positive whole quantity.";
-    }
-
-    const from =
-      kind === "in" ? null : action.from;
-
-    const to =
-      kind === "out" ? null : action.to;
-
-    if (
-      (from && !locationValid(from)) ||
-      (to && !locationValid(to)) ||
-      (!from && !to)
-    ) {
-      return "Choose valid locations.";
-    }
-
-    if (
-      kind === "transfer" &&
-      (!from || !to || from === to)
-    ) {
-      return "Source and destination must be different.";
-    }
-
-    if (
-      (kind === "out" && !from) ||
-      (kind === "in" && !to)
-    ) {
-      return "Choose a location.";
-    }
-
-    if (
-      from &&
-      balances[sku][from] < quantity
-    ) {
-      return "Insufficient stock at the source location.";
-    }
-
-    const updated = structuredClone(balances);
-
-    if (from) {
-      updated[sku][from] -= quantity;
-    }
-
-    if (to) {
-      updated[sku][to] += quantity;
-    }
+    const result = applyMovement(balances, action);
+    if (typeof result === "string") return result;
 
     const { kind, sku, quantity } = action;
     const { updated, from, to } = result;
@@ -283,8 +235,8 @@ export function OperationsProvider({
       kind,
       sku,
       quantity,
-      from ?? null,
-      to ?? null,
+      from,
+      to,
       action.reason?.trim() || "",
       updated
     );
