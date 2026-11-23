@@ -1,3 +1,4 @@
+// The control edits a calendar date for reporting and filters. Preserve the day as selected when working across time zones.
 import { useEffect, useRef, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -15,6 +16,7 @@ function formatKey(year: number, month: number, day: number): string {
   return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 }
 
+// Parse components locally because ISO date-only parsing would interpret the key as UTC.
 function fromKey(value: string): Date {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return new Date();
   const [year, month, day] = value.split("-").map(Number);
