@@ -1,3 +1,4 @@
+// Browser preferences are optional because storage can be blocked by privacy settings or unavailable.
 /** localStorage can throw (blocked storage, privacy modes). Never let it break the app. */
 export function readStorage(key: string): string | null {
   try {
