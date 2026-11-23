@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
+/** A movement uses positive whole units. The movement kind determines which endpoint identifiers are required. */
 public record InventoryMovementRequest(
         @NotNull Kind kind,
 
