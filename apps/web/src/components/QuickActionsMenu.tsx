@@ -1,3 +1,4 @@
+// Shortcuts point to existing workflows so quick navigation and the sidebar share the same route behavior.
 import { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
