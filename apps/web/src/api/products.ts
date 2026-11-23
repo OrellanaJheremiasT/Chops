@@ -1,6 +1,11 @@
+<<<<<<< Updated upstream
 
 import { apiGet, apiRequest } from "./client";
 import { demoItems } from "../demo/catalog";
+=======
+// Keep the catalog contract identical for the HTTP client and the demo adapter so pages can switch at build time.
+import { demoMode, apiGet, apiRequest } from "./client";
+>>>>>>> Stashed changes
 
 export type ProductVariant = {
   sku: string;
