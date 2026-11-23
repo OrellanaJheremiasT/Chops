@@ -1,3 +1,4 @@
+// Edit product variants by SKU and read live stock separately so catalog errors and inventory errors remain distinguishable.
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { Pencil, Plus, RefreshCcw, Search, Trash2, X } from "lucide-react";
@@ -68,7 +69,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [working, setWorking] = useState(false);
 
-  // En el modo API, las existencias se consultan por SKU en Inventory.
+  // In API mode, the inventory endpoint supplies stock totals by SKU.
   const [stockBySku, setStockBySku] = useState<Record<string, number>>({});
   const [stockLoading, setStockLoading] = useState(!inventoryDemoMode);
   const [stockError, setStockError] = useState(false);
@@ -225,6 +226,7 @@ export default function ProductsPage() {
       return;
     }
 
+    // Validate the normalized draft against itself and against other products.
     const skus = payload.variants.map((variant) => variant.sku);
     const otherSkus = products
       .filter((item) => item.id !== editing.id)
