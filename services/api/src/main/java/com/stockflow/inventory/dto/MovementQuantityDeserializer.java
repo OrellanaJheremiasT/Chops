@@ -1,0 +1,23 @@
+package com.stockflow.inventory.dto;
+
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
+
+// Limit exact decimal-to-integer conversion to movement quantities so unrelated JSON fields keep their normal coercion rules.
+/** A decimal token may represent whole units, but rounding it would change stock. */
+final class MovementQuantityDeserializer extends ValueDeserializer<Long> {
+    @Override
+    public Long deserialize(JsonParser parser, DeserializationContext context) {
+        if (!parser.hasToken(JsonToken.VALUE_NUMBER_FLOAT)) {
+            return context.readValue(parser, long.class);
+        }
+
+        try {
+            return parser.getDecimalValue().longValueExact();
+        } catch (ArithmeticException invalidQuantity) {
+            return context.reportInputMismatch(Long.class, "Quantity must be a whole number in the supported range");
+        }
+    }
+}
