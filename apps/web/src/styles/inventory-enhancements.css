@@ -1,3 +1,4 @@
+/* Apply supplemental rules to the inventory route without changing shared stock controls. */
 .inv-title-actions {
   display: flex;
   align-items: center;
