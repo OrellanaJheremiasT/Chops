@@ -1,3 +1,4 @@
+// English strings serve as translation keys and fallback text, so wording changes can affect existing Spanish translations.
 import { useEffect, useState } from "react"
 import type { ReactNode } from "react"
 import { readStorage, writeStorage } from "../utils/safeStorage"
