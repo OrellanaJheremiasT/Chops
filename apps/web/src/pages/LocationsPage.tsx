@@ -1,3 +1,4 @@
+// Coordinate branch and location forms while keeping required-area checks consistent with the rules enforced by the selected data source.
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 
@@ -68,6 +69,7 @@ function describeError(error: unknown, spanish: boolean): string {
     : "Request failed. Check that Spring Boot is running.";
 }
 
+// Check the projected set of locations so form validation can catch changes that would remove a required area.
 function retainsRequiredLocations(
   branchId: number,
   candidate: StorageLocation[],
