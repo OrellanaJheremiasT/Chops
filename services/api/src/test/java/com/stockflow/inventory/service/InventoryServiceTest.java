@@ -15,6 +15,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,7 +30,7 @@ class InventoryServiceTest {
         private long exhibitionId;
         private long warehouseId;
 
-    private static final String SKU = "TEST-COKE-500";
+        private static final String SKU = "TEST-COKE-500";
 
         @BeforeEach
         void setUp() {
@@ -205,7 +207,7 @@ class InventoryServiceTest {
 
                 ResponseStatusException error = assertThrows(
                                 ResponseStatusException.class,
-                                () -> inventory.ensureProductCanDelete(1L));
+                                () -> inventory.deleteProduct(1L));
 
                 assertEquals(
                                 HttpStatus.CONFLICT,
@@ -222,11 +224,77 @@ class InventoryServiceTest {
 
                 ResponseStatusException error = assertThrows(
                                 ResponseStatusException.class,
-                                () -> inventory.ensureLocationCanDelete(
+                                () -> inventory.deleteLocation(
                                                 warehouseId));
 
                 assertEquals(
                                 HttpStatus.CONFLICT,
                                 error.getStatusCode());
+        }
+
+        @Test
+        void zeroBalanceStillProtectsSkuAndBranchHistory() {
+                inventory.register(request(InventoryMovementRequest.Kind.IN, null, warehouseId, 1));
+                inventory.register(request(InventoryMovementRequest.Kind.OUT, warehouseId, null, 1));
+                long branch = locations.findLocation(warehouseId).branchId();
+                long product = products.findAll().getFirst().id();
+                var changedSku = new ProductRequest("New name", "Drinks", BigDecimal.ONE,
+                                List.of(new ProductRequest.VariantRequest("NEW-SKU", "Small")));
+                var history = inventory.findMovements(SKU, null);
+
+                assertEquals(HttpStatus.CONFLICT, assertThrows(ResponseStatusException.class,
+                                () -> inventory.updateProduct(product, changedSku)).getStatusCode());
+                assertEquals(HttpStatus.CONFLICT, assertThrows(ResponseStatusException.class,
+                                () -> inventory.deleteBranch(branch)).getStatusCode());
+                assertEquals(warehouseId, locations.findLocation(warehouseId).id());
+                assertEquals(SKU, products.findById(product).variants().getFirst().sku());
+                assertEquals(0, balance(warehouseId));
+                assertEquals(history, inventory.findMovements(SKU, null));
+        }
+
+        @Test
+        void concurrentDeletionAndReceiptKeepProductAndHistoryConsistent() throws Exception {
+                var start = new CyclicBarrier(2);
+                try (var workers = Executors.newVirtualThreadPerTaskExecutor()) {
+                        var receipt = workers.submit(() -> {
+                                start.await();
+                                try {
+                                        inventory.register(request(InventoryMovementRequest.Kind.IN, null, warehouseId, 1));
+                                        return true;
+                                } catch (ResponseStatusException error) {
+                                        assertEquals(HttpStatus.NOT_FOUND, error.getStatusCode());
+                                        return false;
+                                }
+                        });
+                        var deletion = workers.submit(() -> {
+                                start.await();
+                                try {
+                                        inventory.deleteProduct(1L);
+                                        return true;
+                                } catch (ResponseStatusException error) {
+                                        assertEquals(HttpStatus.CONFLICT, error.getStatusCode());
+                                        return false;
+                                }
+                        });
+                        boolean registered = receipt.get();
+                        assertNotEquals(registered, deletion.get());
+                        assertEquals(registered, !inventory.findMovements(SKU, null).isEmpty());
+                        assertEquals(registered, !products.findAll().isEmpty());
+                }
+        }
+
+        @Test
+        void overflowingTransferPreservesBalancesAndHistory() {
+                inventory.register(request(InventoryMovementRequest.Kind.IN, null, warehouseId, Long.MAX_VALUE));
+                inventory.register(request(InventoryMovementRequest.Kind.IN, null, exhibitionId, 1));
+                var before = inventory.findMovements(null, null);
+
+                var error = assertThrows(ResponseStatusException.class, () ->
+                        inventory.register(request(InventoryMovementRequest.Kind.TRANSFER, exhibitionId, warehouseId, 1)));
+
+                assertEquals(HttpStatus.CONFLICT, error.getStatusCode());
+                assertEquals(1, balance(exhibitionId));
+                assertEquals(Long.MAX_VALUE, balance(warehouseId));
+                assertEquals(before, inventory.findMovements(null, null));
         }
 }

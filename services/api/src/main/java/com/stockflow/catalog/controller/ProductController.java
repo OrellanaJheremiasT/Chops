@@ -64,9 +64,7 @@ public class ProductController {
             @PathVariable long id,
             @Valid @RequestBody ProductRequest request
     ) {
-        inventoryService.ensureProductCanUpdate(id, request);
-
-        return productService.update(id, request);
+        return inventoryService.updateProduct(id, request);
     }
 
     @DeleteMapping("/{id}")
@@ -74,8 +72,6 @@ public class ProductController {
     public void delete(
             @PathVariable long id
     ) {
-        inventoryService.ensureProductCanDelete(id);
-
-        productService.delete(id);
+        inventoryService.deleteProduct(id);
     }
 }

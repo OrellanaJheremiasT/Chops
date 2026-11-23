@@ -19,24 +19,12 @@ import {
 } from "../api/inventory";
 import ChopsSelect from "../components/ChopsSelect";
 
-import type { Product } from "../api/products";
-import type {
-  Branch,
-  StorageLocation,
-} from "../api/locations";
-import type { InventoryBalance } from "../api/inventory";
+import { buildStockRows, type InventorySnapshot, type StockRow } from "../features/inventory/stockRows";
 
 import "../styles/inventory-enhancements.css";
 
 type Tab = "total" | "exhibition" | "warehouse";
 type StockStatus = "all" | "low" | "out";
-
-type InventorySnapshot = {
-  products: Product[];
-  branches: Branch[];
-  locations: StorageLocation[];
-  balances: InventoryBalance[];
-};
 
 type LoadState =
   | {
@@ -54,16 +42,6 @@ type LoadState =
       data: null;
       error: string;
     };
-
-type StockRow = {
-  sku: string;
-  name: string;
-  variant: string;
-  category: string;
-  barcode?: string;
-  exhibition: number;
-  warehouse: number;
-};
 
 export default function InventoryPage() {
   const { t, language } = useLanguage();
@@ -176,64 +154,7 @@ export default function InventoryPage() {
       }));
     }
 
-    if (!snapshot || snapshot.locations.length === 0) {
-      return [];
-    }
-
-    const allowed = new Map(
-      visibleLocations
-        .filter(
-          (location) =>
-            locationId === "all" ||
-            String(location.id) === locationId,
-        )
-        .map(
-          (location) =>
-            [location.id, location.type] as const,
-        ),
-    );
-
-    const totals = new Map<
-      string,
-      {
-        exhibition: number;
-        warehouse: number;
-      }
-    >();
-
-    for (const balance of snapshot.balances) {
-      const area = allowed.get(balance.locationId);
-
-      if (!area) continue;
-
-      const sku = balance.sku.toUpperCase();
-
-      const current = totals.get(sku) ?? {
-        exhibition: 0,
-        warehouse: 0,
-      };
-
-      current[area] += balance.quantity;
-
-      totals.set(sku, current);
-    }
-
-    return snapshot.products.flatMap((product) =>
-      product.variants.map((variant) => {
-        const stock = totals.get(
-          variant.sku.toUpperCase(),
-        );
-
-        return {
-          sku: variant.sku,
-          name: product.name,
-          variant: variant.name,
-          category: product.category,
-          exhibition: stock?.exhibition ?? 0,
-          warehouse: stock?.warehouse ?? 0,
-        };
-      }),
-    );
+    return buildStockRows(snapshot, visibleLocations, locationId);
   }, [
     demoItems,
     demoBalances,

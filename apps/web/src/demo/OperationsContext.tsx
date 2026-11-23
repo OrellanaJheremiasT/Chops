@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 
 import { demoInitialBalances as initial, demoItems } from "./catalog";
 import type { InventoryState, Item } from "./catalog";
+import { applyMovement, isStockArea, type DemoMovement } from "./applyMovement";
 import { Context } from "./operationsHook";
 
 export type { Item };
@@ -43,20 +44,11 @@ export type Operation = {
 
 const STORAGE_KEY = "chops-operations-demo-v1";
 
-type Action = {
-  kind: "in" | "out" | "transfer";
-  sku: string;
-  quantity: number;
-  from?: Area;
-  to?: Area;
-  reason?: string;
-};
-
 export type OperationApi = {
   balances: InventoryState;
   operations: Operation[];
   items: Item[];
-  register: (input: Action) => string | null;
+  register: (input: DemoMovement) => string | null;
   reportLoss: (
     sku: string,
     area: Area,
@@ -77,9 +69,6 @@ type SavedState = {
   operations: Operation[];
 };
 
-
-const locationValid = (area: unknown): area is Area =>
-  area === "exhibition" || area === "warehouse";
 
 const positive = (value: number) =>
   Number.isSafeInteger(value) && value > 0;
@@ -145,9 +134,9 @@ function loadSavedState(): SavedState {
         Number.isSafeInteger(operation.quantity) &&
         operation.quantity > 0 &&
         (operation.from === null ||
-          locationValid(operation.from)) &&
+          isStockArea(operation.from)) &&
         (operation.to === null ||
-          locationValid(operation.to)) &&
+          isStockArea(operation.to)) &&
         typeof operation.reason === "string"
     );
 
@@ -180,14 +169,10 @@ export function OperationsProvider({
   );
 
   const [nextId, setNextId] = useState(() => {
-    const ids = savedState.operations.map(
-      (operation) => {
-        const match = /^MOV-(\d+)$/.exec(operation.id);
-        return match ? Number(match[1]) : 0;
-      }
-    );
-
-    return Math.max(0, ...ids) + 1;
+    return savedState.operations.reduce((highestId, operation) => {
+      const match = /^MOV-(\d+)$/.exec(operation.id);
+      return match ? Math.max(highestId, Number(match[1])) : highestId;
+    }, 0) + 1;
   });
 
   // Automatically save whenever stock or history changes.
@@ -292,6 +277,8 @@ export function OperationsProvider({
       updated[sku][to] += quantity;
     }
 
+    const { kind, sku, quantity } = action;
+    const { updated, from, to } = result;
     save(
       kind,
       sku,
@@ -314,7 +301,7 @@ export function OperationsProvider({
   ): string | null {
     if (
       !balances[sku] ||
-      !locationValid(area) ||
+      !isStockArea(area) ||
       !positive(quantity)
     ) {
       return "Choose a product and a positive whole quantity.";
@@ -351,7 +338,7 @@ export function OperationsProvider({
   ): string | null {
     if (
       !balances[sku] ||
-      !locationValid(area) ||
+      !isStockArea(area) ||
       !Number.isSafeInteger(counted) ||
       counted < 0
     ) {
@@ -394,4 +381,3 @@ export function OperationsProvider({
     </Context.Provider>
   );
 }
-

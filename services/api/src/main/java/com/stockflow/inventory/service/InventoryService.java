@@ -2,6 +2,9 @@
 package com.stockflow.inventory.service;
 
 import com.stockflow.catalog.dto.ProductRequest;
+import com.stockflow.catalog.dto.ProductResponse;
+import com.stockflow.locations.dto.BranchRequest;
+import com.stockflow.locations.dto.BranchResponse;
 import com.stockflow.catalog.service.ProductService;
 import com.stockflow.inventory.dto.InventoryBalanceResponse;
 import com.stockflow.inventory.dto.InventoryMovementRequest;
@@ -16,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,7 +39,7 @@ public class InventoryService {
 
     private final Map<StockKey, Long> balances = new LinkedHashMap<>();
 
-    private final List<InventoryMovementResponse> history = new ArrayList<>();
+    private final Deque<InventoryMovementResponse> history = new ArrayDeque<>();
 
     private long nextMovementId = 1;
 
@@ -217,7 +222,7 @@ public class InventoryService {
                         ? ""
                         : request.reason().trim());
 
-        history.add(0, movement);
+        history.addFirst(movement);
 
         return movement;
     }
@@ -265,9 +270,12 @@ public class InventoryService {
                                         movement.toLocationId(), id));
     }
 
-    // Referential-integrity guards for the current REST controllers.
+    // Keep active-state and reference checks atomic with register() across services.
+    public synchronized BranchResponse updateBranch(long id, BranchRequest request) {
+        return locations.updateBranch(id, request);
+    }
 
-    public synchronized void ensureProductCanDelete(long productId) {
+    public synchronized void deleteProduct(long productId) {
         var product = products.findById(productId);
 
         for (var variant : product.variants()) {
@@ -276,9 +284,10 @@ public class InventoryService {
                         "Cannot delete a product with inventory history");
             }
         }
+        products.delete(productId);
     }
 
-    public synchronized void ensureProductCanUpdate(
+    public synchronized ProductResponse updateProduct(
             long productId,
             ProductRequest request) {
         var current = products.findById(productId);
@@ -294,18 +303,20 @@ public class InventoryService {
                         "Cannot remove a SKU with inventory history");
             }
         }
+        return products.update(productId, request);
     }
 
-    public synchronized void ensureLocationCanDelete(long id) {
+    public synchronized void deleteLocation(long id) {
         locations.findLocation(id);
 
         if (hasLocationReferences(id)) {
             throw conflict(
                     "Cannot delete a location with inventory history");
         }
+        locations.deleteLocation(id);
     }
 
-    public synchronized void ensureBranchCanDelete(long id) {
+    public synchronized void deleteBranch(long id) {
         locations.findBranch(id);
 
         for (var location : locations.findAllLocations()) {
@@ -315,9 +326,10 @@ public class InventoryService {
                         "Cannot delete a branch with inventory history");
             }
         }
+        locations.deleteBranch(id);
     }
 
-    public synchronized void ensureLocationCanUpdate(
+    public synchronized StorageLocationResponse updateLocation(
             long id,
             StorageLocationRequest request) {
         var current = locations.findLocation(id);
@@ -340,6 +352,7 @@ public class InventoryService {
             throw conflict(
                     "Cannot deactivate a location with stock");
         }
+        return locations.updateLocation(id, request);
     }
 
     private ResponseStatusException badRequest(String message) {

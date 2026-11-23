@@ -97,6 +97,7 @@ const spanish: Record<string, string> = {
   'Source and destination must be different.': 'El origen y destino deben ser distintos.',
   'Choose a location.': 'Selecciona una ubicación.',
   'Insufficient stock at the source location.': 'Stock insuficiente en la ubicación de origen.',
+  'Stock quantity limit exceeded.': 'Se superó el límite de existencias.',
   'Enter a valid physical count.': 'Ingresa un conteo físico válido.',
   'Physical count matches recorded stock. No adjustment needed.': 'El conteo coincide con el stock. No se necesita ajuste.',
 

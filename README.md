@@ -137,6 +137,8 @@ The backend currently provides endpoints in these areas:
 | Inventory balances | `/api/v1/inventory/balances` |
 | Inventory movements | `/api/v1/inventory/movements` |
 
+Inventory movement quantities are positive whole units. A request containing `1.7` returns HTTP 400 before either balance or the movement history changes. A numeric value such as `2.0` represents two units.
+
 > Backend services currently keep core data **in memory**. Restarting the API can reset this data. Persistent database storage remains a future milestone.
 
 ## Quality checks
@@ -148,10 +150,11 @@ cd apps/web
 npm run build
 ```
 
-**Frontend lint (issues may still need fixing):**
+**Frontend lint and regression tests** (from `apps/web`)
 
 ```bash
 npm run lint
+npm test
 ```
 
 **Backend tests:**
@@ -175,9 +178,11 @@ On Windows, replace `./mvnw` with `.\mvnw.cmd`.
 - [x] GitHub Actions workflows and Dependabot configuration
 - [ ] Connect sales, inventory, stock movements, losses, and dashboard to one consistent data model
 - [ ] Replace in-memory/demo data with persistent database storage
-- [ ] Complete end-to-end tests and address remaining lint issues
+- [ ] Extend end-to-end coverage across demo and API workflows
 - [ ] Authentication, authorization, and production security hardening
 - [ ] Deploy and validate the complete frontend + backend solution
+
+See [repository conventions](AGENTS.md) and the [refactoring audit](docs/refactorizacion.md) for module boundaries, verification results and remaining risks.
 
 ## Contributing
 

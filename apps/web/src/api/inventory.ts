@@ -3,7 +3,7 @@ import { apiGet, apiRequest } from "./client";
 import { productsDemoMode } from "./products";
 import type { LocationType } from "./locations";
 
-export const inventoryDemoMode = productsDemoMode;
+export const inventoryDemoMode = demoMode;
 
 export type InventoryBalance = {
   sku: string;

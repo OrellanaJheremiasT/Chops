@@ -17,10 +17,12 @@ import { useOperations } from "../demo/operationsHook";
 
 import type { Operation } from "../demo/OperationsContext";
 
+import { downloadCSV, downloadJSON, type CsvValue } from "../features/reports/exportFiles";
+
 import "../styles/reports.css";
 
 type Period = "week" | "month" | "custom" | "all";
-type CsvValue = string | number | null | undefined;
+
 
 type Closing = {
   id: string;
@@ -62,47 +64,6 @@ function readClosings(): Closing[] {
   } catch {
     return [];
   }
-}
-
-function csvCell(value: CsvValue) {
-  const text = String(value ?? "");
-  const safe =
-    /^[=+@\t\r]/.test(text) ||
-    (text.startsWith("-") && !/^-?\d+(\.\d+)?$/.test(text))
-      ? "'" + text
-      : text;
-
-  return `"${safe.replace(/"/g, '""')}"`;
-}
-
-function downloadFile(filename: string, content: string, mimeType: string) {
-  const blob = new Blob([content], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-function downloadCSV(filename: string, headers: string[], rows: CsvValue[][]) {
-  const csv =
-    "\uFEFF" +
-    [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
-
-  downloadFile(filename, csv, "text/csv;charset=utf-8");
-}
-
-function downloadJSON(filename: string, value: unknown) {
-  downloadFile(
-    filename,
-    JSON.stringify(value, null, 2),
-    "application/json;charset=utf-8",
-  );
 }
 
 export default function ReportsPage() {

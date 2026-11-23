@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { CheckCircle2, XCircle, LoaderCircle } from "lucide-react";
 
-import { getApiHealth } from "../api/client";
+import { demoMode, getApiHealth } from "../api/client";
 import { useLanguage } from "../i18n/languageHook";
 
 type ConnectionStatus = "checking" | "online" | "offline";
@@ -13,10 +13,8 @@ export default function ApiConnectionStatus() {
 
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const enable = import.meta.env.DEV || Boolean(import.meta.env.VITE_API_URL);
-
   useEffect(() => {
-    if (!enable) return;
+    if (demoMode) return;
 
     const controller = new AbortController();
 
@@ -35,9 +33,9 @@ export default function ApiConnectionStatus() {
     return () => {
       controller.abort();
     };
-  }, [enable, refreshKey]);
+  }, [refreshKey]);
 
-  if (!enable) return null;
+  if (demoMode) return null;
 
   const descriptions = {
     checking:

@@ -3,6 +3,9 @@ const API_BASE_URL = import.meta.env.DEV
   ? ""
   : (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/+$/, "");
 
+// Pages serves only static assets unless a backend URL was configured at build time.
+export const demoMode = import.meta.env.PROD && !import.meta.env.VITE_API_URL?.trim();
+
 export class ApiError extends Error {
   readonly status: number;
 

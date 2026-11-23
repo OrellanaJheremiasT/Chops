@@ -1,6 +1,7 @@
 
 package com.stockflow.inventory.dto;
 
+import tools.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
