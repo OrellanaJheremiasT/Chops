@@ -1,10 +1,6 @@
-<<<<<<< Updated upstream
+// Inventory quantities are scoped to a SKU and physical location. Use the demo operations context for simulated writes.
 import { apiGet, apiRequest } from "./client";
 import { productsDemoMode } from "./products";
-=======
-// Inventory quantities are scoped to a SKU and physical location. Use the demo operations context for simulated writes.
-import { demoMode, apiGet, apiRequest } from "./client";
->>>>>>> Stashed changes
 import type { LocationType } from "./locations";
 
 export const inventoryDemoMode = productsDemoMode;

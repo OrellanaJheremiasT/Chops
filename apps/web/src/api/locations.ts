@@ -1,10 +1,5 @@
-<<<<<<< Updated upstream
-
-import { ApiError, apiGet, apiRequest } from "./client";
-=======
 // Expose the same branch and storage-location operations for the HTTP client and the browser demo.
-import { demoMode, apiGet, apiRequest } from "./client";
->>>>>>> Stashed changes
+import { ApiError, apiGet, apiRequest } from "./client";
 
 export type LocationType = "exhibition" | "warehouse";
 
