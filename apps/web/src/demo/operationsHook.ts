@@ -1,3 +1,4 @@
+// Demo operation consumers must share a provider because quantities and history belong to the same simulated ledger.
 import { createContext, useContext } from "react";
 import type { OperationApi } from "./OperationsContext";
 export const Context = createContext<OperationApi | null>(null);
