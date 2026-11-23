@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+/** Location validation combines request constraints with service rules about branch ownership and area type. */
 public record StorageLocationRequest(
 
     @NotBlank
