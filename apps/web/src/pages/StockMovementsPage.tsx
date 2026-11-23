@@ -1,3 +1,4 @@
+// The route chooses the live or demo workflow before loading any data. Live writes are followed by a refresh from the API.
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 
@@ -68,7 +69,7 @@ function describePostError(error: unknown, spanish: boolean): string {
     }
   }
 
-  // Si se pierde la respuesta, el servidor podría haber registrado el POST.
+  // The server may have recorded the movement even if the response was lost.
   return spanish
     ? "No se pudo confirmar el resultado. Revisa el historial antes de volver a enviar."
     : "The result could not be confirmed. Check the history before submitting again.";
@@ -201,6 +202,7 @@ function ApiStockMovementsPage() {
       return;
     }
 
+    // Claim the write synchronously because a second submit can arrive before React renders the saving state.
     submitLock.current = true;
     setSaving(true);
     setFormError("");
@@ -227,7 +229,7 @@ function ApiStockMovementsPage() {
       const message = describePostError(error, spanish);
       setFormError(message);
       notify(message, "error");
-      // Reconsulta los saldos y el historial. El POST nunca se reintenta aquí.
+      // Refresh balances and history without resending a potentially committed movement.
       refresh();
     } finally {
       submitLock.current = false;
