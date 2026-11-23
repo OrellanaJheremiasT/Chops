@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+/** The in-memory catalog enforces SKU uniqueness across products after normalizing input. */
 @Service
 public class ProductService {
 
@@ -81,6 +82,7 @@ public class ProductService {
             long id,
             ProductRequest request
     ) {
+        // Exclude the product being edited so it can keep its own SKUs.
         Set<String> occupiedSkus = new HashSet<>();
 
         for (ProductResponse product : products.values()) {
