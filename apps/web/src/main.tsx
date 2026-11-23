@@ -1,3 +1,4 @@
+// The router uses Vite's base path so direct links resolve both at the development root and under GitHub Pages.
 
 import React from "react";
 import ReactDOM from "react-dom/client";

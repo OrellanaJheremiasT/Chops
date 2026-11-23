@@ -1,3 +1,4 @@
+// Join API balances by SKU and eligible location. Keep catalog variants visible at zero when the selected scope has no stock for them.
 import type { Branch, StorageLocation } from "../../api/locations";
 import type { InventoryBalance } from "../../api/inventory";
 import type { Product } from "../../api/products";

@@ -1,3 +1,4 @@
+// Run the catalog clients with Pages settings to check demo CRUD through the same entry points the pages call.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createServer } from "vite";

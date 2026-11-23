@@ -1,3 +1,4 @@
+// Serialize alert and confirmation requests so concurrent callers each receive the answer to their own dialog.
 
 import {
   useCallback,
@@ -32,6 +33,7 @@ export default function DialogProvider({
   );
 
   const queueRef = useRef<DialogRequest[]>([]);
+  // The ref makes queue ownership visible immediately, before React commits the active dialog.
   const activeRef = useRef<DialogRequest | null>(null);
   const nextId = useRef(0);
 

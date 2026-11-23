@@ -1,3 +1,4 @@
+// Seed data supplies predictable SKUs and starting balances for the simulated inventory and checkout flows.
 // Single source of truth for the demo catalog and its starting stock.
 // Used by the operations context and by the checkout demo.
 

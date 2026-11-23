@@ -1,3 +1,4 @@
+# Publish the static web bundle and keep a fallback document for client-side routes on Pages.
 name: Deploy Chops to GitHub Pages
 
 on:

@@ -1,3 +1,4 @@
+// Validate both sides of a demo movement before copying the affected SKU so a rejected transfer leaves balances intact.
 import type { InventoryState } from "./catalog";
 import type { Area } from "./OperationsContext";
 

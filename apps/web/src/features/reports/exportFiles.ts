@@ -1,7 +1,9 @@
+// Keep CSV and JSON downloads at the browser boundary so report calculations stay independent of file handling.
 export type CsvValue = string | number | null | undefined;
 
 export function csvCell(value: CsvValue) {
   const text = String(value ?? "");
+  // Prefix formula-like text before CSV escaping so spreadsheet applications treat it as text.
   const safe =
     /^[=+@\t\r]/.test(text) ||
     (text.startsWith("-") && !/^-?\d+(\.\d+)?$/.test(text))

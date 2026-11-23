@@ -1,3 +1,4 @@
+// Contain render failures and failed lazy imports within the route while keeping the surrounding application available.
 import { Component } from "react";
 import type { ErrorInfo, ReactNode } from "react";
 import { AlertTriangle, RotateCw } from "lucide-react";

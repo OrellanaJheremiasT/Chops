@@ -1,3 +1,4 @@
+// All live requests share URL resolution and error parsing. An API failure remains an error even when a demo implementation exists.
 const API_BASE_URL = import.meta.env.DEV
   ? ""
   : (import.meta.env.VITE_API_URL ?? "").trim().replace(/\/+$/, "");

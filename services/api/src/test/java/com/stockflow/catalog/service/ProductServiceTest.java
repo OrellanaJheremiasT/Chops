@@ -15,6 +15,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/** Verify catalog rules in isolation, including normalization and SKU uniqueness. */
 class ProductServiceTest {
 
     private ProductService service;

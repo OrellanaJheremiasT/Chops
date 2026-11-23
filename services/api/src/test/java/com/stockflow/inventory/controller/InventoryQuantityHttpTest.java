@@ -19,6 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/** Verify fractional quantities are rejected at the HTTP boundary without changing either balance or movement history. */
 @SpringBootTest
 @AutoConfigureMockMvc
 class InventoryQuantityHttpTest {

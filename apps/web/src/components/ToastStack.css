@@ -1,3 +1,4 @@
+/* Place notices above page content while keeping room for dismissal controls on narrow screens. */
 /* ToastStack: contextual Chops notifications, adapted from Bencho's stack.
  * The original always populated three fictional events. Here toasts only
  * appear after actual user actions and expire without replacing themselves. */

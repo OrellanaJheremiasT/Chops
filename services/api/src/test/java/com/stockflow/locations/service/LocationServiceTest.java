@@ -15,6 +15,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/** Verify default areas and the rules that protect required storage locations. */
 class LocationServiceTest {
 
     private LocationService service;

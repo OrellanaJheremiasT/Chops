@@ -1,3 +1,4 @@
+/* Apply one focus treatment to search inputs whose wrapper contains the icon and text field. */
 /* Single focus ring: search wrapper owns the visible border. */
 .products-search:focus-within, .ops-search:focus-within,
 .sm-search:focus-within, .inventory-search .products-search:focus-within {

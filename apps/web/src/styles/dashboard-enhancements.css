@@ -1,3 +1,4 @@
+/* Apply dashboard-specific refinements after the base dashboard rules. */
 .dashboard-v2 {
   display: flex;
   flex-direction: column;

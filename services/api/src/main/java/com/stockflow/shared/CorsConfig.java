@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+// Same-origin development uses Vite's proxy. Cross-origin deployments must supply allowed origins explicitly.
 /**
  * Cross-origin access is disabled unless chops.cors.allowed-origins lists
  * origins (comma separated), e.g. the origin hosting the frontend.

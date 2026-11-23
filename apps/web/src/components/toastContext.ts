@@ -1,3 +1,4 @@
+// Expose notifications to features without coupling callers to toast rendering or dismissal.
 import { createContext, useContext } from "react";
 
 export type ToastKind = "success" | "info" | "warning" | "error";

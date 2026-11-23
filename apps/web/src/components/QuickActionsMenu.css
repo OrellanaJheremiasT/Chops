@@ -1,3 +1,4 @@
+/* Keep quick actions usable within the header on both pointer and touch layouts. */
 /* Quick actions: compact, anchored Chops menu, keyboard/touch friendly. */
 .chops-quick {
   position: relative;

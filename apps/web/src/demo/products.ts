@@ -1,3 +1,4 @@
+// Demo catalog writes affect this tab's in-memory copy. They do not change the seed items used by other demos.
 import type { Product, ProductInput } from "../api/products";
 import { demoItems } from "./catalog";
 

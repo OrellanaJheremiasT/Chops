@@ -1,3 +1,4 @@
+# Run backend tests when files in the API subtree change.
 name: API tests
 
 on:

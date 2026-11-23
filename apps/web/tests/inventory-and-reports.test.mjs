@@ -1,3 +1,4 @@
+// Exercise stock aggregation, demo movement invariants, and CSV handling without mounting the interface.
 import assert from "node:assert/strict";
 import test from "node:test";
 import { buildStockRows } from "../src/features/inventory/stockRows.ts";

@@ -1,3 +1,4 @@
+// Branch and location changes share one in-memory catalog so branch defaults and location requirements can be checked together.
 import type { Branch, BranchInput, LocationType, StorageLocation, StorageLocationInput } from "../api/locations";
 import { ApiError } from "../api/client";
 

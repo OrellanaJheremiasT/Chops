@@ -3,6 +3,7 @@ package com.stockflow.inventory.model;
 
 import java.util.Locale;
 
+/** Use both the normalized SKU and location identifier so balances for the same variant stay independent across locations. */
 public record StockKey(String sku, long locationId) {
 
     public StockKey {

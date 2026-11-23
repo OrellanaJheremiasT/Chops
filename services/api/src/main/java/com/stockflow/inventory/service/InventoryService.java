@@ -30,6 +30,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/** One service monitor coordinates the balance ledger, history, and writes that could invalidate inventory references. */
 @Service
 public class InventoryService {
 
@@ -49,6 +50,7 @@ public class InventoryService {
         this.locations = locations;
     }
 
+    // Include zero balances for catalog SKUs so untouched variants remain visible within the requested location scope.
     public synchronized List<InventoryBalanceResponse> findBalances(
             Long branchId,
             Long locationId,
@@ -251,6 +253,7 @@ public class InventoryService {
         }
     }
 
+    // History keeps protecting a SKU after its remaining stock reaches zero.
     private boolean hasSkuReferences(String sku) {
         return balances.keySet().stream()
                 .anyMatch(key -> key.sku().equals(sku))

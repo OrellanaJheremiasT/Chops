@@ -1,4 +1,5 @@
-import { demoMode, apiGet, apiRequest } from "./client";
+// Expose the same branch and storage-location operations for the HTTP client and the browser demo.
+import { apiGet, apiRequest, demoMode } from "./client";
 
 export type LocationType = "exhibition" | "warehouse";
 

@@ -1,3 +1,4 @@
+/* The modal surface and backdrop use shared theme tokens so dialogs remain readable over every route. */
 
 .chops-dialog-overlay {
   position: fixed;

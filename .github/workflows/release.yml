@@ -1,3 +1,4 @@
+# Publish release notes for a verified tag and reuse an existing release when the workflow is rerun.
 
 name: Chops Release
 

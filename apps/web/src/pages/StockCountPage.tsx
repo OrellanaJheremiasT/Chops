@@ -1,3 +1,4 @@
+// Record the difference from a physical count. Zero is a valid count and can reduce the recorded quantity to zero.
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { ClipboardCheck, Search } from "lucide-react";

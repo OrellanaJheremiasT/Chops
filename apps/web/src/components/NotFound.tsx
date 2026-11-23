@@ -1,3 +1,4 @@
+// Give unmatched client-side routes a way back into the app, including direct navigation on GitHub Pages.
 import { Link } from "react-router-dom";
 import { Compass } from "lucide-react";
 

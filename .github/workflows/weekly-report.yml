@@ -1,3 +1,4 @@
+# Summarize repository activity on the scheduled run and publish the report through the configured workflow steps.
 
 name: Chops Weekly Development Report
 

@@ -1,3 +1,4 @@
+// Development proxies API requests locally. Production assets use the repository subpath expected by GitHub Pages.
 
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";

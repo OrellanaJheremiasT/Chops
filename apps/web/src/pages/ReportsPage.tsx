@@ -1,3 +1,4 @@
+// Report periods filter the demo ledger. A saved closing captures a copy of the period's operations and the stock snapshot.
 import { useMemo, useState } from "react";
 import {
   Download,
@@ -35,6 +36,7 @@ type Closing = {
 
 const CLOSINGS_KEY = "chops-report-closings-v1";
 
+// Build a local calendar key so report boundaries match the dates selected in the browser.
 function dateKey(date: Date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");

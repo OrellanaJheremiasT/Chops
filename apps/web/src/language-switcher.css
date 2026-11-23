@@ -1,3 +1,4 @@
+/* Style the language control independently of the labels supplied by translations. */
 .header-controls {
   display: flex;
   align-items: center;

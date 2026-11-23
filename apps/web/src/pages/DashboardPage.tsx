@@ -1,3 +1,4 @@
+// Summarize demo inventory activity alongside illustrative sales metrics. These figures do not come from the live API.
 import { useState } from "react";
 import {
   Wallet,

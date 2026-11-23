@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/** Expose balances and movement history while delegating stock validation and atomic writes to the service. */
 @RestController
 @RequestMapping("/api/v1/inventory")
 public class InventoryController {

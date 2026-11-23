@@ -1,3 +1,4 @@
+// Use the same SKU, barcode, and name matching rules across demo operation forms.
 import type { Item } from "./catalog";
 export { demoItems } from "./catalog";
 export function itemLabel(item: Item) {

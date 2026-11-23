@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+/** Validate catalog input at the REST boundary and use decimal arithmetic for product prices. */
 public record ProductRequest(
 
     @NotBlank

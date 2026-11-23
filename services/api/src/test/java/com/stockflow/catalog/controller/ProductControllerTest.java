@@ -12,6 +12,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+/** Cover the product HTTP contract, including conflict and not-found details consumed by clients. */
 @SpringBootTest
 @AutoConfigureMockMvc
 class ProductControllerTest {

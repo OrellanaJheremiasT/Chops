@@ -1,3 +1,4 @@
+// A demo loss removes stock from one area and records the reason for later reporting.
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { AlertTriangle, Search } from "lucide-react";

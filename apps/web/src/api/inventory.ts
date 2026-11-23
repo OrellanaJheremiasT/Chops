@@ -1,4 +1,5 @@
-import { demoMode, apiGet, apiRequest } from "./client";
+// Inventory quantities are scoped to a SKU and physical location. Use the demo operations context for simulated writes.
+import { apiGet, apiRequest, demoMode } from "./client";
 import type { LocationType } from "./locations";
 
 export const inventoryDemoMode = demoMode;

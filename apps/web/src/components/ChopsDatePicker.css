@@ -1,3 +1,4 @@
+/* Keep popup positioning, selected dates, and keyboard focus legible across themes. */
 /* Chops calendar: desktop visual style, mobile platform-native input. */
 .chops-date {
   position: relative;

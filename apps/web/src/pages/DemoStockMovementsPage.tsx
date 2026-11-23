@@ -1,3 +1,4 @@
+// Route demo movements through the shared operations ledger so balances and history update together.
 import { useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import {

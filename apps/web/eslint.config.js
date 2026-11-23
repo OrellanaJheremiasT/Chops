@@ -1,3 +1,4 @@
+// Apply browser globals to the TypeScript application and Node globals to the regression tests.
 import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'

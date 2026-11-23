@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
 
+/** Branch and location writes that affect stock references are coordinated with inventory mutations. */
 @RestController
 public class LocationsController {
 

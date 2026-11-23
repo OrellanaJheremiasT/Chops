@@ -1,3 +1,4 @@
+// Shared placeholders reserve the shape of loading content while the real data is fetched.
 import type { CSSProperties } from "react";
 import "./Skeleton.css";
 

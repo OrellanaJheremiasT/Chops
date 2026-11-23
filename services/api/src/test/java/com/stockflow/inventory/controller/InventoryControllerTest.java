@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/** Exercise inventory through HTTP so request validation, status codes, and movement effects are checked together. */
 @SpringBootTest
 @AutoConfigureMockMvc
 

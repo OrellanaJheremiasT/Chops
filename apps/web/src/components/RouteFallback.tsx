@@ -1,3 +1,4 @@
+// Provide temporary feedback while a lazy route loads without showing a success or error state prematurely.
 import { useLanguage } from "../i18n/languageHook";
 import { PageSkeleton } from "./Skeleton";
 import "./StatusPanel.css";

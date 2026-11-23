@@ -1,4 +1,5 @@
-import { demoMode, apiGet, apiRequest } from "./client";
+// Keep the catalog contract identical for the HTTP client and the demo adapter so pages can switch at build time.
+import { apiGet, apiRequest, demoMode } from "./client";
 
 export type ProductVariant = {
   sku: string;

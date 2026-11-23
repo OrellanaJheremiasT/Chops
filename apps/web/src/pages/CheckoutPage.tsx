@@ -1,3 +1,4 @@
+// Simulate checkout with stock local to the checkout screen and monetary calculations in integer cents.
 import { useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import {
@@ -117,6 +118,7 @@ export default function CheckoutPage() {
     0,
   );
 
+  // Convert cash input to cents before comparing it with the cart total.
   const receivedCents =
     cashReceived.trim() !== "" && Number.isFinite(Number(cashReceived))
       ? Math.round(Number(cashReceived) * 100)
