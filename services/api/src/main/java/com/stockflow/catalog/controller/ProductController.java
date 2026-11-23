@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.List;
 
+/** Inventory-aware writes go through the inventory service so a SKU cannot disappear between a reference check and a movement. */
 @RestController
 @RequestMapping("/api/v1/products")
 public class ProductController {
