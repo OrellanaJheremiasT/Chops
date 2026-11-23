@@ -1,3 +1,4 @@
+// Group inventory activity by period and operation type so chart totals can be traced back to the operations ledger.
 import { useMemo, useState } from "react";
 
 import type { Operation, OperationKind } from "../demo/OperationsContext";
