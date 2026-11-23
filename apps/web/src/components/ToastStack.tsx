@@ -1,3 +1,4 @@
+// Bound the visible toast stack so bursts of feedback do not obscure the active workflow.
 import {
   useCallback,
   useEffect,
