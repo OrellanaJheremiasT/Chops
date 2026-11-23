@@ -1,3 +1,4 @@
+// The promise-based dialog API lets callers wait for confirmation before starting a write.
 
 import { createContext, useContext } from "react";
 
