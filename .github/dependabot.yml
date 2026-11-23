@@ -1,3 +1,4 @@
+# Group compatible dependency updates while keeping the npm, Maven, and Actions ecosystems separate.
 
 version: 2
 
