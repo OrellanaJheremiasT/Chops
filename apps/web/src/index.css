@@ -1,3 +1,4 @@
+/* Define the theme tokens once so the application and shared controls inherit matching colors and surfaces. */
 /* Chops — centralized theme tokens.
    Dark surfaces are tonal steps of #0A0A0A, never another base hue.
    #1B21BB is the primary interactive accent; green/yellow/red are states. */
