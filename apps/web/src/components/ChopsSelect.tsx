@@ -1,3 +1,4 @@
+// The custom select coordinates trigger focus and option navigation. Preserve keyboard access when changing the popup.
 import { useEffect, useId, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { Check, ChevronDown } from "lucide-react";
