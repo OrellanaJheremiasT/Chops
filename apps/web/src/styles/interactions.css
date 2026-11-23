@@ -1,3 +1,4 @@
+/* Shared hover, focus, and press rules are loaded last to make interactive feedback consistent across pages. */
 /* Chops: unified interaction layer (hover / press / focus / disabled / tabs).
    Imported LAST so it wins over per-component transitions at equal specificity.
    Uses the individual `scale` / `translate` properties so it never clashes with
