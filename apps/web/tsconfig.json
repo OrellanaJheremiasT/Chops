@@ -1,3 +1,4 @@
+// Keep browser code and Node-based Vite configuration in separate TypeScript projects.
 {
   "files": [],
   "references": [
