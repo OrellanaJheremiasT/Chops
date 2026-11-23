@@ -12,6 +12,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+/** Exercise the branch and location endpoints through Spring MVC. */
 @SpringBootTest
 @AutoConfigureMockMvc
 class LocationsControllerTest {
