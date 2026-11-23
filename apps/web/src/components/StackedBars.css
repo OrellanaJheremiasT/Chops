@@ -1,3 +1,4 @@
+/* Use shared chart tokens to distinguish operation series in both themes. */
 /* Chops — StackedBars: adapted from the Bencho stacked-chart interaction.
    Uses only recorded inventory operations; no generated sample activity.
    Motion gives feedback, never delays an inventory operation. */
