@@ -18,6 +18,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/** Check ledger invariants including insufficient stock, preserved references, and concurrency with catalog deletion. */
 class InventoryServiceTest {
 
         private InventoryService inventory;
