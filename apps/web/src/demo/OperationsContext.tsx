@@ -1,3 +1,4 @@
+// Persist demo balances and history together under a versioned storage key so a reload restores a consistent snapshot.
 import {
   useState,
   useEffect,
@@ -238,7 +239,15 @@ export function OperationsProvider({
     setOperations((current) => [operation, ...current]);
   }
 
+<<<<<<< Updated upstream
   function register(action: Action): string | null {
+=======
+  function register(action: DemoMovement): string | null {
+    // Write a history entry only after the proposed balance change has passed validation.
+    const result = applyMovement(balances, action);
+    if (typeof result === "string") return result;
+
+>>>>>>> Stashed changes
     const { kind, sku, quantity } = action;
 
     if (!balances[sku] || !positive(quantity)) {
