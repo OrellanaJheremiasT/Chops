@@ -34,12 +34,7 @@ public class InventoryService {
 
     private final Map<StockKey, Long> balances = new LinkedHashMap<>();
 
-<<<<<<< Updated upstream
     private final List<InventoryMovementResponse> history = new ArrayList<>();
-=======
-    // Insert newest movements at the front without shifting existing entries.
-    private final Deque<InventoryMovementResponse> history = new ArrayDeque<>();
->>>>>>> Stashed changes
 
     private long nextMovementId = 1;
 
