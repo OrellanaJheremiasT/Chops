@@ -1,3 +1,4 @@
+/* Share form, product-selection, and list styles across stock operations. */
 .ops-page {
   display: flex;
   flex-direction: column;
