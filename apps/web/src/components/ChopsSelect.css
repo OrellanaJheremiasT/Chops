@@ -1,3 +1,4 @@
+/* Style the trigger and list together so opened, focused, and selected options remain distinct. */
 /* CHOPS dropdown: consistent in light/dark mode on Windows and mobile. */
 
 .chops-select {
