@@ -1,3 +1,4 @@
+// The application shell owns navigation, theme, and layout. Route-level boundaries keep a failing page from taking down the shell.
 
 import {
   Suspense,
