@@ -1,3 +1,4 @@
+// Keep the context and hook separate from the provider component so Fast Refresh can preserve component state.
 import { createContext, useContext } from "react";
 import type { LanguageContextValue } from "./LanguageContext";
 
