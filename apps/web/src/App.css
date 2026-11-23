@@ -1,3 +1,4 @@
+/* Preserve stylesheet import order. Shared interaction rules intentionally follow page styles. */
 /* Chops: modular style entry point. Keep imports in this order. */
 
 @import "./styles/layout.css";
